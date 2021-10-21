@@ -233,7 +233,7 @@
                 var xy = coord(file, rank);
                 stone.setAttribute("cx", xy.x);
                 stone.setAttribute("cy", xy.y);
-                stone.setAttribute("r", "41");
+                stone.setAttribute("r", "44");
                 stone.classList.add("black-stone");
                 g1.appendChild(stone);
 
@@ -241,7 +241,7 @@
                 var xy = coord(file, rank);
                 stone.setAttribute("cx", xy.x);
                 stone.setAttribute("cy", xy.y);
-                stone.setAttribute("r", "40");
+                stone.setAttribute("r", "43");
                 stone.classList.add("white-stone");
                 g1.appendChild(stone);
 
