@@ -15,7 +15,7 @@ body {
     box-sizing: border-box;
 }
 
-#boardarea {
+.board {
     position: relative;
     box-sizing: border-box;
     background-color: #d9b479;
