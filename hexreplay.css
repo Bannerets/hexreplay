@@ -31,3 +31,9 @@ svg {
 .cell:hover {
     fill: #ffffff60
 }
+
+.label {
+    font-family: Helvetica,sans-serif;
+    font-weight: normal;
+    text-anchor: middle;
+}

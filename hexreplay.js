@@ -13,8 +13,12 @@
         }
     }
     
+    function rankToString(x) {
+        return (x+1).toString();
+    }
+    
     function cellname(file, rank) {
-        return fileToString(file) + (rank+1);
+        return fileToString(file) + rankToString(rank);
     }
         
     function svg_of_board(files=11, ranks=11, orientation=0, mirror=false) {
@@ -202,6 +206,48 @@
         path.setAttribute("fill", "none");
         g.appendChild(path);
 
+        // Labels
+        for (var rank=0; rank<ranks; rank++) {
+            var xy = coord(-1.1, rank);
+            var text = document.createElementNS(svgNS, "text");
+            text.setAttribute("class", "label");
+            text.setAttribute("font-size", "30");
+            text.setAttribute("x", xy.x);
+            text.setAttribute("y", xy.y + 10);
+            text.innerHTML = rankToString(rank);
+            g.appendChild(text);
+        }
+        for (var rank=0; rank<ranks; rank++) {
+            var xy = coord(files+0.1, rank);
+            var text = document.createElementNS(svgNS, "text");
+            text.setAttribute("class", "label");
+            text.setAttribute("font-size", "30");
+            text.setAttribute("x", xy.x);
+            text.setAttribute("y", xy.y + 10);
+            text.innerHTML = rankToString(rank);
+            g.appendChild(text);
+        }
+        for (var file=0; file<files; file++) {
+            var xy = coord(file, -1.1);
+            var text = document.createElementNS(svgNS, "text");
+            text.setAttribute("class", "label");
+            text.setAttribute("font-size", "30");
+            text.setAttribute("x", xy.x);
+            text.setAttribute("y", xy.y + 10);
+            text.innerHTML = fileToString(file);
+            g.appendChild(text);
+        }
+        for (var file=0; file<files; file++) {
+            var xy = coord(file, ranks+0.1);
+            var text = document.createElementNS(svgNS, "text");
+            text.setAttribute("class", "label");
+            text.setAttribute("font-size", "30");
+            text.setAttribute("x", xy.x);
+            text.setAttribute("y", xy.y + 10);
+            text.innerHTML = fileToString(file);
+            g.appendChild(text);
+        }
+        
         return svg;
     }
 
