@@ -3,6 +3,22 @@
 "use strict";
 
 // ----------------------------------------------------------------------
+// Constants
+
+function Const() {
+}
+
+Const.black = "black";
+Const.white = "white";
+Const.empty = "empty";
+Const.move = "move";
+Const.pass = "pass";
+Const.swap_pieces = "swap-pieces";
+Const.swap_sides = "swap-sides";
+Const.resign = "resign";
+Const.forfeit = "forfeit";
+
+// ----------------------------------------------------------------------
 // Cell
 
 // A cell on the hex board. File and rank are 0-based, i.e., the cell
@@ -50,10 +66,10 @@ Cell.prototype.toString = function () {
 
 // Convert a file symbol to an integer.
 Cell.stringToFile = function(s) {
-    if (s.length == 0) {
+    if (s.length === 0) {
         throw "Cell.stringToFile: " + s;
     }
-    if (s[0] == "-") {
+    if (s[0] === "-") {
         return -Cell.stringToFile(s.substring(1))-1;
     }
     var acc = -1;
@@ -144,6 +160,14 @@ Board.prototype.resize = function() {
     this.svg.setAttribute("height", this.dom.offsetHeight);
 }
 
+// Set the logical size of the board. This also clears the board.
+Board.prototype.setSize = function(files, ranks) {
+    this.files = files;
+    this.ranks = ranks;
+    this.update();
+    this.resize();
+}
+
 Board.prototype.svg_of_board = function() {
     var files = this.files;
     var ranks = this.ranks;
@@ -189,7 +213,7 @@ Board.prototype.svg_of_board = function() {
 
     function boundingbox(points) {
         var len = points.length;
-        if (len == 0) { // nonsense
+        if (len === 0) { // nonsense
             return {x0: 0, x1: 1, y0: 0, y1: 1};
         }
         var x0 = points[0].x;
@@ -356,7 +380,7 @@ Board.prototype.svg_of_board = function() {
             var path = document.createElementNS(svgNS, "path");
             path.setAttribute("d", hexpath(file, rank));
             path.classList.add("background");
-            if (Math.min(file, rank, files-file-1, ranks-rank-1) % 2 == 1) {
+            if (Math.min(file, rank, files-file-1, ranks-rank-1) % 2 === 1) {
                 path.classList.add("shaded");
             }
             g1.appendChild(path);
@@ -437,50 +461,190 @@ Board.prototype.svg_of_board = function() {
     return svg;
 }
 
-// Cell values
-Board.black = "black";
-Board.white = "white";
-Board.empty = "empty";
-
-// Set the cell's content to value, which is Board.black, Board.white, or Board.empty.
+// Set the cell's content to value, which is Const.black, Const.white, or Const.empty.
 Board.prototype.setStone = function(cell, value) {
     var cell = document.getElementById(cell.toString());
     if (cell) {
         cell.classList.remove("black");
         cell.classList.remove("white");
-        if (value == Board.black) {
+        if (value === Const.black) {
             cell.classList.add("black");
-        } else if (value == Board.white) {
+        } else if (value === Const.white) {
             cell.classList.add("white");
         }
     }
 }
 
+// Get the contents of the cell.
+Board.prototype.getStone = function(cell) {
+    var cell = document.getElementById(cell.toString());
+    if (cell.classList.contains("black")) {
+        return Const.black;
+    } else if (cell.classList.contains("white")) {
+        return Const.white;
+    } else {
+        return Const.empty;
+    }
+}
+
+// Check whether the cell is empty.
+Board.prototype.isEmpty = function(cell) {
+    return this.getStone(cell) === Const.empty;
+}
+
+// Swap the board state. This involves swapping the board dimensions
+// as well. This swap method is implemented for all boards, and
+// doesn't care whether swapping is legal or not.
+Board.prototype.swap = function() {
+    var self = this;
+    var black = this.svg.querySelectorAll(".cell.black");
+    var white = this.svg.querySelectorAll(".cell.white");
+    this.setSize(this.ranks, this.files); // also clears the board
+    black.forEach(function(cell) {
+        var c = Cell.fromString(cell.id);
+        self.setStone(new Cell(c.rank, c.file), Const.white);
+    });
+    white.forEach(function(cell) {
+        var c = Cell.fromString(cell.id);
+        self.setStone(new Cell(c.rank, c.file), Const.black);
+    });
+}
+
 // ----------------------------------------------------------------------
 // Game logic
 
-// A move is either a cell or one of the special moves "pass",
-// "swap-pieces", "swap-sides", "resign".
+// A move is either a cell or one of the special moves Move.pass,
+// Move.swap_pieces, Move.swap_sides, Move.resign, Move.forfeit.
+function Move(cell) {
+    this.type = Const.move;
+    this.cell = cell;
+}
 
+Move.pass = {type: Const.pass};
+Move.swap_pieces = {type: Const.swap_pieces};
+Move.swap_sides = {type: Const.swap_sides};
+Move.resign = {type: Const.resign};
+Move.forfeit = {type: Const.forfeit};
+
+function GameState(board) {
+    this.movelist = [];
+    this.currentmove = 0;
+    this.board = board;
+}
+
+// Check whether the current move is a resign move.
+GameState.prototype.resigned = function() {
+    var n = this.currentmove;
+    if (n == 0) {
+        return false;
+    }
+    return this.movelist[n-1].type === Const.resign;
+}
+
+// Check whether the current move is a forfeit move.
+GameState.prototype.forfeited = function() {
+    var n = this.currentmove;
+    if (n == 0) {
+        return false;
+    }
+    return this.movelist[n-1].type === Const.forfeit;
+}
+
+// Check whether the given move is legal.
+GameState.prototype.isLegal = function(move) {
+    // No legal moves after resigning.
+    if (this.resigned() || this.forfeited()) {
+        return false;
+    }
+    switch (move.type) {
+    case Const.move:
+        if (move.cell.file < 0 || move.cell.file >= board.files) {
+            return false;
+        }
+        if (move.cell.rank < 0 || move.cell.rank >= board.ranks) {
+            return false;
+        }
+        return this.board.isEmpty(move.cell);
+        break;
+    case Const.swap_pieces:
+    case Const.swap_sides:
+        return this.currentmove === 1;
+        break;
+    case Const.pass:
+    case Const.resign:
+    case Const.forfeit:
+        return true;
+        break;
+    }        
+}
+
+// Truncate movelist to current position.
+GameState.prototype.truncate = function() {
+    this.movelist.length = this.currentmove;
+}
+
+GameState.prototype.currentPlayer = function () {
+    var n = this.currentmove;
+    if (this.currentmove >= 2 && this.movelist[1].type === Const.swap_sides) {
+        n += 1;
+    }
+    return n % 2 === 0 ? Const.black : Const.white
+}
+
+// Play the requested move, if possible. Return true on success, false
+// on failure.
+GameState.prototype.play = function(move) {
+    if (!this.isLegal(move)) {
+        return false;
+    }
+    this.truncate();
+    var player = this.currentPlayer();
+    this.currentmove += 1;
+    var n = this.currentmove;
+    this.movelist.push({
+        number: n,
+        player: player,
+        move: move
+    });
+    this.playBoardMove(n, player, move);
+    return true;
+}
+
+GameState.prototype.playBoardMove = function(n, player, move) {
+    switch (move.type) {
+    case Const.move:
+        this.board.setStone(move.cell, player);
+        break;
+    case Const.pass:
+        break;
+    case Const.swap_pieces:
+        this.board.swap();
+        break;
+    case Const.swap_sides:
+        break;
+    case Const.resign:
+        break;
+    case Const.forfeit:
+        break;
+    }
+}
 
 // ----------------------------------------------------------------------
 // Testing
 
 var main = document.getElementById("main");
-var board = new Board(11, 11, 9, false);
+var board = new Board(11, 9, 9, false);
 main.appendChild(board.dom);
 
 board.resize();
+
+var state = new GameState(board);
+state.play(new Move(new Cell(0,0)));
+
 
 // Clicks
 board.onclick = function(cell) {
     console.log("Clicked " + cell);
 }
-
-// Stones
-board.setStone(new Cell(0,0), Board.black);
-board.setStone(new Cell(1,1), Board.white);
-board.setStone(new Cell(1,2), Board.black);
-board.setStone(new Cell(1,3), Board.white);
 
 // })();
