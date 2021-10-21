@@ -27,3 +27,7 @@ body {
 svg {
     position: absolute;
 }
+
+.cell:hover {
+    fill: #ffffff60
+}

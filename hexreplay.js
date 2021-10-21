@@ -1,6 +1,22 @@
 (function () {
     "use strict";
 
+    function fileToString(x) {
+        if (x < 0) {
+            return "-" + this.fileToString(-1-x);
+        } else if (x < 26) {
+            return String.fromCharCode(97 + x);
+        } else {
+            var rest = this.fileToString(Math.floor(x/26 - 1));
+            var last = String.fromCharCode(97 + (x % 26));
+            return rest + last;
+        }
+    }
+    
+    function cellname(file, rank) {
+        return fileToString(file) + (rank+1);
+    }
+        
     function svg_of_board(files=11, ranks=11, orientation=0, mirror=false) {
         var theta = -Math.PI * (orientation + 2) / 6;
         var ax = 100 * Math.cos(theta);
@@ -64,6 +80,19 @@
             coord(files, -1, 1, 0, 0),
             coord(files, -1, 0, 0, -1)
         ]);
+
+        // Return an SVG path corresponding to hex (file, rank).
+        function hexpath(file, rank) {
+            var hex = ""
+            hex += "M" + coordstr(file, rank, 0, -1, 0);
+            hex += "L" + coordstr(file, rank, 0, 0, -1);
+            hex += " " + coordstr(file, rank, 1, 0, 0);
+            hex += " " + coordstr(file, rank, 0, 1, 0);
+            hex += " " + coordstr(file, rank, 0, 0, 1);
+            hex += " " + coordstr(file, rank, -1, 0, 0);
+            hex += "z";
+            return hex;
+        }
         
         var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         svg.setAttribute("width", "500px");
@@ -140,18 +169,30 @@
         border.setAttribute("fill", "#ffffff");
         g.appendChild(border);
         
+        // Clickable cells
+        for (var rank=0; rank<ranks; rank++) {
+            for (var file=0; file<files; file++) {
+                var path = document.createElementNS(svgNS, "path");
+                path.setAttribute("d", hexpath(file, rank));
+                path.setAttribute("fill", "none");
+                path.setAttribute("stroke", "#000000");
+                path.setAttribute("stroke-width", "5");
+                path.setAttribute("id", cellname(file, rank));
+                path.setAttribute("pointer-events", "all");
+                path.classList.add("cell");
+                g.appendChild(path);
+                var tooltip = document.createElementNS(svgNS, "title");
+                tooltip.innerHTML = cellname(file, rank);
+                path.appendChild(tooltip);
+            }
+        }
+        
         // Hexes
         var path = document.createElementNS(svgNS, "path");
         var hexes = "";
         for (var rank=0; rank<ranks; rank++) {
             for (var file=0; file<files; file++) {
-                hexes += "M" + coordstr(file, rank, 0, -1, 0);
-                hexes += "L" + coordstr(file, rank, 0, 0, -1);
-                hexes += " " + coordstr(file, rank, 1, 0, 0);
-                hexes += " " + coordstr(file, rank, 0, 1, 0);
-                hexes += " " + coordstr(file, rank, 0, 0, 1);
-                hexes += " " + coordstr(file, rank, -1, 0, 0);
-                hexes += "z";
+                hexes += hexpath(file, rank);
             }
         }
         path.setAttribute("d", hexes);
@@ -180,6 +221,5 @@
     resize_svg();
 
     window.addEventListener('resize', resize_svg);
-    
-    
+
 })();
