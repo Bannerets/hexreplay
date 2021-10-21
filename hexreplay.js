@@ -145,9 +145,7 @@
         borderblack += "z";
         
         border.setAttribute("d", borderblack);
-        border.setAttribute("stroke", "#000000");
-        border.setAttribute("stroke-width", "5");
-        border.setAttribute("fill", "#000000");
+        border.classList.add("black-border");
         g.appendChild(border);
         
         var border = document.createElementNS(svgNS, "path");
@@ -175,9 +173,7 @@
         borderwhite += "z";
 
         border.setAttribute("d", borderwhite);
-        border.setAttribute("stroke", "#000000");
-        border.setAttribute("stroke-width", "5");
-        border.setAttribute("fill", "#ffffff");
+        border.classList.add("white-border");
         g.appendChild(border);
         
         // Clickable cells
@@ -185,11 +181,7 @@
             for (var file=0; file<files; file++) {
                 var path = document.createElementNS(svgNS, "path");
                 path.setAttribute("d", hexpath(file, rank));
-                path.setAttribute("fill", "none");
-                path.setAttribute("stroke", "#000000");
-                path.setAttribute("stroke-width", "5");
                 path.setAttribute("id", cellname(file, rank));
-                path.setAttribute("pointer-events", "all");
                 path.classList.add("cell");
                 g.appendChild(path);
                 var tooltip = document.createElementNS(svgNS, "title");
@@ -198,27 +190,23 @@
             }
         }
         
-        // Hexes
-        var path = document.createElementNS(svgNS, "path");
+        // Grid
+        var grid = document.createElementNS(svgNS, "path");
         var hexes = "";
         for (var rank=0; rank<ranks; rank++) {
             for (var file=0; file<files; file++) {
                 hexes += hexpath(file, rank);
             }
         }
-        path.setAttribute("d", hexes);
-        path.setAttribute("stroke", "#000000");
-        path.setAttribute("stroke-width", "5");
-        path.setAttribute("fill", "#ff0000");
-        path.setAttribute("fill", "none");
-        g.appendChild(path);
+        grid.setAttribute("d", hexes);
+        grid.classList.add("grid");
+        g.appendChild(grid);
 
         // Labels
         for (var rank=0; rank<ranks; rank++) {
             var xy = coord(-1.1, rank);
             var text = document.createElementNS(svgNS, "text");
-            text.setAttribute("class", "label");
-            text.setAttribute("font-size", "30");
+            text.classList.add("label");
             text.setAttribute("x", xy.x);
             text.setAttribute("y", xy.y + 10);
             text.innerHTML = rankToString(rank);
@@ -227,8 +215,7 @@
         for (var rank=0; rank<ranks; rank++) {
             var xy = coord(files+0.1, rank);
             var text = document.createElementNS(svgNS, "text");
-            text.setAttribute("class", "label");
-            text.setAttribute("font-size", "30");
+            text.classList.add("label");
             text.setAttribute("x", xy.x);
             text.setAttribute("y", xy.y + 10);
             text.innerHTML = rankToString(rank);
@@ -237,8 +224,7 @@
         for (var file=0; file<files; file++) {
             var xy = coord(file, -1.1);
             var text = document.createElementNS(svgNS, "text");
-            text.setAttribute("class", "label");
-            text.setAttribute("font-size", "30");
+            text.classList.add("label");
             text.setAttribute("x", xy.x);
             text.setAttribute("y", xy.y + 10);
             text.innerHTML = fileToString(file);
@@ -247,8 +233,7 @@
         for (var file=0; file<files; file++) {
             var xy = coord(file, ranks+0.1);
             var text = document.createElementNS(svgNS, "text");
-            text.setAttribute("class", "label");
-            text.setAttribute("font-size", "30");
+            text.classList.add("label");
             text.setAttribute("x", xy.x);
             text.setAttribute("y", xy.y + 10);
             text.innerHTML = fileToString(file);

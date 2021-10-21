@@ -28,6 +28,13 @@ svg {
     position: absolute;
 }
 
+.cell {
+    fill: none;
+    stroke: #000000;
+    stroke-width: 5;
+    pointer-events: all;
+}
+
 .cell:hover {
     fill: #ffffff60
 }
@@ -36,4 +43,23 @@ svg {
     font-family: Helvetica,sans-serif;
     font-weight: normal;
     text-anchor: middle;
+    font-size: 30px;
+}
+
+.black-border {
+    fill: #000000;
+    stroke: #000000;
+    stroke-width: 5;
+}
+
+.white-border {
+    fill: #ffffff;
+    stroke: #000000;
+    stroke-width: 5;
+}
+
+.grid {
+    stroke: #000000;
+    stroke-width: 5;
+    fill: none;
 }
