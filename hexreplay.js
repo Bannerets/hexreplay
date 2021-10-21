@@ -102,6 +102,8 @@ function Board(files = 11, ranks = 11, orientation = 9, mirror = false) {
     // Internal parameters.
     this.unit = 80;
     this.borderradius = 1.2;
+    this.excentricity_acute = 0.5;
+    this.excentricity_obtuse = 0.5;
 
     // Create the board's DOM element.
     this.dom = document.createElement("div");
@@ -278,31 +280,34 @@ Board.prototype.svg_of_board = function() {
 
     // Border
     var r = this.borderradius;
-    var r2 = r / Math.sqrt(3);
-    var r3 = r * Math.sqrt(1/3) * this.unit;
-
+    var e = this.excentricity_acute;
+    var r4 = (r-e/2) * Math.sqrt(1/3) * this.unit;
+    var e2 = this.excentricity_obtuse;
+    var r2 = e2/2 + (r - 3/4*e2) / Math.sqrt(3);
+    var r3 = (r-3*e2/4) * Math.sqrt(1/3) * this.unit;
+    
     var border = document.createElementNS(svgNS, "path");
     var borderblack = "";
-    borderblack += "M" + coordstr(0, 0, 0, 0, -r);
-    borderblack += "A" + r3.toFixed(0) + " " + r3.toFixed(0) + " 0 0 " + (mirror ? "1" : "0") + " " + coordstr(0, 0, 0, -r, 0);
+    borderblack += "M" + coordstr(0, 0, 0, -e, -r+e/2);
+    borderblack += "A" + r4.toFixed(0) + " " + r4.toFixed(0) + " 0 0 " + (mirror ? "1" : "0") + " " + coordstr(0, 0, 0, -r-e/2, 0);
     for (var i=0; i<files; i++) {
         borderblack += "L" + coordstr(i, 0, 0, -1, 0);
         borderblack += "L" + coordstr(i, 0, 0, 0, -1);
     }
     borderblack += "L" + coordstr(files-1, 0, 0.5, 0, -0.5);
     borderblack += "L" + coordstr(files-1, 0, r2, 0, -r2);
-    borderblack += "A" + r3.toFixed(0) + " " + r3.toFixed(0) + " 0 0 " + (mirror ? "1" : "0") + " " + coordstr(files-1, 0, 0, 0, -r);
+    borderblack += "A" + r3.toFixed(0) + " " + r3.toFixed(0) + " 0 0 " + (mirror ? "1" : "0") + " " + coordstr(files-1, 0, e2/2, 0, -r+e2/4);
     borderblack += "z";
 
-    borderblack += "M" + coordstr(files-1, ranks-1, 0, 0, r);
-    borderblack += "A" + r3.toFixed(0) + " " + r3.toFixed(0) + " 0 0 " + (mirror ? "1" : "0") + " " + coordstr(files-1, ranks-1, 0, r, 0);
+    borderblack += "M" + coordstr(files-1, ranks-1, 0, e, r-e/2);
+    borderblack += "A" + r4.toFixed(0) + " " + r4.toFixed(0) + " 0 0 " + (mirror ? "1" : "0") + " " + coordstr(files-1, ranks-1, 0, r+e/2, 0);
     for (var i=0; i<files; i++) {
         borderblack += "L" + coordstr(files-1-i, ranks-1, 0, 1, 0);
         borderblack += "L" + coordstr(files-1-i, ranks-1, 0, 0, 1);
     }
     borderblack += "L" + coordstr(0, ranks-1, -0.5, 0, 0.5);
     borderblack += "L" + coordstr(0, ranks-1, -r2, 0, r2);
-    borderblack += "A" + r3.toFixed(0) + " " + r3.toFixed(0) + " 0 0 " + (mirror ? "1" : "0") + " " + coordstr(0, ranks-1, 0, 0, r);
+    borderblack += "A" + r3.toFixed(0) + " " + r3.toFixed(0) + " 0 0 " + (mirror ? "1" : "0") + " " + coordstr(0, ranks-1, -e2/2, 0, r-e2/4);
     borderblack += "z";
     
     border.setAttribute("d", borderblack);
@@ -311,26 +316,26 @@ Board.prototype.svg_of_board = function() {
     
     var border = document.createElementNS(svgNS, "path");
     var borderwhite = "";
-    borderwhite += "M" + coordstr(0, 0, -r, 0, 0);
-    borderwhite += "A" + r3.toFixed(0) + " " + r3.toFixed(0) + " 0 0 " + (mirror ? "0" : "1") + " " + coordstr(0, 0, 0, -r, 0);
+    borderwhite += "M" + coordstr(0, 0, -r+e/2, -e, 0);
+    borderwhite += "A" + r4.toFixed(0) + " " + r4.toFixed(0) + " 0 0 " + (mirror ? "0" : "1") + " " + coordstr(0, 0, 0, -r-e/2, 0);
     for (var i=0; i<ranks; i++) {
         borderwhite += "L" + coordstr(0, i, 0, -1, 0);
         borderwhite += "L" + coordstr(0, i, -1, 0, 0);
     }
     borderwhite += "L" + coordstr(0, ranks-1, -0.5, 0, 0.5);
     borderwhite += "L" + coordstr(0, ranks-1, -r2, 0, r2);
-    borderwhite += "A" + r3.toFixed(0) + " " + r3.toFixed(0) + " 0 0 " + (mirror ? "0" : "1") + " " + coordstr(0, ranks-1, -r, 0, 0);
+    borderwhite += "A" + r3.toFixed(0) + " " + r3.toFixed(0) + " 0 0 " + (mirror ? "0" : "1") + " " + coordstr(0, ranks-1, -r+e2/4, 0, e2/2);
     borderwhite += "z";
 
-    borderwhite += "M" + coordstr(files-1, ranks-1, r, 0, 0);
-    borderwhite += "A" + r3.toFixed(0) + " " + r3.toFixed(0) + " 0 0 " + (mirror ? "0" : "1") + " " + coordstr(files-1, ranks-1, 0, r, 0);
+    borderwhite += "M" + coordstr(files-1, ranks-1, r-e/2, e, 0);
+    borderwhite += "A" + r4.toFixed(0) + " " + r4.toFixed(0) + " 0 0 " + (mirror ? "0" : "1") + " " + coordstr(files-1, ranks-1, 0, r+e/2, 0);
     for (var i=0; i<ranks; i++) {
         borderwhite += "L" + coordstr(files-1, ranks-1-i, 0, 1, 0);
         borderwhite += "L" + coordstr(files-1, ranks-1-i, 1, 0, 0);
     }
     borderwhite += "L" + coordstr(files-1, 0, 0.5, 0, -0.5);
     borderwhite += "L" + coordstr(files-1, 0, r2, 0, -r2);
-    borderwhite += "A" + r3.toFixed(0) + " " + r3.toFixed(0) + " 0 0 " + (mirror ? "0" : "1") + " " + coordstr(files-1, 0, r, 0, 0);
+    borderwhite += "A" + r3.toFixed(0) + " " + r3.toFixed(0) + " 0 0 " + (mirror ? "0" : "1") + " " + coordstr(files-1, 0, r-e2/4, 0, -e2/2);
     borderwhite += "z";
 
     border.setAttribute("d", borderwhite);
@@ -448,10 +453,17 @@ Board.prototype.setStone = function(cell, value) {
 }
 
 // ----------------------------------------------------------------------
+// Game logic
+
+// A move is either a cell or one of the special moves "pass",
+// "swap-pieces", "swap-sides", "resign".
+
+
+// ----------------------------------------------------------------------
 // Testing
 
 var main = document.getElementById("main");
-var board = new Board(11, 11, 10, false);
+var board = new Board(11, 11, 9, false);
 main.appendChild(board.dom);
 
 board.resize();
