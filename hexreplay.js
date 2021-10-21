@@ -220,6 +220,15 @@
 
     resize_svg();
 
-    window.addEventListener('resize', resize_svg);
+    window.addEventListener("resize", resize_svg);
 
+    // Testing clicks
+    document.addEventListener("click", function(event) {
+        if (!event.target.matches(".cell")) {
+            return;
+        }
+        console.log("cell click: " + event.target.id);
+    }, false);
+    
+    
 })();
