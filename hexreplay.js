@@ -538,7 +538,7 @@ GameState.prototype.resigned = function() {
     if (n == 0) {
         return false;
     }
-    return this.movelist[n-1].type === Const.resign;
+    return this.movelist[n-1].move.type === Const.resign;
 }
 
 // Check whether the current move is a forfeit move.
@@ -547,7 +547,7 @@ GameState.prototype.forfeited = function() {
     if (n == 0) {
         return false;
     }
-    return this.movelist[n-1].type === Const.forfeit;
+    return this.movelist[n-1].move.type === Const.forfeit;
 }
 
 // Check whether the given move is legal.
@@ -671,6 +671,22 @@ GameState.prototype.undo = function() {
     var move = this.movelist[n-1];
     this.undoBoardMove(move.number, move.player, move.move);
     this.currentmove--;
+    return true;
+}
+
+// Go to the start of the move list.
+GameState.prototype.first = function() {
+    while (this.currentmove > 0) {
+        this.undo();
+    }
+    return true;
+}
+
+// Go to the end of the move list.
+GameState.prototype.last = function() {
+    while (this.currentmove < this.movelist.length) {
+        this.redo();
+    }
     return true;
 }
 
