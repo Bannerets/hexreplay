@@ -28,19 +28,19 @@ svg {
     position: absolute;
 }
 
-.cell {
+.background {
     fill: none;
 }
 
-.cell.shaded {
+.background.shaded {
     fill: #00000018;
 }
 
-.cellgroup:hover .cell {
+.cell:hover .background {
     fill: #ffffff60;
 }
 
-.cellgroup {
+.cell {
     pointer-events: all;
 }
 
@@ -81,7 +81,7 @@ svg {
 .black .black-stone {
     display: block;
     fill: url('#black-gradient');
-    filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .7));
+    filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .5));
 }
 
 .white-stone {
@@ -91,5 +91,5 @@ svg {
 .white .white-stone {
     display: block;
     fill: url('#white-gradient');
-    filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .7));
+    filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .5));
 }

@@ -21,31 +21,69 @@ Cell.prototype.equals = function(c) {
 // Auxiliary function. Convert an integer to a file symbol: a..z,
 // aa..zz, aaa..zzz and so on. This way we can (in principle) support
 // board sizes greater than 26.
-Cell.prototype.fileToString = function(x) {
+Cell.fileToString = function(x) {
     if (x < 0) {
-        return "-" + this.fileToString(-1-x);
+        return "-" + Cell.fileToString(-1-x);
     } else if (x < 26) {
         return String.fromCharCode(97 + x);
     } else {
-        var rest = this.fileToString(Math.floor(x/26 - 1));
+        var rest = Cell.fileToString(Math.floor(x/26 - 1));
         var last = String.fromCharCode(97 + (x % 26));
         return rest + last;
     }
 }
 
 // Auxiliary function. Convert an integer to a rank symbol.
-Cell.prototype.rankToString = function(x) {
+Cell.rankToString = function(x) {
     return (x+1).toString();
 }
 
 // Auxiliary function. Convert a pair of integers to a cell name.
-Cell.prototype.cellname = function(file, rank) {
-    return Cell.prototype.fileToString(file) + Cell.prototype.rankToString(rank);
+Cell.cellname = function(file, rank) {
+    return Cell.fileToString(file) + Cell.rankToString(rank);
 }
 
 // Get the name of a cell (e.g., "a1").
 Cell.prototype.toString = function () {
-    return this.cellname(this.file, this.rank);
+    return Cell.cellname(this.file, this.rank);
+}
+
+// Convert a file symbol to an integer.
+Cell.stringToFile = function(s) {
+    if (s.length == 0) {
+        throw "Cell.stringToFile: " + s;
+    }
+    if (s[0] == "-") {
+        return -Cell.stringToFile(s.substring(1))-1;
+    }
+    var acc = -1;
+    for (var i=0; i<s.length; i++) {
+        var c = s.charCodeAt(i) - 97;
+        if (c < 0 || c > 25) {
+            throw "Cell.stringToFile: " + s;
+        }
+        acc += 1;
+        acc *= 26;
+        acc += c;
+    }
+    return acc;
+}
+
+// Convert a rank symbol to an integer.
+Cell.stringToRank = function(s) {
+    return parseInt(s) - 1;
+}
+
+// Convert a cell name (such as "a1") to a cell.
+Cell.fromString = function (s) {
+    var regexp = /^([a-z]+)([0-9]+)$/g;
+    var matches = s.matchAll(regexp).next().value;
+    if (!matches) {
+        return null;
+    }
+    var file = Cell.stringToFile(matches[1]);
+    var rank = Cell.stringToRank(matches[2]);
+    return new Cell(file, rank);
 }
 
 // ----------------------------------------------------------------------
@@ -62,17 +100,27 @@ function Board(files = 11, ranks = 11, orientation = 9, mirror = false) {
     this.mirror = mirror;
 
     // Internal parameters.
-    this.unit = 100;
+    this.unit = 80;
     this.borderradius = 1.2;
 
     // Create the board's DOM element.
     this.dom = document.createElement("div");
     this.dom.classList.add("board");
 
+    // A user-supplied function to call when a cell is clicked.
+    this.onclick = function (cell) {};
+    
     // Update the board's appearance.
     this.update();
 
     window.addEventListener("resize", function () {self.resize()});
+
+    this.dom.addEventListener("click", function(event) {
+        var cell = event.target.closest(".cell");
+        if (cell) {
+            self.onclick(Cell.fromString(cell.id));
+        }
+    });
 }
 
 Board.prototype.update = function() {
@@ -102,15 +150,15 @@ Board.prototype.svg_of_board = function() {
     
     var theta = -Math.PI * (orientation + 2) / 6;
     if (!mirror) {
-        var ax = 100 * Math.cos(theta);
-        var ay = -100 * Math.sin(theta);
-        var bx = 100 * Math.cos(theta - Math.PI / 3);
-        var by = -100 * Math.sin(theta - Math.PI / 3);
+        var ax = this.unit * Math.cos(theta);
+        var ay = -this.unit * Math.sin(theta);
+        var bx = this.unit * Math.cos(theta - Math.PI / 3);
+        var by = -this.unit * Math.sin(theta - Math.PI / 3);
     } else {
-        var ax = 100 * Math.cos(theta - Math.PI / 3);
-        var ay = -100 * Math.sin(theta - Math.PI / 3);
-        var bx = 100 * Math.cos(theta);
-        var by = -100 * Math.sin(theta);
+        var ax = this.unit * Math.cos(theta - Math.PI / 3);
+        var ay = -this.unit * Math.sin(theta - Math.PI / 3);
+        var bx = this.unit * Math.cos(theta);
+        var by = -this.unit * Math.sin(theta);
     }            
 
     // Hex coordinates:
@@ -198,7 +246,7 @@ Board.prototype.svg_of_board = function() {
     grad.setAttribute("cy", "30%");
     grad.setAttribute("r", "0.5");
     var stop = document.createElementNS(svgNS, "stop");
-    stop.setAttribute("offset", "0%");
+    stop.setAttribute("offset", "15%");
     stop.setAttribute("stop-color", "#666666");
     grad.appendChild(stop);
     var stop = document.createElementNS(svgNS, "stop");
@@ -229,9 +277,9 @@ Board.prototype.svg_of_board = function() {
     svg.appendChild(g);
 
     // Border
-    var r = 1.2;
+    var r = this.borderradius;
     var r2 = r / Math.sqrt(3);
-    var r3 = r * Math.sqrt(1/3) * 100;
+    var r3 = r * Math.sqrt(1/3) * this.unit;
 
     var border = document.createElementNS(svgNS, "path");
     var borderblack = "";
@@ -293,25 +341,25 @@ Board.prototype.svg_of_board = function() {
     for (var rank=0; rank<ranks; rank++) {
         for (var file=0; file<files; file++) {
             var g1 = document.createElementNS(svgNS, "g");
-            g1.classList.add("cellgroup");
+            g1.setAttribute("id", Cell.cellname(file, rank));
+            g1.classList.add("cell");
             
             var path = document.createElementNS(svgNS, "path");
             path.setAttribute("d", hexpath(file, rank));
-            path.setAttribute("id", Cell.prototype.cellname(file, rank));
-            path.classList.add("cell");
+            path.classList.add("background");
             if (Math.min(file, rank, files-file-1, ranks-rank-1) % 2 == 1) {
                 path.classList.add("shaded");
             }
             g1.appendChild(path);
             var tooltip = document.createElementNS(svgNS, "title");
-            tooltip.innerHTML = Cell.prototype.cellname(file, rank);
+            tooltip.innerHTML = Cell.cellname(file, rank);
             g1.appendChild(tooltip);
 
             var stone = document.createElementNS(svgNS, "circle");
             var xy = coord(file, rank);
             stone.setAttribute("cx", xy.x);
             stone.setAttribute("cy", xy.y);
-            stone.setAttribute("r", "44");
+            stone.setAttribute("r", 0.43 * this.unit);
             stone.classList.add("black-stone");
             g1.appendChild(stone);
 
@@ -319,7 +367,7 @@ Board.prototype.svg_of_board = function() {
             var xy = coord(file, rank);
             stone.setAttribute("cx", xy.x);
             stone.setAttribute("cy", xy.y);
-            stone.setAttribute("r", "43");
+            stone.setAttribute("r", 0.42 * this.unit);
             stone.classList.add("white-stone");
             g1.appendChild(stone);
 
@@ -346,7 +394,7 @@ Board.prototype.svg_of_board = function() {
         text.classList.add("label");
         text.setAttribute("x", xy.x);
         text.setAttribute("y", xy.y + 10);
-        text.innerHTML = Cell.prototype.rankToString(rank);
+        text.innerHTML = Cell.rankToString(rank);
         g.appendChild(text);
     }
     for (var rank=0; rank<ranks; rank++) {
@@ -355,7 +403,7 @@ Board.prototype.svg_of_board = function() {
         text.classList.add("label");
         text.setAttribute("x", xy.x);
         text.setAttribute("y", xy.y + 10);
-        text.innerHTML = Cell.prototype.rankToString(rank);
+        text.innerHTML = Cell.rankToString(rank);
         g.appendChild(text);
     }
     for (var file=0; file<files; file++) {
@@ -364,7 +412,7 @@ Board.prototype.svg_of_board = function() {
         text.classList.add("label");
         text.setAttribute("x", xy.x);
         text.setAttribute("y", xy.y + 10);
-        text.innerHTML = Cell.prototype.fileToString(file);
+        text.innerHTML = Cell.fileToString(file);
         g.appendChild(text);
     }
     for (var file=0; file<files; file++) {
@@ -373,12 +421,34 @@ Board.prototype.svg_of_board = function() {
         text.classList.add("label");
         text.setAttribute("x", xy.x);
         text.setAttribute("y", xy.y + 10);
-        text.innerHTML = Cell.prototype.fileToString(file);
+        text.innerHTML = Cell.fileToString(file);
         g.appendChild(text);
     }
     
     return svg;
 }
+
+// Cell values
+Board.black = "black";
+Board.white = "white";
+Board.empty = "empty";
+
+// Set the cell's content to value, which is Board.black, Board.white, or Board.empty.
+Board.prototype.setStone = function(cell, value) {
+    var cell = document.getElementById(cell.toString());
+    if (cell) {
+        cell.classList.remove("black");
+        cell.classList.remove("white");
+        if (value == Board.black) {
+            cell.classList.add("black");
+        } else if (value == Board.white) {
+            cell.classList.add("white");
+        }
+    }
+}
+
+// ----------------------------------------------------------------------
+// Testing
 
 var main = document.getElementById("main");
 var board = new Board(11, 11, 10, false);
@@ -386,19 +456,15 @@ main.appendChild(board.dom);
 
 board.resize();
 
+// Clicks
+board.onclick = function(cell) {
+    console.log("Clicked " + cell);
+}
 
-// Testing clicks
-document.addEventListener("click", function(event) {
-    console.log(event.target);
-    if (!event.target.matches(".cell")) {
-        return;
-    }
-    console.log("cell click: " + event.target.id);
-}, false);
-
-// Testing stones
-document.getElementById("a3").parentElement.classList.add("black");
-document.getElementById("b2").parentElement.classList.add("white");
-document.getElementById("c1").parentElement.classList.add("black");
+// Stones
+board.setStone(new Cell(0,0), Board.black);
+board.setStone(new Cell(1,1), Board.white);
+board.setStone(new Cell(1,2), Board.black);
+board.setStone(new Cell(1,3), Board.white);
 
 // })();
