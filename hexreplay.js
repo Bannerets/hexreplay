@@ -629,6 +629,51 @@ GameState.prototype.playBoardMove = function(n, player, move) {
     }
 }
 
+GameState.prototype.undoBoardMove = function(n, player, move) {
+    switch (move.type) {
+    case Const.move:
+        this.board.setStone(move.cell, Const.empty);
+        break;
+    case Const.pass:
+        break;
+    case Const.swap_pieces:
+        this.board.swap();
+        break;
+    case Const.swap_sides:
+        break;
+    case Const.resign:
+        break;
+    case Const.forfeit:
+        break;
+    }
+}
+
+// Redo the next move. Return true on success, false on failure.
+GameState.prototype.redo = function() {
+    var n = this.currentmove;
+
+    if (n >= this.movelist.length) {
+        return false;
+    }
+    var move = this.movelist[n];
+    this.playBoardMove(move.number, move.player, move.move);
+    this.currentmove++;
+    return true;
+}
+
+// Undo the last move. Return true on success, false on failure.
+GameState.prototype.undo = function() {
+    var n = this.currentmove;
+
+    if (n <= 0) {
+        return false;
+    }
+    var move = this.movelist[n-1];
+    this.undoBoardMove(move.number, move.player, move.move);
+    this.currentmove--;
+    return true;
+}
+
 // ----------------------------------------------------------------------
 // Testing
 
