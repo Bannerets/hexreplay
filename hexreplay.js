@@ -224,7 +224,7 @@
                 g1.appendChild(path);
                 var tooltip = document.createElementNS(svgNS, "title");
                 tooltip.innerHTML = cellname(file, rank);
-                path.appendChild(tooltip);
+                g1.appendChild(tooltip);
 
                 var stone = document.createElementNS(svgNS, "circle");
                 var xy = coord(file, rank);
