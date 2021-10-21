@@ -166,6 +166,20 @@
 
     var boardarea = document.getElementById("boardarea");
     var svg = svg_of_board(6, 5, 10);
+    svg.setAttribute("id", "board");
     boardarea.appendChild(svg);
 
+    // Resize SVG to container.
+    function resize_svg() {
+        var svg = document.getElementById("board");
+        var container = document.getElementById("boardarea");
+        svg.setAttribute("width", container.offsetWidth);
+        svg.setAttribute("height", container.offsetHeight);
+    }
+
+    resize_svg();
+
+    window.addEventListener('resize', resize_svg);
+    
+    
 })();
