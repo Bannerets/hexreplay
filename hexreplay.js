@@ -111,6 +111,41 @@
         svg.setAttribute("viewBox", box.x0.toFixed(0) + " " + box.y0.toFixed(0) + " " + (box.x1-box.x0).toFixed(0) + " " + (box.y1-box.y0).toFixed(0));
         svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
         var svgNS = svg.namespaceURI;
+
+        var defs = document.createElementNS(svgNS, "defs");
+
+        var grad = document.createElementNS(svgNS, "radialGradient");
+        grad.setAttribute("id", "black-gradient");
+        grad.setAttribute("cx", "30%");
+        grad.setAttribute("cy", "30%");
+        grad.setAttribute("r", "0.5");
+        var stop = document.createElementNS(svgNS, "stop");
+        stop.setAttribute("offset", "0%");
+        stop.setAttribute("stop-color", "#666666");
+        grad.appendChild(stop);
+        var stop = document.createElementNS(svgNS, "stop");
+        stop.setAttribute("offset", "100%");
+        stop.setAttribute("stop-color", "#030303");
+        grad.appendChild(stop);
+        defs.appendChild(grad);
+        svg.appendChild(defs);
+        
+        var grad = document.createElementNS(svgNS, "radialGradient");
+        grad.setAttribute("id", "white-gradient");
+        grad.setAttribute("cx", "30%");
+        grad.setAttribute("cy", "30%");
+        grad.setAttribute("r", "0.5");
+        var stop = document.createElementNS(svgNS, "stop");
+        stop.setAttribute("offset", "0%");
+        stop.setAttribute("stop-color", "#ffffff");
+        grad.appendChild(stop);
+        var stop = document.createElementNS(svgNS, "stop");
+        stop.setAttribute("offset", "90%");
+        stop.setAttribute("stop-color", "#d7d0c9");
+        grad.appendChild(stop);
+        defs.appendChild(grad);
+        svg.appendChild(defs);
+        
         var g = document.createElementNS(svgNS, "g");
         g.setAttribute("transform", "scale(1,1)");
         svg.appendChild(g);
@@ -176,17 +211,37 @@
         border.classList.add("white-border");
         g.appendChild(border);
         
-        // Clickable cells
+        // Clickable cells and stones
         for (var rank=0; rank<ranks; rank++) {
             for (var file=0; file<files; file++) {
+                var g1 = document.createElementNS(svgNS, "g");
+                
                 var path = document.createElementNS(svgNS, "path");
                 path.setAttribute("d", hexpath(file, rank));
                 path.setAttribute("id", cellname(file, rank));
                 path.classList.add("cell");
-                g.appendChild(path);
+                g1.appendChild(path);
                 var tooltip = document.createElementNS(svgNS, "title");
                 tooltip.innerHTML = cellname(file, rank);
                 path.appendChild(tooltip);
+
+                var stone = document.createElementNS(svgNS, "circle");
+                var xy = coord(file, rank);
+                stone.setAttribute("cx", xy.x);
+                stone.setAttribute("cy", xy.y);
+                stone.setAttribute("r", "41");
+                stone.classList.add("black-stone");
+                g1.appendChild(stone);
+
+                var stone = document.createElementNS(svgNS, "circle");
+                var xy = coord(file, rank);
+                stone.setAttribute("cx", xy.x);
+                stone.setAttribute("cy", xy.y);
+                stone.setAttribute("r", "40");
+                stone.classList.add("white-stone");
+                g1.appendChild(stone);
+
+                g.appendChild(g1);
             }
         }
         
@@ -267,6 +322,10 @@
         }
         console.log("cell click: " + event.target.id);
     }, false);
-    
+
+    // Testing stones
+    document.getElementById("a3").parentElement.classList.add("black");
+    document.getElementById("b2").parentElement.classList.add("white");
+    document.getElementById("c1").parentElement.classList.add("black");
     
 })();

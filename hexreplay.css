@@ -30,8 +30,6 @@ svg {
 
 .cell {
     fill: none;
-    stroke: #000000;
-    stroke-width: 5;
     pointer-events: all;
 }
 
@@ -49,17 +47,42 @@ svg {
 .black-border {
     fill: #000000;
     stroke: #000000;
-    stroke-width: 5;
+    stroke-width: 4;
 }
 
 .white-border {
-    fill: #ffffff;
+    fill: #efe8e1;
     stroke: #000000;
-    stroke-width: 5;
+    stroke-width: 4;
 }
 
 .grid {
     stroke: #000000;
-    stroke-width: 5;
+    stroke-width: 4;
     fill: none;
+}
+
+.stone {
+    fill: #000000;
+    display: none;
+}
+
+.black-stone {
+    display: none;
+}
+
+.black .black-stone {
+    display: block;
+    fill: url('#black-gradient');
+    filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .7));
+}
+
+.white-stone {
+    display: none;
+}
+
+.white .white-stone {
+    display: block;
+    fill: url('#white-gradient');
+    filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .7));
 }
