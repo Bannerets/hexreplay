@@ -215,6 +215,7 @@
         for (var rank=0; rank<ranks; rank++) {
             for (var file=0; file<files; file++) {
                 var g1 = document.createElementNS(svgNS, "g");
+                g1.classList.add("cellgroup");
                 
                 var path = document.createElementNS(svgNS, "path");
                 path.setAttribute("d", hexpath(file, rank));
@@ -317,6 +318,7 @@
 
     // Testing clicks
     document.addEventListener("click", function(event) {
+        console.log(event.target);
         if (!event.target.matches(".cell")) {
             return;
         }

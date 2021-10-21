@@ -28,12 +28,12 @@ svg {
     position: absolute;
 }
 
-.cell {
+.cellgroup {
     fill: none;
     pointer-events: all;
 }
 
-.cell:hover {
+.cellgroup:hover {
     fill: #ffffff60
 }
 
