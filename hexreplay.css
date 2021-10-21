@@ -28,13 +28,20 @@ svg {
     position: absolute;
 }
 
-.cellgroup {
+.cell {
     fill: none;
-    pointer-events: all;
 }
 
-.cellgroup:hover {
-    fill: #ffffff60
+.cell.shaded {
+    fill: #00000018;
+}
+
+.cellgroup:hover .cell {
+    fill: #ffffff60;
+}
+
+.cellgroup {
+    pointer-events: all;
 }
 
 .label {

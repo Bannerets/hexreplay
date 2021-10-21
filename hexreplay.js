@@ -221,6 +221,9 @@
                 path.setAttribute("d", hexpath(file, rank));
                 path.setAttribute("id", cellname(file, rank));
                 path.classList.add("cell");
+                if (Math.min(file, rank, files-file-1, ranks-rank-1) % 2 == 1) {
+                    path.classList.add("shaded");
+                }
                 g1.appendChild(path);
                 var tooltip = document.createElementNS(svgNS, "title");
                 tooltip.innerHTML = cellname(file, rank);
@@ -300,7 +303,7 @@
     }
 
     var boardarea = document.getElementById("boardarea");
-    var svg = svg_of_board(6, 5, 10, false);
+    var svg = svg_of_board(11, 11, 10, false);
     svg.setAttribute("id", "board");
     boardarea.appendChild(svg);
 
