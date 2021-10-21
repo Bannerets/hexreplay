@@ -158,25 +158,25 @@
         var border = document.createElementNS(svgNS, "path");
         var borderblack = "";
         borderblack += "M" + coordstr(0, 0, 0, 0, -r);
-        borderblack += "A" + r3 + " " + r3 + " 0 0 " + (mirror ? "1" : "0") + " " + coordstr(0, 0, 0, -r, 0);
+        borderblack += "A" + r3.toFixed(0) + " " + r3.toFixed(0) + " 0 0 " + (mirror ? "1" : "0") + " " + coordstr(0, 0, 0, -r, 0);
         for (var i=0; i<files; i++) {
             borderblack += "L" + coordstr(i, 0, 0, -1, 0);
             borderblack += "L" + coordstr(i, 0, 0, 0, -1);
         }
         borderblack += "L" + coordstr(files-1, 0, 0.5, 0, -0.5);
         borderblack += "L" + coordstr(files-1, 0, r2, 0, -r2);
-        borderblack += "A" + r3 + " " + r3 + " 0 0 " + (mirror ? "1" : "0") + " " + coordstr(files-1, 0, 0, 0, -r);
+        borderblack += "A" + r3.toFixed(0) + " " + r3.toFixed(0) + " 0 0 " + (mirror ? "1" : "0") + " " + coordstr(files-1, 0, 0, 0, -r);
         borderblack += "z";
 
         borderblack += "M" + coordstr(files-1, ranks-1, 0, 0, r);
-        borderblack += "A" + r3 + " " + r3 + " 0 0 " + (mirror ? "1" : "0") + " " + coordstr(files-1, ranks-1, 0, r, 0);
+        borderblack += "A" + r3.toFixed(0) + " " + r3.toFixed(0) + " 0 0 " + (mirror ? "1" : "0") + " " + coordstr(files-1, ranks-1, 0, r, 0);
         for (var i=0; i<files; i++) {
             borderblack += "L" + coordstr(files-1-i, ranks-1, 0, 1, 0);
             borderblack += "L" + coordstr(files-1-i, ranks-1, 0, 0, 1);
         }
         borderblack += "L" + coordstr(0, ranks-1, -0.5, 0, 0.5);
         borderblack += "L" + coordstr(0, ranks-1, -r2, 0, r2);
-        borderblack += "A" + r3 + " " + r3 + " 0 0 " + (mirror ? "1" : "0") + " " + coordstr(0, ranks-1, 0, 0, r);
+        borderblack += "A" + r3.toFixed(0) + " " + r3.toFixed(0) + " 0 0 " + (mirror ? "1" : "0") + " " + coordstr(0, ranks-1, 0, 0, r);
         borderblack += "z";
         
         border.setAttribute("d", borderblack);
@@ -186,25 +186,25 @@
         var border = document.createElementNS(svgNS, "path");
         var borderwhite = "";
         borderwhite += "M" + coordstr(0, 0, -r, 0, 0);
-        borderwhite += "A" + r3 + " " + r3 + " 0 0 " + (mirror ? "0" : "1") + " " + coordstr(0, 0, 0, -r, 0);
+        borderwhite += "A" + r3.toFixed(0) + " " + r3.toFixed(0) + " 0 0 " + (mirror ? "0" : "1") + " " + coordstr(0, 0, 0, -r, 0);
         for (var i=0; i<ranks; i++) {
             borderwhite += "L" + coordstr(0, i, 0, -1, 0);
             borderwhite += "L" + coordstr(0, i, -1, 0, 0);
         }
         borderwhite += "L" + coordstr(0, ranks-1, -0.5, 0, 0.5);
         borderwhite += "L" + coordstr(0, ranks-1, -r2, 0, r2);
-        borderwhite += "A" + r3 + " " + r3 + " 0 0 " + (mirror ? "0" : "1") + " " + coordstr(0, ranks-1, -r, 0, 0);
+        borderwhite += "A" + r3.toFixed(0) + " " + r3.toFixed(0) + " 0 0 " + (mirror ? "0" : "1") + " " + coordstr(0, ranks-1, -r, 0, 0);
         borderwhite += "z";
 
         borderwhite += "M" + coordstr(files-1, ranks-1, r, 0, 0);
-        borderwhite += "A" + r3 + " " + r3 + " 0 0 " + (mirror ? "0" : "1") + " " + coordstr(files-1, ranks-1, 0, r, 0);
+        borderwhite += "A" + r3.toFixed(0) + " " + r3.toFixed(0) + " 0 0 " + (mirror ? "0" : "1") + " " + coordstr(files-1, ranks-1, 0, r, 0);
         for (var i=0; i<ranks; i++) {
             borderwhite += "L" + coordstr(files-1, ranks-1-i, 0, 1, 0);
             borderwhite += "L" + coordstr(files-1, ranks-1-i, 1, 0, 0);
         }
         borderwhite += "L" + coordstr(files-1, 0, 0.5, 0, -0.5);
         borderwhite += "L" + coordstr(files-1, 0, r2, 0, -r2);
-        borderwhite += "A" + r3 + " " + r3 + " 0 0 " + (mirror ? "0" : "1") + " " + coordstr(files-1, 0, r, 0, 0);
+        borderwhite += "A" + r3.toFixed(0) + " " + r3.toFixed(0) + " 0 0 " + (mirror ? "0" : "1") + " " + coordstr(files-1, 0, r, 0, 0);
         borderwhite += "z";
 
         border.setAttribute("d", borderwhite);
