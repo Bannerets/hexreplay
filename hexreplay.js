@@ -872,7 +872,7 @@ GameState.prototype.clear = function() {
 }
 
 // Format a move for the move list.
-GameState.prototype.format_move = function(move, current) {
+GameState.prototype.formatMove = function(move, current) {
     var acc = "";
     if (current) {
         acc += '<div class="move current">';
@@ -913,16 +913,77 @@ GameState.prototype.format_move = function(move, current) {
 GameState.prototype.draw_movelist = function() {
     var p = this.movelist_panel;
     p.innerHTML = "";
-    p.innerHTML += this.format_move(null, this.currentmove === 0);
+    p.innerHTML += this.formatMove(null, this.currentmove === 0);
     for (var i=0; i<this.movelist.length; i++) {
         var move = this.movelist[i];
-        p.innerHTML += this.format_move(move, i === this.currentmove-1);
+        p.innerHTML += this.formatMove(move, i === this.currentmove-1);
     }
 }
 
 // Update all UI components.
 GameState.prototype.update = function() {
     this.draw_movelist();
+    window.location.hash = this.URLHash();
+}
+
+// Format a move for the URL string.
+GameState.prototype.hashMove = function(move) {
+    switch (move.move.type) {
+    case Const.move:
+        return move.move.cell.toString();
+        break;
+    case Const.swap_pieces:
+        return ".s";
+        break;
+    case Const.swap_sides:
+        return ".S";
+        break;
+    case Const.pass:
+        return ".p";
+        break;
+    case Const.resign:
+        if (move.player === Const.black) {
+            return ".rb";
+        } else {
+            return ".rw";
+        }
+        break;
+    case Const.forfeit:
+        if (move.player === Const.black) {
+            return ".fb";
+        } else {
+            return ".fw";
+        }
+        break;
+    }
+}
+
+// Construct a local-URL string (the part after '#').
+GameState.prototype.URLHash = function() {
+    var acc = "";
+    acc += new Dimension(this.board.files, this.board.ranks).format();
+    var orient = this.board.orientation % 12;
+    if (orient < 0) {
+        orient += 12;
+    }
+    if (orient !== 10) {
+        acc += "r" + (orient);
+    }
+    if (this.board.mirrored) {
+        acc += "m";
+    }
+    acc += ","
+    if (this.currentmove === 0) {
+        acc += ",";
+    }
+    for (var i=0; i<this.movelist.length; i++) {
+        var move = this.movelist[i];
+        acc += this.hashMove(move);
+        if (i === this.currentmove-1) {
+            acc += ",";
+        }
+    }
+    return acc;
 }
 
 // ----------------------------------------------------------------------
@@ -955,9 +1016,11 @@ document.getElementById("button-resign-white").addEventListener("click", functio
 });
 document.getElementById("button-rotate-left").addEventListener("click", function () {
     board.rotate(-1);
+    state.update();
 });
 document.getElementById("button-rotate-right").addEventListener("click", function () {
     board.rotate(1);
+    state.update();
 });
 document.getElementById("button-first").addEventListener("click", function () {
     state.first();
