@@ -34,6 +34,10 @@ Cell.prototype.equals = function(c) {
     return (this.file === c.file && this.rank === c.rank);
 }
 
+Cell.prototype.swap = function() {
+    return new Cell(this.rank, this.file);
+}
+
 // Auxiliary function. Convert an integer to a file symbol: a..z,
 // aa..zz, aaa..zzz and so on. This way we can (in principle) support
 // board sizes greater than 26.
@@ -107,13 +111,13 @@ Cell.fromString = function (s) {
 
 // This holds a DOM element to display a board.
 
-function Board(files = 11, ranks = 11, orientation = 9, mirror = false) {
+function Board(files = 11, ranks = 11, orientation = 9, mirrored = false) {
     var self = this;
 
     this.files = files;
     this.ranks = ranks;
     this.orientation = orientation;
-    this.mirror = mirror;
+    this.mirrored = mirrored;
 
     // Internal parameters.
     this.unit = 80;
@@ -129,7 +133,8 @@ function Board(files = 11, ranks = 11, orientation = 9, mirror = false) {
     this.onclick = function (cell) {};
     
     // Update the board's appearance.
-    this.update();
+    this.draw_svg();
+    this.resize();
 
     window.addEventListener("resize", function () {self.resize()});
 
@@ -141,7 +146,10 @@ function Board(files = 11, ranks = 11, orientation = 9, mirror = false) {
     });
 }
 
-Board.prototype.update = function() {
+// Use this when the SVG does not yet exist in the DOM tree, or when
+// the contents should be cleared. If the SVG already exists and the
+// content should be preserved, use update().
+Board.prototype.draw_svg = function() {
     // Delete old contents.
     this.dom.innerHTML = "";
     
@@ -149,6 +157,14 @@ Board.prototype.update = function() {
     this.svg = this.svg_of_board();
 
     this.dom.appendChild(this.svg);
+}
+
+// Redraw the board, preserving the existing contents.
+Board.prototype.update = function () {
+    var dict = this.saveContents();
+    this.draw_svg();
+    this.resize();
+    this.restoreContents(dict);
 }
 
 // Resize SVG to container. This must be called upon initialization
@@ -164,7 +180,7 @@ Board.prototype.resize = function() {
 Board.prototype.setSize = function(files, ranks) {
     this.files = files;
     this.ranks = ranks;
-    this.update();
+    this.draw_svg();
     this.resize();
 }
 
@@ -172,10 +188,10 @@ Board.prototype.svg_of_board = function() {
     var files = this.files;
     var ranks = this.ranks;
     var orientation = this.orientation;
-    var mirror = this.mirror;
+    var mirrored = this.mirrored;
     
     var theta = -Math.PI * (orientation + 2) / 6;
-    if (!mirror) {
+    if (!mirrored) {
         var ax = this.unit * Math.cos(theta);
         var ay = -this.unit * Math.sin(theta);
         var bx = this.unit * Math.cos(theta - Math.PI / 3);
@@ -317,25 +333,25 @@ Board.prototype.svg_of_board = function() {
     var border = document.createElementNS(svgNS, "path");
     var borderblack = "";
     borderblack += "M" + coordstr(0, 0, 0, -e, -r+e/2);
-    borderblack += arc(r4, mirror, 0, 0, 0, -r-e/2, 0);
+    borderblack += arc(r4, mirrored, 0, 0, 0, -r-e/2, 0);
     for (var i=0; i<files; i++) {
         borderblack += "L" + coordstr(i, 0, 0, -1, 0);
         borderblack += "L" + coordstr(i, 0, 0, 0, -1);
     }
     borderblack += "L" + coordstr(files-1, 0, 0.5, 0, -0.5);
     borderblack += "L" + coordstr(files-1, 0, r2, 0, -r2);
-    borderblack += arc(r3, mirror, files-1, 0, e2/2, 0, -r+e2/4);
+    borderblack += arc(r3, mirrored, files-1, 0, e2/2, 0, -r+e2/4);
     borderblack += "z";
 
     borderblack += "M" + coordstr(files-1, ranks-1, 0, e, r-e/2);
-    borderblack += arc(r4, mirror, files-1, ranks-1, 0, r+e/2, 0);
+    borderblack += arc(r4, mirrored, files-1, ranks-1, 0, r+e/2, 0);
     for (var i=0; i<files; i++) {
         borderblack += "L" + coordstr(files-1-i, ranks-1, 0, 1, 0);
         borderblack += "L" + coordstr(files-1-i, ranks-1, 0, 0, 1);
     }
     borderblack += "L" + coordstr(0, ranks-1, -0.5, 0, 0.5);
     borderblack += "L" + coordstr(0, ranks-1, -r2, 0, r2);
-    borderblack += arc(r3, mirror, 0, ranks-1, -e2/2, 0, r-e2/4);
+    borderblack += arc(r3, mirrored, 0, ranks-1, -e2/2, 0, r-e2/4);
     borderblack += "z";
     
     border.setAttribute("d", borderblack);
@@ -345,25 +361,25 @@ Board.prototype.svg_of_board = function() {
     var border = document.createElementNS(svgNS, "path");
     var borderwhite = "";
     borderwhite += "M" + coordstr(0, 0, -r+e/2, -e, 0);
-    borderwhite += arc(r4, !mirror, 0, 0, 0, -r-e/2, 0);
+    borderwhite += arc(r4, !mirrored, 0, 0, 0, -r-e/2, 0);
     for (var i=0; i<ranks; i++) {
         borderwhite += "L" + coordstr(0, i, 0, -1, 0);
         borderwhite += "L" + coordstr(0, i, -1, 0, 0);
     }
     borderwhite += "L" + coordstr(0, ranks-1, -0.5, 0, 0.5);
     borderwhite += "L" + coordstr(0, ranks-1, -r2, 0, r2);
-    borderwhite += arc(r3, !mirror, 0, ranks-1, -r+e2/4, 0, e2/2);
+    borderwhite += arc(r3, !mirrored, 0, ranks-1, -r+e2/4, 0, e2/2);
     borderwhite += "z";
 
     borderwhite += "M" + coordstr(files-1, ranks-1, r-e/2, e, 0);
-    borderwhite += arc(r4, !mirror, files-1, ranks-1, 0, r+e/2, 0);
+    borderwhite += arc(r4, !mirrored, files-1, ranks-1, 0, r+e/2, 0);
     for (var i=0; i<ranks; i++) {
         borderwhite += "L" + coordstr(files-1, ranks-1-i, 0, 1, 0);
         borderwhite += "L" + coordstr(files-1, ranks-1-i, 1, 0, 0);
     }
     borderwhite += "L" + coordstr(files-1, 0, 0.5, 0, -0.5);
     borderwhite += "L" + coordstr(files-1, 0, r2, 0, -r2);
-    borderwhite += arc(r3, !mirror, files-1, 0, r-e2/4, 0, -e2/2);
+    borderwhite += arc(r3, !mirrored, files-1, 0, r-e2/4, 0, -e2/2);
     borderwhite += "z";
 
     border.setAttribute("d", borderwhite);
@@ -496,18 +512,71 @@ Board.prototype.isEmpty = function(cell) {
 // as well. This swap method is implemented for all boards, and
 // doesn't care whether swapping is legal or not.
 Board.prototype.swap = function() {
-    var self = this;
+    var dict = this.saveContents();
+    this.setSize(this.ranks, this.files); // also clears the board
+    var dict2 = {};
+    for (var c in dict) {
+        var cell = Cell.fromString(c).swap();
+        dict2[cell] = dict[c] === Const.black ? Const.white : Const.black;
+    }
+    this.restoreContents(dict2);
+}
+
+// Store the board contents in a data structure. This is used during
+// updates that need to redraw the SVG.
+Board.prototype.saveContents = function() {
     var black = this.svg.querySelectorAll(".cell.black");
     var white = this.svg.querySelectorAll(".cell.white");
-    this.setSize(this.ranks, this.files); // also clears the board
+    var dict = {};
     black.forEach(function(cell) {
         var c = Cell.fromString(cell.id);
-        self.setStone(new Cell(c.rank, c.file), Const.white);
+        dict[c] = Const.black;
     });
     white.forEach(function(cell) {
         var c = Cell.fromString(cell.id);
-        self.setStone(new Cell(c.rank, c.file), Const.black);
+        dict[c] = Const.white;
     });
+    return dict;
+}
+
+// Restore the board contents from a data structure. The board must be
+// of the correct dimensions and empty.
+Board.prototype.restoreContents = function(dict) {
+    for (var c in dict) {
+        this.setStone(Cell.fromString(c), dict[c]);
+    }
+}
+
+Board.prototype.mirror_long_diagonal = function() {
+    this.mirrored = !this.mirrored;
+    this.update();
+}
+
+Board.prototype.mirror_short_diagonal = function() {
+    this.mirrored = !this.mirrored;
+    this.orientation += 6;
+    this.update();
+}
+
+Board.prototype.mirror_horizontal = function() {
+    this.mirrored = !this.mirrored;
+    this.orientation = -this.orientation;
+    this.update();
+}
+
+Board.prototype.mirror_vertical = function() {
+    this.mirrored = !this.mirrored;
+    this.orientation = 6-this.orientation;
+    this.update();
+}
+
+Board.prototype.rotate = function(step) {
+    if (this.mirrored) {
+        this.orientation += step;
+    } else {
+        this.orientation += step;
+    }
+    this.update();
 }
 
 // ----------------------------------------------------------------------
@@ -711,6 +780,11 @@ board.resize();
 
 var state = new GameState(board);
 state.play(new Move(new Cell(0,0)));
+state.play(new Move(new Cell(1,5)));
+state.play(new Move(new Cell(2,2)));
+state.play(new Move(new Cell(3,8)));
+state.play(new Move(new Cell(4,0)));
+state.play(new Move(new Cell(6,2)));
 
 
 // Clicks
