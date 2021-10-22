@@ -8,9 +8,9 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    id="svg8"
    version="1.1"
-   viewBox="0 0 79.375002 7.9375001"
+   viewBox="0 0 111.125 7.9375001"
    height="30"
-   width="300">
+   width="420">
   <defs
      id="defs2">
     <linearGradient
@@ -482,5 +482,105 @@
            y="264.59564"
            style="font-size:9.87777805px;stroke-width:0.26458332">S</tspan></text>
     </g>
+    <g
+       id="g1047">
+      <rect
+         style="opacity:1;fill:#fcfcfc;fill-opacity:0;stroke:none;stroke-width:0.06614584;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="rect988-0-91-1-77-6-6-62"
+         width="7.9375"
+         height="7.9375"
+         x="87.3125"
+         y="289.0625" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:6.53378773px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.17501216"
+         x="89.173447"
+         y="295.41187"
+         id="text1087-7-9"
+         transform="scale(1.0000075,0.99999248)"><tspan
+           id="tspan1085-5-1"
+           x="89.173447"
+           y="295.41187"
+           style="font-size:6.53378773px;stroke-width:0.17501216">P</tspan></text>
+    </g>
+    <rect
+       y="280.28958"
+       x="69.727081"
+       height="4.2333331"
+       width="4.2333331"
+       id="rect2351-2"
+       style="opacity:1;fill:#ffffff;fill-opacity:0.00392157;stroke:none;stroke-width:0.08909272;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <rect
+       y="289.0625"
+       x="79.375"
+       height="7.9375"
+       width="7.9375"
+       id="rect988-0-91-1-77-6-6-6"
+       style="opacity:1;fill:#fcfcfc;fill-opacity:0;stroke:none;stroke-width:0.06614584;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <text
+       transform="scale(1.0000075,0.99999249)"
+       id="text1087-7-7"
+       y="295.41187"
+       x="81.236008"
+       style="font-style:normal;font-weight:normal;font-size:6.53378773px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.17501216"
+       xml:space="preserve"><tspan
+         style="font-size:6.53378773px;stroke-width:0.17501216"
+         y="295.41187"
+         x="81.236008"
+         id="tspan1085-5-5">S</tspan></text>
+    <circle
+       r="0.9921875"
+       cy="294.61877"
+       cx="85.460419"
+       id="path2349-0"
+       style="opacity:1;fill:#000000;fill-opacity:1;stroke:#ffffff;stroke-width:0.13229166;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <rect
+       y="289.0625"
+       x="95.25"
+       height="7.9375"
+       width="7.9375"
+       id="rect988-0-91-1-77-6-6-6-3"
+       style="opacity:1;fill:#fcfcfc;fill-opacity:0;stroke:none;stroke-width:0.06614584;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <text
+       transform="scale(1.0000075,0.99999249)"
+       id="text1087-7-7-7"
+       y="295.41187"
+       x="97.110886"
+       style="font-style:normal;font-weight:normal;font-size:6.53378773px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.17501216"
+       xml:space="preserve"><tspan
+         style="font-size:6.53378773px;stroke-width:0.17501216"
+         y="295.41187"
+         x="97.110886"
+         id="tspan1085-5-5-5">R</tspan></text>
+    <circle
+       r="0.9921875"
+       cy="294.61877"
+       cx="101.86459"
+       id="path2349-0-9"
+       style="opacity:1;fill:#000000;fill-opacity:1;stroke:#ffffff;stroke-width:0.13229166;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <rect
+       y="289.0625"
+       x="103.1875"
+       height="7.9375"
+       width="7.9375"
+       id="rect988-0-91-1-77-6-6-6-8"
+       style="opacity:1;fill:#fcfcfc;fill-opacity:0;stroke:none;stroke-width:0.06614584;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <text
+       transform="scale(1.0000075,0.99999249)"
+       id="text1087-7-7-9"
+       y="295.41187"
+       x="105.04832"
+       style="font-style:normal;font-weight:normal;font-size:6.53378773px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.17501216"
+       xml:space="preserve"><tspan
+         style="font-size:6.53378773px;stroke-width:0.17501216"
+         y="295.41187"
+         x="105.04832"
+         id="tspan1085-5-5-7">R</tspan></text>
+    <circle
+       r="0.86816406"
+       cy="294.61877"
+       cx="109.6698"
+       id="path2349-0-3"
+       style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.11575519;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
   </g>
 </svg>
