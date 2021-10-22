@@ -606,9 +606,15 @@ Move.forfeit = function (player) {
 }
 
 function GameState(board) {
+    self = this;
     this.movelist = [];
     this.currentmove = 0;
     this.board = board;
+
+    // Connect click action.
+    this.board.onclick = function(cell) {
+        self.play(new Move(cell));
+    }
 }
 
 // Check whether the current move is a resign move.
@@ -772,13 +778,50 @@ GameState.prototype.last = function() {
 // ----------------------------------------------------------------------
 // Testing
 
-var main = document.getElementById("main");
+var main = document.getElementById("board-container");
 var board = new Board(11, 9, 9, false);
 main.appendChild(board.dom);
-
 board.resize();
-
 var state = new GameState(board);
+
+// ----------------------------------------------------------------------
+// Map buttons
+
+document.getElementById("button-swap-pieces").addEventListener("click", function () {
+    state.play(Move.swap_pieces);
+});
+document.getElementById("button-swap-sides").addEventListener("click", function () {
+    state.play(Move.swap_sides);
+});
+document.getElementById("button-pass").addEventListener("click", function () {
+    state.play(Move.pass);
+});
+document.getElementById("button-resign-black").addEventListener("click", function () {
+    state.play(Move.resign(Const.black));
+});
+document.getElementById("button-resign-white").addEventListener("click", function () {
+    state.play(Move.resign(Const.white));
+});
+document.getElementById("button-rotate-left").addEventListener("click", function () {
+    board.rotate(-1);
+});
+document.getElementById("button-rotate-right").addEventListener("click", function () {
+    board.rotate(1);
+});
+document.getElementById("button-first").addEventListener("click", function () {
+    state.first();
+});
+document.getElementById("button-undo").addEventListener("click", function () {
+    state.undo();
+});
+document.getElementById("button-redo").addEventListener("click", function () {
+    state.redo();
+});
+document.getElementById("button-last").addEventListener("click", function () {
+    state.last();
+});
+                                                               
+
 state.play(new Move(new Cell(0,0)));
 state.play(new Move(new Cell(1,5)));
 state.play(new Move(new Cell(2,2)));
@@ -786,10 +829,5 @@ state.play(new Move(new Cell(3,8)));
 state.play(new Move(new Cell(4,0)));
 state.play(new Move(new Cell(6,2)));
 
-
-// Clicks
-board.onclick = function(cell) {
-    console.log("Clicked " + cell);
-}
 
 // })();

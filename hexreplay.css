@@ -10,9 +10,23 @@ body {
     padding: 0px;
 }
 
-#main {
+#board-panel {
+    flex: 1;
+    display: flex;
+    flex-flow: column;
+    height: 100%;
+}
+
+#board-container {
+    display: flex;
     height: 100%;
     box-sizing: border-box;
+    flex-flow: column;
+    position: relative;
+}
+
+#buttons-container {
+    flex: 0 0 20px;
 }
 
 .board {
@@ -92,4 +106,81 @@ svg {
     display: block;
     fill: url('#white-gradient');
     filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .5));
+}
+
+.button {
+    background-color: #f0f0f0;
+    background-repeat: no-repeat;
+    background-size: 300px 30px;
+    display: inline-block;
+    border: 1px solid #ccc;
+    padding: 0px;
+    width: 30px;
+    height: 30px;
+    border-radius: 5px;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.button:hover {
+    background-color: #ffffff;
+}
+
+.button:active {
+    background-color: #d0d0d0;
+}
+
+#button-swap-pieces {
+    background-image: url("images/buttons.svg");
+    background-position: -0px 0px;
+}
+
+#button-swap-sides {
+    background-image: url("images/buttons.svg");
+    background-position: -0px 0px;
+}
+
+#button-pass {
+    background-image: url("images/buttons.svg");
+    background-position: -0px 0px;
+}
+
+#button-resign-black {
+    background-image: url("images/buttons.svg");
+    background-position: -0px 0px;
+}
+
+#button-resign-white {
+    background-image: url("images/buttons.svg");
+    background-position: -0px 0px;
+}
+
+#button-rotate-left {
+    background-image: url("images/buttons.svg");
+    background-position: -30px 0px;
+}
+
+#button-rotate-right {
+    background-image: url("images/buttons.svg");
+    background-position: -60px 0px;
+}
+
+#button-first {
+    background-image: url("images/buttons.svg");
+    background-position: -180px 0px;
+}
+
+#button-redo {
+    background-image: url("images/buttons.svg");
+    background-position: -150px 0px;
+}
+
+#button-undo {
+    background-image: url("images/buttons.svg");
+    background-position: -120px 0px;
+}
+
+#button-last {
+    background-image: url("images/buttons.svg");
+    background-position: -210px 0px;
 }
