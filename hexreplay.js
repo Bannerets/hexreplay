@@ -670,7 +670,7 @@ GameState.prototype.truncate = function() {
 
 GameState.prototype.currentPlayer = function () {
     var n = this.currentmove;
-    if (this.currentmove >= 2 && this.movelist[1].type === Const.swap_sides) {
+    if (this.currentmove >= 2 && this.movelist[1].move.type === Const.swap_sides) {
         n += 1;
     }
     return n % 2 === 0 ? Const.black : Const.white
