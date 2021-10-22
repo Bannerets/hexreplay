@@ -523,8 +523,18 @@ function Move(cell) {
 Move.pass = {type: Const.pass};
 Move.swap_pieces = {type: Const.swap_pieces};
 Move.swap_sides = {type: Const.swap_sides};
-Move.resign = {type: Const.resign};
-Move.forfeit = {type: Const.forfeit};
+Move.resign = function (player) {
+    return {
+        type: Const.resign,
+        player: player
+    };
+}
+Move.forfeit = function (player) {
+    return {
+        type: Const.forfeit,
+        player: player
+    };
+}
 
 function GameState(board) {
     this.movelist = [];
