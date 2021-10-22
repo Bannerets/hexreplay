@@ -107,6 +107,57 @@ Cell.fromString = function (s) {
 }
 
 // ----------------------------------------------------------------------
+// Dimension
+
+function Dimension(files, ranks) {
+    this.files = files;
+    this.ranks = ranks;
+}
+
+// Formatting for HTML form.
+Dimension.prototype.format = function () {
+    if (this.files == this.ranks) {
+        return this.files.toString();
+    } else {
+        return this.files + "x" + this.ranks;
+    }
+}
+
+// Parsing for HTML form.
+Dimension.parse = function (s) {
+    // Parse an integer with optional whitespace (and return undefined
+    // if it's anything else).
+    function fromInt(s) {
+        s = s.trim();
+        for (var i=0; i<s.length; i++) {
+            var c = s.charCodeAt(i);
+            if (c < "0".charCodeAt(0) || c > "9".charCodeAt(0)) {
+                return undefined;
+            }
+        }
+        var n = parseInt(s);
+        if (isNaN(n)) {
+            return undefined;
+        }
+        return n;
+    }            
+
+    var files, ranks;
+    var x = s.indexOf("x");
+    if (x == -1) {
+        files = fromInt(s);
+        ranks = files;
+    } else {
+        files = fromInt(s.slice(0, x));
+        ranks = fromInt(s.slice(x+1));
+    }
+    if (typeof files === "undefined" || typeof ranks === "undefined") {
+        return undefined;
+    }
+    return new Dimension(files, ranks);
+}
+
+// ----------------------------------------------------------------------
 // Board
 
 // This holds a DOM element to display a board.
@@ -787,6 +838,9 @@ GameState.prototype.last = function() {
 // Set the game size. Return true on success and false on failure
 // (including when the size is unchanged).
 GameState.prototype.setSize = function(files, ranks) {
+    if (files < 1 || files > 30 || ranks < 1 || ranks > 30) {
+        return false;
+    }
     if (this.board.files === files && this.board.ranks === ranks) {
         return false;
     }
@@ -852,17 +906,20 @@ input.addEventListener("keydown", function (event) {
     if (event.keyCode !== 13) {
         return;
     }
-    var size = parseInt(input.value);
-    if (size >= 1 && size <= 30) {
-        state.setSize(size, size);
+    var size = Dimension.parse(input.value);
+    if (size !== undefined) {
+        state.setSize(size.files, size.ranks);
     }
     input.blur()
 });
 input.addEventListener("blur", function (event) {
-    var value = state.board.files;
-    input.value = value;
+    input_update(input);
 });
-                                                               
+function input_update(input) {
+    var value = new Dimension(state.board.files, state.board.ranks);
+    input.value = value.format();
+}
+input_update(input);
 
 state.play(new Move(new Cell(0,0)));
 state.play(new Move(new Cell(1,5)));
