@@ -652,24 +652,35 @@ function Move(cell) {
 Move.pass = {type: Const.pass};
 Move.swap_pieces = {type: Const.swap_pieces};
 Move.swap_sides = {type: Const.swap_sides};
-Move.resign = function (player) {
+Move.resign = function(player) {
     return {
         type: Const.resign,
         player: player
     };
 }
-Move.forfeit = function (player) {
+Move.forfeit = function(player) {
     return {
         type: Const.forfeit,
         player: player
     };
 }
 
-function GameState(board) {
+Move.getPlayer = function(move) {
+    switch (move.type) {
+    case Const.resign:
+    case Const.forfeit:
+        return move.player;
+        break;
+    }
+    return null;
+}
+
+function GameState(board, movelist_panel) {
     self = this;
     this.movelist = [];
     this.currentmove = 0;
     this.board = board;
+    this.movelist_panel = movelist_panel;
 
     // Connect click action.
     this.board.onclick = function(cell) {
@@ -743,7 +754,7 @@ GameState.prototype.play = function(move) {
         return false;
     }
     this.truncate();
-    var player = this.currentPlayer();
+    var player = Move.getPlayer(move) || this.currentPlayer();
     this.currentmove += 1;
     var n = this.currentmove;
     this.movelist.push({
@@ -752,6 +763,7 @@ GameState.prototype.play = function(move) {
         move: move
     });
     this.playBoardMove(n, player, move);
+    this.update();
     return true;
 }
 
@@ -803,6 +815,7 @@ GameState.prototype.redo = function() {
     var move = this.movelist[n];
     this.playBoardMove(move.number, move.player, move.move);
     this.currentmove++;
+    this.update();
     return true;
 }
 
@@ -816,6 +829,7 @@ GameState.prototype.undo = function() {
     var move = this.movelist[n-1];
     this.undoBoardMove(move.number, move.player, move.move);
     this.currentmove--;
+    this.update();
     return true;
 }
 
@@ -854,6 +868,61 @@ GameState.prototype.clear = function() {
     this.movelist = [];
     this.currentmove = 0;
     this.board.clear();
+    this.update();
+}
+
+// Format a move for the move list.
+GameState.prototype.format_move = function(move, current) {
+    var acc = "";
+    if (current) {
+        acc += '<div class="move current">';
+    } else {
+        acc += '<div class="move">';
+    }
+    if (move !== null) {
+        var s;
+        switch (move.move.type) {
+        case Const.move:
+            s = move.move.cell.toString();
+            break;
+        case Const.swap_pieces:
+        case Const.swap_sides:
+            s = "swap";
+            break;
+        case Const.pass:
+            s = "pass";
+            break;
+        case Const.resign:
+            s = "resign";
+            break;
+        case Const.forfeit:
+            s = "forfeit";
+            break;
+        }
+        acc += move.number + '. ';
+        acc += move.player + ' ';
+        acc += s;
+    } else {
+        acc += '&nbsp;';
+    }
+    acc += '</div>';
+    return acc;
+}
+
+// Format the move list.
+GameState.prototype.draw_movelist = function() {
+    var p = this.movelist_panel;
+    p.innerHTML = "";
+    p.innerHTML += this.format_move(null, this.currentmove === 0);
+    for (var i=0; i<this.movelist.length; i++) {
+        var move = this.movelist[i];
+        p.innerHTML += this.format_move(move, i === this.currentmove-1);
+    }
+}
+
+// Update all UI components.
+GameState.prototype.update = function() {
+    this.draw_movelist();
 }
 
 // ----------------------------------------------------------------------
@@ -863,7 +932,8 @@ var main = document.getElementById("board-container");
 var board = new Board(11, 9, 9, false);
 main.appendChild(board.dom);
 board.resize();
-var state = new GameState(board);
+var movelist_panel = document.getElementById("movelist-panel");
+var state = new GameState(board, movelist_panel);
 
 // ----------------------------------------------------------------------
 // Map buttons

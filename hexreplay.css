@@ -183,3 +183,26 @@ svg {
     background-image: url("images/buttons.svg");
     background-position: -210px 0px;
 }
+
+#main {
+    display: flex;
+    width: 100%;
+    flex-flow: row;
+}
+
+#movelist-panel {
+    flex: 0 0 140px;
+}
+
+.move {
+    text-align: left;
+    border-bottom: 1px solid #ccc;
+    padding: 0px 10px;
+    font-family: monospace;
+    margin-left: 0px;
+    cursor: pointer;
+}
+
+.move.current {
+        background-color: #ffc;
+}
