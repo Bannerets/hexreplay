@@ -138,7 +138,7 @@ function Board(files = 11, ranks = 11, orientation = 9, mirrored = false) {
 
     window.addEventListener("resize", function () {self.resize()});
 
-    this.dom.addEventListener("click", function(event) {
+    this.dom.addEventListener("mousedown", function(event) {
         var cell = event.target.closest(".cell");
         if (cell) {
             self.onclick(Cell.fromString(cell.id));
