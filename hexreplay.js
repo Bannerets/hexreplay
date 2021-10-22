@@ -508,6 +508,15 @@ Board.prototype.isEmpty = function(cell) {
     return this.getStone(cell) === Const.empty;
 }
 
+// Clear the board.
+Board.prototype.clear = function() {
+    var cells = this.svg.querySelectorAll(".cell");
+    cells.forEach(function(cell) {
+        cell.classList.remove("black");
+        cell.classList.remove("white");
+    });
+}
+
 // Swap the board state. This involves swapping the board dimensions
 // as well. This swap method is implemented for all boards, and
 // doesn't care whether swapping is legal or not.
@@ -775,6 +784,24 @@ GameState.prototype.last = function() {
     return true;
 }
 
+// Set the game size. Return true on success and false on failure
+// (including when the size is unchanged).
+GameState.prototype.setSize = function(files, ranks) {
+    if (this.board.files === files && this.board.ranks === ranks) {
+        return false;
+    }
+    this.board.setSize(files, ranks);
+    this.clear();
+    return true;
+}
+
+// Clear the move list.
+GameState.prototype.clear = function() {
+    this.movelist = [];
+    this.currentmove = 0;
+    this.board.clear();
+}
+
 // ----------------------------------------------------------------------
 // Testing
 
@@ -819,6 +846,21 @@ document.getElementById("button-redo").addEventListener("click", function () {
 });
 document.getElementById("button-last").addEventListener("click", function () {
     state.last();
+});
+var input = document.getElementById("input-size");
+input.addEventListener("keydown", function (event) {
+    if (event.keyCode !== 13) {
+        return;
+    }
+    var size = parseInt(input.value);
+    if (size >= 1 && size <= 30) {
+        state.setSize(size, size);
+    }
+    input.blur()
+});
+input.addEventListener("blur", function (event) {
+    var value = state.board.files;
+    input.value = value;
 });
                                                                
 
