@@ -226,3 +226,18 @@ svg {
 .move.current {
         background-color: #ffc;
 }
+
+.move .number {
+    display: inline-block;
+    margin-right: 1ex;
+    min-width: 3.5ex;
+}
+
+.move .player {
+    display: inline;
+    margin-right: 1.5ex;
+}
+
+.move .action {
+    display: inline;
+}

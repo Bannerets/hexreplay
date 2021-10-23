@@ -922,50 +922,57 @@ GameState.prototype.clear = function() {
 
 // Format a move for the move list.
 GameState.prototype.formatMove = function(move, current) {
-    var acc = "";
+    var div = document.createElement("div");
+    div.classList.add("move");
     if (current) {
-        acc += '<div class="move current">';
-    } else {
-        acc += '<div class="move">';
+        div.classList.add("current");
     }
-    if (move !== null) {
-        var s;
-        switch (move.move.type) {
-        case Const.move:
-            s = move.move.cell.toString();
-            break;
-        case Const.swap_pieces:
-        case Const.swap_sides:
-            s = "swap";
-            break;
-        case Const.pass:
-            s = "pass";
-            break;
-        case Const.resign:
-            s = "resign";
-            break;
-        case Const.forfeit:
-            s = "forfeit";
-            break;
-        }
-        acc += move.number + '. ';
-        acc += move.player + ' ';
-        acc += s;
-    } else {
-        acc += '&nbsp;';
+    if (move === null) {
+        div.innerHTML = "&nbsp;";
+        return div;
     }
-    acc += '</div>';
-    return acc;
+    var s;
+    switch (move.move.type) {
+    case Const.move:
+        s = move.move.cell.toString();
+        break;
+    case Const.swap_pieces:
+    case Const.swap_sides:
+        s = "swap";
+        break;
+    case Const.pass:
+        s = "pass";
+        break;
+    case Const.resign:
+        s = "resign";
+        break;
+    case Const.forfeit:
+        s = "forfeit";
+        break;
+    }
+    var numdiv = document.createElement("div");
+    numdiv.classList.add("number");
+    numdiv.innerHTML = move.number + '.';
+    div.appendChild(numdiv);
+    var playerdiv = document.createElement("div");
+    playerdiv.classList.add("player");
+    playerdiv.innerHTML = move.player;
+    div.appendChild(playerdiv);
+    var actiondiv = document.createElement("div");
+    actiondiv.classList.add("action");
+    actiondiv.innerHTML = s;
+    div.appendChild(actiondiv);
+    return div;
 }
 
 // Format the move list.
 GameState.prototype.draw_movelist = function() {
     var p = this.movelist_panel;
     p.innerHTML = "";
-    p.innerHTML += this.formatMove(null, this.currentmove === 0);
+    p.appendChild(this.formatMove(null, this.currentmove === 0));
     for (var i=0; i<this.movelist.length; i++) {
         var move = this.movelist[i];
-        p.innerHTML += this.formatMove(move, i === this.currentmove-1);
+        p.appendChild(this.formatMove(move, i === this.currentmove-1));
     }
 }
 
