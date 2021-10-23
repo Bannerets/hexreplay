@@ -11,12 +11,18 @@ function Const() {
 Const.black = "black";
 Const.white = "white";
 Const.empty = "empty";
+
 Const.move = "move";
 Const.pass = "pass";
 Const.swap_pieces = "swap-pieces";
 Const.swap_sides = "swap-sides";
 Const.resign = "resign";
 Const.forfeit = "forfeit";
+
+Const.longDiagonal = "longDiagonal";
+Const.shortDiagonal = "shortDiagonal";
+Const.horizontal = "horizontal";
+Const.vertical = "vertical";
 
 // ----------------------------------------------------------------------
 // Cell
@@ -647,29 +653,32 @@ Board.prototype.restoreContents = function(dict) {
     }
 }
 
-Board.prototype.mirror_long_diagonal = function() {
-    this.mirrored = !this.mirrored;
+// Mirror the board about the specified axis, which is one of
+// Const.longDiagonal, Const.shortDiagonal, Const.horizontal,
+// Const.vertical.
+Board.prototype.mirror = function(axis) {
+    switch (axis) {
+    case Const.longDiagonal:
+        this.mirrored = !this.mirrored;
+        break;
+    case Const.shortDiagonal:
+        this.mirrored = !this.mirrored;
+        this.orientation += 6;
+        break;
+    case Const.horizontal:
+        this.mirrored = !this.mirrored;
+        this.orientation = -this.orientation;
+        break;
+    case Const.vertical:
+        this.mirrored = !this.mirrored;
+        this.orientation = 6-this.orientation;
+        break;
+    }
     this.update();
 }
 
-Board.prototype.mirror_short_diagonal = function() {
-    this.mirrored = !this.mirrored;
-    this.orientation += 6;
-    this.update();
-}
-
-Board.prototype.mirror_horizontal = function() {
-    this.mirrored = !this.mirrored;
-    this.orientation = -this.orientation;
-    this.update();
-}
-
-Board.prototype.mirror_vertical = function() {
-    this.mirrored = !this.mirrored;
-    this.orientation = 6-this.orientation;
-    this.update();
-}
-
+// Rotate the board by the given "step", which measured in hours
+// clockwise.
 Board.prototype.rotate = function(step) {
     if (this.mirrored) {
         this.orientation += step;
@@ -1026,6 +1035,18 @@ GameState.prototype.URLHash = function() {
     return acc;
 }
 
+// Mirror the board.
+GameState.prototype.mirror = function(axis) {
+    this.board.mirror(axis);
+    this.update();
+}
+
+// Rotate the board.
+GameState.prototype.rotate = function(step) {
+    this.board.rotate(step);
+    this.update();
+}
+
 // ----------------------------------------------------------------------
 // Testing
 
@@ -1055,12 +1076,10 @@ document.getElementById("button-resign-white").addEventListener("click", functio
     state.play(Move.resign(Const.white));
 });
 document.getElementById("button-rotate-left").addEventListener("click", function () {
-    board.rotate(-1);
-    state.update();
+    state.rotate(-1);
 });
 document.getElementById("button-rotate-right").addEventListener("click", function () {
-    board.rotate(1);
-    state.update();
+    state.rotate(1);
 });
 document.getElementById("button-first").addEventListener("click", function () {
     state.first();
