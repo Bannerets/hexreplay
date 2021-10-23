@@ -365,6 +365,42 @@ Board.prototype.svg_of_board = function() {
     defs.appendChild(grad);
     svg.appendChild(defs);
     
+    var grad = document.createElementNS(svgNS, "radialGradient");
+    grad.setAttribute("id", "red-gradient");
+    grad.setAttribute("cx", "30%");
+    grad.setAttribute("cy", "30%");
+    grad.setAttribute("r", "0.6");
+    var stop = document.createElementNS(svgNS, "stop");
+    stop.setAttribute("offset", "0%");
+    stop.setAttribute("stop-color", "#ff8080");
+    grad.appendChild(stop);
+    var stop = document.createElementNS(svgNS, "stop");
+    stop.setAttribute("offset", "30%");
+    stop.setAttribute("stop-color", "#ff2020");
+    grad.appendChild(stop);
+    var stop = document.createElementNS(svgNS, "stop");
+    stop.setAttribute("offset", "100%");
+    stop.setAttribute("stop-color", "#880000");
+    grad.appendChild(stop);
+    defs.appendChild(grad);
+    svg.appendChild(defs);
+    
+    var grad = document.createElementNS(svgNS, "radialGradient");
+    grad.setAttribute("id", "blue-gradient");
+    grad.setAttribute("cx", "30%");
+    grad.setAttribute("cy", "30%");
+    grad.setAttribute("r", "0.5");
+    var stop = document.createElementNS(svgNS, "stop");
+    stop.setAttribute("offset", "0%");
+    stop.setAttribute("stop-color", "#a0a0ff");
+    grad.appendChild(stop);
+    var stop = document.createElementNS(svgNS, "stop");
+    stop.setAttribute("offset", "100%");
+    stop.setAttribute("stop-color", "#0000a0");
+    grad.appendChild(stop);
+    defs.appendChild(grad);
+    svg.appendChild(defs);
+    
     var g = document.createElementNS(svgNS, "g");
     g.setAttribute("transform", "scale(1,1)");
     svg.appendChild(g);
@@ -1061,5 +1097,6 @@ state.play(new Move(new Cell(3,8)));
 state.play(new Move(new Cell(4,0)));
 state.play(new Move(new Cell(6,2)));
 
+board.dom.classList.add("redblue");
 
 // })();
