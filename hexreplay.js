@@ -1085,6 +1085,7 @@ GameState.prototype.UIupdate = function() {
     window.location.replace(this.URLHash());
     enable_popstate = old_enable_popstate;
     input_update(input);
+    this.board.rescale();  // because move list might have changed size
 }
 
 // Format a move for the URL string.
