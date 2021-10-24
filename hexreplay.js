@@ -1136,13 +1136,11 @@ GameState.prototype.fromURLHash = function(hash) {
     // Parse parameters.
     var s = parts[0] ? parts[0] : "";
     var p;
-    console.log(s);
     if ((p = parse(s, /^([1-9][0-9]*x[1-9][0-9]*|[1-9][0-9]*)(.*)$/g)) !== null) {
         dim = Dimension.parse(p.match);
         s = p.rest;
     }
     while ((p = parse(s, /^(r[1-9][0-9]*|m)(.*)$/g)) !== null) {
-        console.log(p.match[0]);
         switch (p.match[0]) {
         case "r":
             rotation = parseInt(p.match.substring(1));
@@ -1158,7 +1156,6 @@ GameState.prototype.fromURLHash = function(hash) {
     this.clear();
     this.setSize(dim);
     this.setOrientation(rotation, mirrored);
-    console.log(rotation, mirrored);
     
     // Parse moves.
     var s = parts[1] ? parts[1] : ""
@@ -1250,6 +1247,84 @@ function input_update(input) {
     input.value = value.format();
 }
 input_update(input);
+
+function inputFocus() {
+    var a = document.activeElement;
+    if (a === input) {
+        return true;
+    }
+    return false;
+}
+
+// Keyboard shortcuts
+document.addEventListener("keydown", function(e) {
+    // Ignore keyboard input when any input field is in focus.
+    if (inputFocus()) {
+        return false;
+    }
+    if (e.keyCode === "S".charCodeAt(0) && e.ctrlKey == false && e.shiftKey == false) {
+        document.getElementById("button-swap-pieces").click();
+        e.preventDefault();
+        return true
+    }
+    if (e.keyCode === "P".charCodeAt(0) && e.ctrlKey == false && e.shiftKey == false) {
+        document.getElementById("button-undo").click();
+        e.preventDefault();
+        return true
+    }
+    if (e.keyCode === "N".charCodeAt(0) && e.ctrlKey == false && e.shiftKey == false) {
+        document.getElementById("button-redo").click();
+        e.preventDefault();
+        return true
+    }
+    if (e.keyCode === "F".charCodeAt(0) && e.ctrlKey == false && e.shiftKey == false) {
+        document.getElementById("button-first").click();
+        e.preventDefault();
+        return true
+    }
+    if (e.keyCode === "L".charCodeAt(0) && e.ctrlKey == false && e.shiftKey == false) {
+        document.getElementById("button-last").click();
+        e.preventDefault();
+        return true
+    }
+    if (e.keyCode === 37 && e.ctrlKey == false && e.shiftKey == false) {
+        // Left
+        document.getElementById("button-undo").click();
+        e.preventDefault();
+        return true
+    }
+    if (e.keyCode === 38 && e.ctrlKey == false && e.shiftKey == false) {
+        // Up
+        document.getElementById("button-undo").click();
+        e.preventDefault();
+        return true
+    }
+    if (e.keyCode === 39 && e.ctrlKey == false && e.shiftKey == false) {
+        // Right
+        document.getElementById("button-redo").click();
+        e.preventDefault();
+        return true
+    }
+    if (e.keyCode === 40 && e.ctrlKey == false && e.shiftKey == false) {
+        // Down
+        document.getElementById("button-redo").click();
+        e.preventDefault();
+        return true
+    }
+    if (e.keyCode === 36 && e.ctrlKey == false && e.shiftKey == false) {
+        // Home
+        document.getElementById("button-first").click();
+        e.preventDefault();
+        return true
+    }
+    if (e.keyCode === 35 && e.ctrlKey == false && e.shiftKey == false) {
+        // End
+        document.getElementById("button-last").click();
+        e.preventDefault();
+        return true
+    }
+    return false;
+});
 
 state.fromURLHash(window.location.hash);
 
