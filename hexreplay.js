@@ -12,7 +12,7 @@ Const.black = "black";
 Const.white = "white";
 Const.empty = "empty";
 
-Const.move = "move";
+Const.cell = "cell";
 Const.pass = "pass";
 Const.swap_pieces = "swap-pieces";
 Const.swap_sides = "swap-sides";
@@ -702,32 +702,34 @@ Board.prototype.rotate = function(step) {
 
 // A move is either a cell or one of the special moves Move.pass,
 // Move.swap_pieces, Move.swap_sides, Move.resign, Move.forfeit.
-function Move(cell) {
-    this.type = Const.move;
-    this.cell = cell;
+function Move(type) {
+    this.type = type;
 }
 
-Move.pass = {type: Const.pass};
-Move.swap_pieces = {type: Const.swap_pieces};
-Move.swap_sides = {type: Const.swap_sides};
+Move.cell = function (cell) {
+    var m = new Move(Const.cell);
+    m.cell = cell;
+    return m;
+}
+Move.pass = new Move(Const.pass);
+Move.swap_pieces = new Move(Const.swap_pieces);
+Move.swap_sides = new Move(Const.swap_sides);
 Move.resign = function(player) {
-    return {
-        type: Const.resign,
-        player: player
-    };
+    var m = new Move(Const.resign);
+    m.player = player
+    return m;
 }
 Move.forfeit = function(player) {
-    return {
-        type: Const.forfeit,
-        player: player
-    };
+    var m = new Move(Const.forfeit);
+    m.player = player
+    return m;
 }
 
-Move.getPlayer = function(move) {
-    switch (move.type) {
+Move.prototype.getPlayer = function() {
+    switch (this.type) {
     case Const.resign:
     case Const.forfeit:
-        return move.player;
+        return this.player;
         break;
     }
     return null;
@@ -745,7 +747,7 @@ function GameState(board, movelist_panel) {
 
     // Connect click action.
     this.board.onclick = function(cell) {
-        self.UIplay(new Move(cell));
+        self.UIplay(Move.cell(cell));
     }
 }
 
@@ -774,7 +776,7 @@ GameState.prototype.isLegal = function(move) {
         return false;
     }
     switch (move.type) {
-    case Const.move:
+    case Const.cell:
         if (move.cell.file < 0 || move.cell.file >= board.dim.files) {
             return false;
         }
@@ -820,7 +822,7 @@ GameState.prototype.play = function(move) {
         return false;
     }
     this.truncate();
-    var player = Move.getPlayer(move) || this.currentPlayer();
+    var player = move.getPlayer() || this.currentPlayer();
     this.currentmove += 1;
     var n = this.currentmove;
     this.movelist.push({
@@ -851,7 +853,7 @@ GameState.prototype.UIplay = function(move) {
 
 GameState.prototype.playBoardMove = function(n, player, move) {
     switch (move.type) {
-    case Const.move:
+    case Const.cell:
         this.board.setStone(move.cell, player);
         break;
     case Const.pass:
@@ -870,7 +872,7 @@ GameState.prototype.playBoardMove = function(n, player, move) {
 
 GameState.prototype.undoBoardMove = function(n, player, move) {
     switch (move.type) {
-    case Const.move:
+    case Const.cell:
         this.board.setStone(move.cell, Const.empty);
         break;
     case Const.pass:
@@ -1028,7 +1030,7 @@ GameState.prototype.formatMove = function(move, current) {
     }
     var s;
     switch (move.move.type) {
-    case Const.move:
+    case Const.cell:
         s = move.move.cell.toString();
         break;
     case Const.swap_pieces:
@@ -1088,7 +1090,7 @@ GameState.prototype.UIupdate = function() {
 // Format a move for the URL string.
 GameState.prototype.hashMove = function(move) {
     switch (move.move.type) {
-    case Const.move:
+    case Const.cell:
         return move.move.cell.toString();
         break;
     case Const.swap_pieces:
@@ -1210,7 +1212,7 @@ GameState.prototype.fromURLHash = function(hash) {
             return Move.forfeit(Const.white);
             break;
         default:
-            return new Move(Cell.fromString(s));
+            return Move.cell(Cell.fromString(s));
             break;
         }            
     }
@@ -1429,14 +1431,8 @@ var enable_popstate = true;
 
 window.addEventListener("popstate", function (e) {
     if (enable_popstate) {
-        console.log("popstate");
-        console.log(e);
         state.UIfromURLHash(window.location.hash);
     }
-});
-
-window.addEventListener("hashchange", function (e) {
-    console.log("hashchange");
 });
 
 state.UIfromURLHash(window.location.hash);
