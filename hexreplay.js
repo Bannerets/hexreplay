@@ -733,7 +733,7 @@ function GameState(board, movelist_panel) {
 
     // Connect click action.
     this.board.onclick = function(cell) {
-        self.play(new Move(cell));
+        self.UIplay(new Move(cell));
     }
 }
 
@@ -812,8 +812,15 @@ GameState.prototype.play = function(move) {
         move: move
     });
     this.playBoardMove(n, player, move);
-    this.update();
     return true;
+}
+
+// Functions whose name starts with UI also update the interface (the
+// move list and the hash).
+GameState.prototype.UIplay = function(move) {
+    var r = this.play(move);
+    this.UIupdate();
+    return r;
 }
 
 GameState.prototype.playBoardMove = function(n, player, move) {
@@ -864,8 +871,14 @@ GameState.prototype.redo = function() {
     var move = this.movelist[n];
     this.playBoardMove(move.number, move.player, move.move);
     this.currentmove++;
-    this.update();
     return true;
+}
+
+// Redo the next move. Return true on success, false on failure.
+GameState.prototype.UIredo = function() {
+    var r = this.redo();
+    this.UIupdate();
+    return r;
 }
 
 // Undo the last move. Return true on success, false on failure.
@@ -878,8 +891,14 @@ GameState.prototype.undo = function() {
     var move = this.movelist[n-1];
     this.undoBoardMove(move.number, move.player, move.move);
     this.currentmove--;
-    this.update();
     return true;
+}
+
+// Undo the last move. Return true on success, false on failure.
+GameState.prototype.UIundo = function() {
+    var r = this.undo();
+    this.UIupdate();
+    return r;
 }
 
 // Go to the start of the move list.
@@ -890,12 +909,26 @@ GameState.prototype.first = function() {
     return true;
 }
 
+// Go to the start of the move list.
+GameState.prototype.UIfirst = function() {
+    var r = this.first();
+    this.UIupdate();
+    return r;
+}
+
 // Go to the end of the move list.
 GameState.prototype.last = function() {
     while (this.currentmove < this.movelist.length) {
         this.redo();
     }
     return true;
+}
+
+// Go to the start of the move list.
+GameState.prototype.UIlast = function() {
+    var r = this.last();
+    this.UIupdate();
+    return r;
 }
 
 // Go to a specific move number.
@@ -923,12 +956,22 @@ GameState.prototype.setSize = function(dim) {
     return true;
 }
 
+GameState.prototype.UIsetSize = function(dim) {
+    var r = this.setSize(dim);
+    this.UIupdate();
+    return r;
+}
+
 // Set the game orientation.
 GameState.prototype.setOrientation = function(rotation, mirrored) {
     this.board.rotation = rotation;
     this.board.mirrored = mirrored;
     this.board.update();
-    this.update();
+}
+
+GameState.prototype.UIsetOrientation = function(rotation, mirrored) {
+    this.setOrientation(rotation, mirrored);
+    this.UIupdate();
 }
 
 // Clear the move list.
@@ -936,7 +979,11 @@ GameState.prototype.clear = function() {
     this.movelist = [];
     this.currentmove = 0;
     this.board.clear();
-    this.update();
+}
+
+GameState.prototype.UIclear = function() {
+    this.clear();
+    this.UIupdate();
 }
 
 // Format a move for the move list.
@@ -995,8 +1042,11 @@ GameState.prototype.draw_movelist = function() {
     }
 }
 
-// Update all UI components.
-GameState.prototype.update = function() {
+// Update all UI components that need to be updated as a whole (do not
+// support incremental updates). Currently, this is the move list and
+// hash. Only functions whose name starts with UI call this. This is
+// to ensure that the UI isn't needlessly updated multiple times.
+GameState.prototype.UIupdate = function() {
     this.draw_movelist();
     window.location.hash = this.URLHash();
 }
@@ -1071,13 +1121,21 @@ GameState.prototype.URLHash = function() {
 // Mirror the board.
 GameState.prototype.mirror = function(axis) {
     this.board.mirror(axis);
-    this.update();
+}
+
+GameState.prototype.UImirror = function(axis) {
+    this.mirror(axis);
+    this.UIupdate();
 }
 
 // Rotate the board.
 GameState.prototype.rotate = function(step) {
     this.board.rotate(step);
-    this.update();
+}
+
+GameState.prototype.UIrotate = function(step) {
+    this.rotate(step);
+    this.UIupdate();
 }
 
 // Initialize from URLHash.
@@ -1182,6 +1240,11 @@ GameState.prototype.fromURLHash = function(hash) {
     this.gotoMove(pos);
 }
 
+GameState.prototype.UIfromURLHash = function(hash) {
+    this.fromURLHash(hash);
+    this.UIupdate();
+}
+
 // ----------------------------------------------------------------------
 // Testing
 
@@ -1196,37 +1259,37 @@ var state = new GameState(board, movelist_panel);
 // Map buttons
 
 document.getElementById("button-swap-pieces").addEventListener("click", function () {
-    state.play(Move.swap_pieces);
+    state.UIplay(Move.swap_pieces);
 });
 document.getElementById("button-swap-sides").addEventListener("click", function () {
-    state.play(Move.swap_sides);
+    state.UIplay(Move.swap_sides);
 });
 document.getElementById("button-pass").addEventListener("click", function () {
-    state.play(Move.pass);
+    state.UIplay(Move.pass);
 });
 document.getElementById("button-resign-black").addEventListener("click", function () {
-    state.play(Move.resign(Const.black));
+    state.UIplay(Move.resign(Const.black));
 });
 document.getElementById("button-resign-white").addEventListener("click", function () {
-    state.play(Move.resign(Const.white));
+    state.UIplay(Move.resign(Const.white));
 });
 document.getElementById("button-rotate-left").addEventListener("click", function () {
-    state.rotate(-1);
+    state.UIrotate(-1);
 });
 document.getElementById("button-rotate-right").addEventListener("click", function () {
-    state.rotate(1);
+    state.UIrotate(1);
 });
 document.getElementById("button-first").addEventListener("click", function () {
-    state.first();
+    state.UIfirst();
 });
 document.getElementById("button-undo").addEventListener("click", function () {
-    state.undo();
+    state.UIundo();
 });
 document.getElementById("button-redo").addEventListener("click", function () {
-    state.redo();
+    state.UIredo();
 });
 document.getElementById("button-last").addEventListener("click", function () {
-    state.last();
+    state.UIlast();
 });
 var input = document.getElementById("input-size");
 input.addEventListener("keydown", function (event) {
@@ -1235,7 +1298,7 @@ input.addEventListener("keydown", function (event) {
     }
     var size = Dimension.parse(input.value);
     if (size !== undefined) {
-        state.setSize(size);
+        state.UIsetSize(size);
     }
     input.blur()
 });
@@ -1326,7 +1389,7 @@ document.addEventListener("keydown", function(e) {
     return false;
 });
 
-state.fromURLHash(window.location.hash);
+state.UIfromURLHash(window.location.hash);
 
 //board.dom.classList.add("redblue");
 
