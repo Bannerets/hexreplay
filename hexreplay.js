@@ -1048,7 +1048,7 @@ GameState.prototype.draw_movelist = function() {
 // to ensure that the UI isn't needlessly updated multiple times.
 GameState.prototype.UIupdate = function() {
     this.draw_movelist();
-    window.location.hash = this.URLHash();
+    window.location.replace(this.URLHash());
 }
 
 // Format a move for the URL string.
