@@ -115,7 +115,10 @@ Cell.fromString = function (s) {
 // ----------------------------------------------------------------------
 // Dimension
 
-function Dimension(files, ranks) {
+function Dimension(files, ranks = undefined) {
+    if (ranks === undefined) {
+        ranks = files;
+    }
     this.files = files;
     this.ranks = ranks;
 }
@@ -163,16 +166,23 @@ Dimension.parse = function (s) {
     return new Dimension(files, ranks);
 }
 
+Dimension.prototype.swap = function() {
+    return new Dimension(this.ranks, this.files);
+}
+
+Dimension.prototype.equals = function(dim) {
+    return dim.files === this.files && dim.ranks === this.ranks;
+}
+
 // ----------------------------------------------------------------------
 // Board
 
 // This holds a DOM element to display a board.
 
-function Board(files = 11, ranks = 11, rotation = 9, mirrored = false) {
+function Board(dim, rotation = 9, mirrored = false) {
     var self = this;
 
-    this.files = files;
-    this.ranks = ranks;
+    this.dim = dim;
     this.rotation = rotation;
     this.mirrored = mirrored;
 
@@ -235,15 +245,14 @@ Board.prototype.resize = function() {
 
 // Set the logical size of the board. This also clears the board.
 Board.prototype.setSize = function(dim) {
-    this.files = dim.files;
-    this.ranks = dim.ranks;
+    this.dim = dim;
     this.draw_svg();
     this.resize();
 }
 
 Board.prototype.svg_of_board = function() {
-    var files = this.files;
-    var ranks = this.ranks;
+    var files = this.dim.files;
+    var ranks = this.dim.ranks;
     var rotation = this.rotation;
     var mirrored = this.mirrored;
     
@@ -619,7 +628,7 @@ Board.prototype.clear = function() {
 // doesn't care whether swapping is legal or not.
 Board.prototype.swap = function() {
     var dict = this.saveContents();
-    this.setSize(new Dimension(this.ranks, this.files)); // also clears the board
+    this.setSize(this.dim.swap()); // also clears the board
     var dict2 = {};
     for (var c in dict) {
         var cell = Cell.fromString(c).swap();
@@ -763,10 +772,10 @@ GameState.prototype.isLegal = function(move) {
     }
     switch (move.type) {
     case Const.move:
-        if (move.cell.file < 0 || move.cell.file >= board.files) {
+        if (move.cell.file < 0 || move.cell.file >= board.dim.files) {
             return false;
         }
-        if (move.cell.rank < 0 || move.cell.rank >= board.ranks) {
+        if (move.cell.rank < 0 || move.cell.rank >= board.dim.ranks) {
             return false;
         }
         return this.board.isEmpty(move.cell);
@@ -962,7 +971,7 @@ GameState.prototype.setSize = function(dim) {
     if (dim.files < 1 || dim.files > 30 || dim.ranks < 1 || dim.ranks > 30) {
         return false;
     }
-    if (this.board.files === dim.files && this.board.ranks === dim.ranks) {
+    if (this.board.dim.equals(dim)) {
         return false;
     }
     this.board.setSize(dim);
@@ -1102,7 +1111,7 @@ GameState.prototype.hashMove = function(move) {
 // Construct a local-URL string (the part after '#').
 GameState.prototype.URLHash = function() {
     var acc = "#";
-    acc += new Dimension(this.board.files, this.board.ranks).format();
+    acc += this.board.dim.format();
     var orient = this.board.rotation % 12;
     if (orient < 0) {
         orient += 12;
@@ -1201,7 +1210,7 @@ GameState.prototype.fromURLHash = function(hash) {
         hash = hash.substring(1);
     }
     
-    var dim = new Dimension(11, 11);
+    var dim = new Dimension(11);
     var rotation = 10;
     var mirrored = false;
     
@@ -1265,7 +1274,7 @@ GameState.prototype.UIfromURLHash = function(hash) {
 // Testing
 
 var main = document.getElementById("board-container");
-var board = new Board(11, 11, 9, false);
+var board = new Board(new Dimension(11), 9, false);
 main.appendChild(board.dom);
 board.resize();
 var movelist_panel = document.getElementById("movelist-panel");
@@ -1325,7 +1334,7 @@ input.addEventListener("blur", function (event) {
     input_update(input);
 });
 function input_update(input) {
-    var value = new Dimension(state.board.files, state.board.ranks);
+    var value = state.board.dim;
     input.value = value.format();
 }
 input_update(input);
