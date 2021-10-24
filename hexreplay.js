@@ -201,9 +201,9 @@ function Board(dim, rotation = 9, mirrored = false) {
     
     // Update the board's appearance.
     this.draw_svg();
-    this.resize();
+    this.rescale();
 
-    window.addEventListener("resize", function () {self.resize()});
+    window.addEventListener("resize", function () {self.rescale()});
 
     this.dom.addEventListener("mousedown", function(event) {
         var cell = event.target.closest(".cell");
@@ -230,15 +230,15 @@ Board.prototype.draw_svg = function() {
 Board.prototype.update = function () {
     var dict = this.saveContents();
     this.draw_svg();
-    this.resize();
+    this.rescale();
     this.restoreContents(dict);
 }
 
-// Resize SVG to container. This must be called upon initialization
+// Rescale SVG to container. This must be called upon initialization
 // (*after* the board element is integrated in the DOM tree, so that
 // its size is known), and upon any event that may affect the
 // element's size. The window's "resize" event is already handled.
-Board.prototype.resize = function() {
+Board.prototype.rescale = function() {
     this.svg.setAttribute("width", this.dom.offsetWidth);
     this.svg.setAttribute("height", this.dom.offsetHeight);
 }
@@ -247,7 +247,7 @@ Board.prototype.resize = function() {
 Board.prototype.setSize = function(dim) {
     this.dim = dim;
     this.draw_svg();
-    this.resize();
+    this.rescale();
 }
 
 Board.prototype.svg_of_board = function() {
@@ -738,6 +738,9 @@ function GameState(board, movelist_panel) {
     this.movelist = [];
     this.currentmove = 0;
     this.board = board;
+    this.dim = this.board.dim; // Holds the initial dimension of the
+                               // game, rather than the current
+                               // dimension.
     this.movelist_panel = movelist_panel;
 
     // Connect click action.
@@ -975,6 +978,7 @@ GameState.prototype.setSize = function(dim) {
         return false;
     }
     this.board.setSize(dim);
+    this.dim = dim;
     this.clear();
     return true;
 }
@@ -1073,7 +1077,12 @@ GameState.prototype.draw_movelist = function() {
 // to ensure that the UI isn't needlessly updated multiple times.
 GameState.prototype.UIupdate = function() {
     this.draw_movelist();
+    // temporarily disable popstate, to avoid bottomless recursion.
+    var old_enable_popstate = enable_popstate;
+    enable_popstate = false;
     window.location.replace(this.URLHash());
+    enable_popstate = old_enable_popstate;
+    input_update(input);
 }
 
 // Format a move for the URL string.
@@ -1111,7 +1120,7 @@ GameState.prototype.hashMove = function(move) {
 // Construct a local-URL string (the part after '#').
 GameState.prototype.URLHash = function() {
     var acc = "#";
-    acc += this.board.dim.format();
+    acc += this.dim.format();
     var orient = this.board.rotation % 12;
     if (orient < 0) {
         orient += 12;
@@ -1276,7 +1285,7 @@ GameState.prototype.UIfromURLHash = function(hash) {
 var main = document.getElementById("board-container");
 var board = new Board(new Dimension(11), 9, false);
 main.appendChild(board.dom);
-board.resize();
+board.rescale();
 var movelist_panel = document.getElementById("movelist-panel");
 var state = new GameState(board, movelist_panel);
 
@@ -1334,10 +1343,9 @@ input.addEventListener("blur", function (event) {
     input_update(input);
 });
 function input_update(input) {
-    var value = state.board.dim;
+    var value = state.dim;
     input.value = value.format();
 }
-input_update(input);
 
 function inputFocus() {
     var a = document.activeElement;
@@ -1417,11 +1425,21 @@ document.addEventListener("keydown", function(e) {
     return false;
 });
 
-state.UIfromURLHash(window.location.hash);
+var enable_popstate = true;
 
 window.addEventListener("popstate", function (e) {
-    state.UIfromURLHash(window.location.hash);
+    if (enable_popstate) {
+        console.log("popstate");
+        console.log(e);
+        state.UIfromURLHash(window.location.hash);
+    }
 });
+
+window.addEventListener("hashchange", function (e) {
+    console.log("hashchange");
+});
+
+state.UIfromURLHash(window.location.hash);
 
 //board.dom.classList.add("redblue");
 
