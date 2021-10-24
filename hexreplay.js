@@ -783,6 +783,11 @@ GameState.prototype.isLegal = function(move) {
     }        
 }
 
+// Check if making a move would truncate the movelist
+GameState.prototype.isDestructive = function(move) {
+    return this.currentmove < this.movelist.length;
+}
+
 // Truncate movelist to current position.
 GameState.prototype.truncate = function() {
     this.movelist.length = this.currentmove;
@@ -815,9 +820,18 @@ GameState.prototype.play = function(move) {
     return true;
 }
 
-// Functions whose name starts with UI also update the interface (the
-// move list and the hash).
 GameState.prototype.UIplay = function(move) {
+    if (!this.isLegal(move)) {
+        return false;
+    }
+    // If this move erases part of the move list, add old state to the
+    // browser history.
+    if (this.isDestructive(move)) {
+        var pos = this.currentmove;
+        this.UIlast();
+        history.pushState(null, null);
+        this.gotoMove(pos);
+    }
     var r = this.play(move);
     this.UIupdate();
     return r;
@@ -957,6 +971,7 @@ GameState.prototype.setSize = function(dim) {
 }
 
 GameState.prototype.UIsetSize = function(dim) {
+    history.pushState(null, null);
     var r = this.setSize(dim);
     this.UIupdate();
     return r;
@@ -982,6 +997,7 @@ GameState.prototype.clear = function() {
 }
 
 GameState.prototype.UIclear = function() {
+    history.pushState(null, null);
     this.clear();
     this.UIupdate();
 }
@@ -1291,6 +1307,9 @@ document.getElementById("button-redo").addEventListener("click", function () {
 document.getElementById("button-last").addEventListener("click", function () {
     state.UIlast();
 });
+document.getElementById("button-clear").addEventListener("click", function () {
+    state.UIclear();
+});
 var input = document.getElementById("input-size");
 input.addEventListener("keydown", function (event) {
     if (event.keyCode !== 13) {
@@ -1390,6 +1409,10 @@ document.addEventListener("keydown", function(e) {
 });
 
 state.UIfromURLHash(window.location.hash);
+
+window.addEventListener("popstate", function (e) {
+    state.UIfromURLHash(window.location.hash);
+});
 
 //board.dom.classList.add("redblue");
 
