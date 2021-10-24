@@ -226,7 +226,10 @@ svg {
 }
 
 #movelist-panel {
-    flex: 0 0 115px;
+    //flex: 0 0 130px;
+    overflow-y: scroll;
+    overflow-x: visible;
+    min-width: 125px;
 }
 
 .move {
