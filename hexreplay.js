@@ -168,12 +168,12 @@ Dimension.parse = function (s) {
 
 // This holds a DOM element to display a board.
 
-function Board(files = 11, ranks = 11, orientation = 9, mirrored = false) {
+function Board(files = 11, ranks = 11, rotation = 9, mirrored = false) {
     var self = this;
 
     this.files = files;
     this.ranks = ranks;
-    this.orientation = orientation;
+    this.rotation = rotation;
     this.mirrored = mirrored;
 
     // Internal parameters.
@@ -234,9 +234,9 @@ Board.prototype.resize = function() {
 }
 
 // Set the logical size of the board. This also clears the board.
-Board.prototype.setSize = function(files, ranks) {
-    this.files = files;
-    this.ranks = ranks;
+Board.prototype.setSize = function(dim) {
+    this.files = dim.files;
+    this.ranks = dim.ranks;
     this.draw_svg();
     this.resize();
 }
@@ -244,10 +244,10 @@ Board.prototype.setSize = function(files, ranks) {
 Board.prototype.svg_of_board = function() {
     var files = this.files;
     var ranks = this.ranks;
-    var orientation = this.orientation;
+    var rotation = this.rotation;
     var mirrored = this.mirrored;
     
-    var theta = -Math.PI * (orientation + 2) / 6;
+    var theta = -Math.PI * (rotation + 2) / 6;
     if (!mirrored) {
         var ax = this.unit * Math.cos(theta);
         var ay = -this.unit * Math.sin(theta);
@@ -619,7 +619,7 @@ Board.prototype.clear = function() {
 // doesn't care whether swapping is legal or not.
 Board.prototype.swap = function() {
     var dict = this.saveContents();
-    this.setSize(this.ranks, this.files); // also clears the board
+    this.setSize(new Dimension(this.ranks, this.files)); // also clears the board
     var dict2 = {};
     for (var c in dict) {
         var cell = Cell.fromString(c).swap();
@@ -663,15 +663,15 @@ Board.prototype.mirror = function(axis) {
         break;
     case Const.shortDiagonal:
         this.mirrored = !this.mirrored;
-        this.orientation += 6;
+        this.rotation += 6;
         break;
     case Const.horizontal:
         this.mirrored = !this.mirrored;
-        this.orientation = -this.orientation;
+        this.rotation = -this.rotation;
         break;
     case Const.vertical:
         this.mirrored = !this.mirrored;
-        this.orientation = 6-this.orientation;
+        this.rotation = 6-this.rotation;
         break;
     }
     this.update();
@@ -681,9 +681,9 @@ Board.prototype.mirror = function(axis) {
 // clockwise.
 Board.prototype.rotate = function(step) {
     if (this.mirrored) {
-        this.orientation += step;
+        this.rotation += step;
     } else {
-        this.orientation += step;
+        this.rotation += step;
     }
     this.update();
 }
@@ -898,18 +898,37 @@ GameState.prototype.last = function() {
     return true;
 }
 
+// Go to a specific move number.
+GameState.prototype.gotoMove = function(n) {
+    while (this.currentmove > n && this.currentmove > 0) {
+        this.undo();
+    }
+    while (this.currentmove < n && this.currentmove < this.movelist.length) {
+        this.redo();
+    }
+    return this.currentmove === n;
+}
+
 // Set the game size. Return true on success and false on failure
 // (including when the size is unchanged).
-GameState.prototype.setSize = function(files, ranks) {
-    if (files < 1 || files > 30 || ranks < 1 || ranks > 30) {
+GameState.prototype.setSize = function(dim) {
+    if (dim.files < 1 || dim.files > 30 || dim.ranks < 1 || dim.ranks > 30) {
         return false;
     }
-    if (this.board.files === files && this.board.ranks === ranks) {
+    if (this.board.files === dim.files && this.board.ranks === dim.ranks) {
         return false;
     }
-    this.board.setSize(files, ranks);
+    this.board.setSize(dim);
     this.clear();
     return true;
+}
+
+// Set the game orientation.
+GameState.prototype.setOrientation = function(rotation, mirrored) {
+    this.board.rotation = rotation;
+    this.board.mirrored = mirrored;
+    this.board.update();
+    this.update();
 }
 
 // Clear the move list.
@@ -989,26 +1008,26 @@ GameState.prototype.hashMove = function(move) {
         return move.move.cell.toString();
         break;
     case Const.swap_pieces:
-        return ".s";
+        return ":s";
         break;
     case Const.swap_sides:
-        return ".S";
+        return ":S";
         break;
     case Const.pass:
-        return ".p";
+        return ":p";
         break;
     case Const.resign:
         if (move.player === Const.black) {
-            return ".rb";
+            return ":rb";
         } else {
-            return ".rw";
+            return ":rw";
         }
         break;
     case Const.forfeit:
         if (move.player === Const.black) {
-            return ".fb";
+            return ":fb";
         } else {
-            return ".fw";
+            return ":fw";
         }
         break;
     }
@@ -1016,9 +1035,9 @@ GameState.prototype.hashMove = function(move) {
 
 // Construct a local-URL string (the part after '#').
 GameState.prototype.URLHash = function() {
-    var acc = "";
+    var acc = "#";
     acc += new Dimension(this.board.files, this.board.ranks).format();
-    var orient = this.board.orientation % 12;
+    var orient = this.board.rotation % 12;
     if (orient < 0) {
         orient += 12;
     }
@@ -1039,6 +1058,13 @@ GameState.prototype.URLHash = function() {
             acc += ",";
         }
     }
+    // remove trailing commas.
+    var len = acc.length;
+    while (len > 0 && acc[len-1] === ",") {
+        len--;
+        acc = acc.substring(0, len);
+    }
+        
     return acc;
 }
 
@@ -1054,11 +1080,116 @@ GameState.prototype.rotate = function(step) {
     this.update();
 }
 
+// Initialize from URLHash.
+GameState.prototype.fromURLHash = function(hash) {
+    function parse(s, regex) {
+        var matches = s.matchAll(regex).next().value;
+        if (!matches) {
+            return null;
+        } else {
+            return {
+                match: matches[1],
+                rest: matches[2]
+            };
+        }
+    }
+
+    function parse_move(s) {
+        switch (s) {
+        case ":s":
+            return Move.swap_pieces;
+            break;
+        case ":S":
+            return Move.swap_sides;
+            break;
+        case ":p":
+            return Move.pass;
+            break;
+        case ":rb":
+            return Move.resign(Const.black);
+            break;
+        case ":rw":
+            return Move.resign(Const.white);
+            break;
+        case ":fb":
+            return Move.forfeit(Const.black);
+            break;
+        case ":fw":
+            return Move.forfeit(Const.white);
+            break;
+        default:
+            return new Move(Cell.fromString(s));
+            break;
+        }            
+    }
+
+    if (hash.length > 0 && hash[0] === "#") {
+        hash = hash.substring(1);
+    }
+    
+    var dim = new Dimension(11, 11);
+    var rotation = 10;
+    var mirrored = false;
+    
+    var parts = hash.split(",");
+
+    // Parse parameters.
+    var s = parts[0] ? parts[0] : "";
+    var p;
+    console.log(s);
+    if ((p = parse(s, /^([1-9][0-9]*x[1-9][0-9]*|[1-9][0-9]*)(.*)$/g)) !== null) {
+        dim = Dimension.parse(p.match);
+        s = p.rest;
+    }
+    while ((p = parse(s, /^(r[1-9][0-9]*|m)(.*)$/g)) !== null) {
+        console.log(p.match[0]);
+        switch (p.match[0]) {
+        case "r":
+            rotation = parseInt(p.match.substring(1));
+            break;
+        case "m":
+            mirrored = true;
+            break;
+        }
+        s = p.rest;
+    }
+    // If there is an unknown parameter, it and any subsequent
+    // parameters are ignored.
+    this.clear();
+    this.setSize(dim);
+    this.setOrientation(rotation, mirrored);
+    console.log(rotation, mirrored);
+    
+    // Parse moves.
+    var s = parts[1] ? parts[1] : ""
+    var p;
+    while ((p = parse(s, /^([a-z]+[1-9][0-9]*|:s|:S|:p|:rb|:rw|:fb|:fw)(.*)$/g)) !== null) {
+        var r = this.play(parse_move(p.match));
+        if (!r) {
+            return;
+        }
+        s = p.rest;
+    }
+    var pos = this.currentmove;
+    var s = parts[2] ? parts[2] : "";
+    var p;
+    while ((p = parse(s, /^([a-z]+[1-9][0-9]*|:s|:S|:p|:rb|:rw|:fb|:fw)(.*)$/g)) !== null) {
+        var r = this.play(parse_move(p.match));
+        if (!r) {
+            break;
+        }
+        s = p.rest;
+    }
+    // If there's an illegal or ill-formed move, it and any subsequent
+    // moves are ignored.
+    this.gotoMove(pos);
+}
+
 // ----------------------------------------------------------------------
 // Testing
 
 var main = document.getElementById("board-container");
-var board = new Board(11, 9, 9, false);
+var board = new Board(11, 11, 9, false);
 main.appendChild(board.dom);
 board.resize();
 var movelist_panel = document.getElementById("movelist-panel");
@@ -1107,7 +1238,7 @@ input.addEventListener("keydown", function (event) {
     }
     var size = Dimension.parse(input.value);
     if (size !== undefined) {
-        state.setSize(size.files, size.ranks);
+        state.setSize(size);
     }
     input.blur()
 });
@@ -1120,13 +1251,8 @@ function input_update(input) {
 }
 input_update(input);
 
-state.play(new Move(new Cell(0,0)));
-state.play(new Move(new Cell(1,5)));
-state.play(new Move(new Cell(2,2)));
-state.play(new Move(new Cell(3,8)));
-state.play(new Move(new Cell(4,0)));
-state.play(new Move(new Cell(6,2)));
+state.fromURLHash(window.location.hash);
 
-board.dom.classList.add("redblue");
+//board.dom.classList.add("redblue");
 
 // })();
