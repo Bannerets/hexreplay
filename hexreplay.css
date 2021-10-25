@@ -174,7 +174,11 @@ svg {
 }
 
 .redblue .black .dot {
-    fill: #c0c0c0;
+    fill: #ffffff;
+}
+
+.redblue .white .dot {
+    fill: #ffffff;
 }
 
 .small-stone {
