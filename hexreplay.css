@@ -65,6 +65,28 @@ svg {
     font-size: 30px;
 }
 
+.stonelabel {
+    display: none;
+    font-family: Helvetica,sans-serif;
+    font-weight: normal;
+    text-anchor: middle;
+    font-size: 30px;
+}
+
+.black .stonelabel {
+    display: block;
+    fill: white;
+}
+
+.white .stonelabel {
+    display: block;
+}
+
+.redblue .white .stonelabel {
+    display: block;
+    fill: white;
+}
+
 .black-border {
     fill: #000000;
     stroke: #000000;
@@ -91,41 +113,72 @@ svg {
     fill: none;
 }
 
+.dot {
+    display: none;
+}
+
 .stone {
-    fill: #000000;
     display: none;
 }
 
-.black-stone {
+.large-stone {
     display: none;
 }
 
-.black .black-stone {
+.black .large-stone {
     display: block;
     fill: url('#black-gradient');
-    filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .5));
+    filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .6));
 }
 
-.redblue .black .black-stone {
+.black.last .dot {
     display: block;
-    fill: url('#red-gradient');
-    filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .5));
+    fill: #c0c0c0;
 }
 
-.white-stone {
+.redblue .black .large-stone {
     display: none;
 }
 
-.white .white-stone {
+.redblue .black .small-stone {
     display: block;
-    fill: url('#white-gradient');
-    filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .5));
+    fill: url('#red-gradient');
+    filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .7));
 }
 
-.redblue .white .white-stone {
+.redblue .black.last .dot {
+    display: block;
+    fill: #c0c0c0;
+}
+
+.small-stone {
+    display: none;
+}
+
+.white .small-stone {
+    display: block;
+    fill: url('#white-gradient');
+    filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .6));
+}
+
+.white.last .dot {
+    display: block;
+    fill: #606060;
+}
+
+.redblue .white .small-stone {
+    display: none;
+}
+
+.redblue .white .large-stone {
     display: block;
     fill: url('#blue-gradient');
-    filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .5));
+    filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .7));
+}
+
+.redblue .white.last .dot {
+    display: block;
+    fill: #c0c0c0;
 }
 
 .button {
@@ -243,7 +296,7 @@ svg {
 }
 
 .move.current {
-        background-color: #ffc;
+    background-color: #ffc;
 }
 
 .move .number {

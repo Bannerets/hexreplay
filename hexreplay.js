@@ -541,7 +541,7 @@ Board.prototype.svg_of_board = function() {
             stone.setAttribute("cx", xy.x);
             stone.setAttribute("cy", xy.y);
             stone.setAttribute("r", 0.43 * this.unit);
-            stone.classList.add("black-stone");
+            stone.classList.add("large-stone");
             g2.appendChild(stone);
 
             var stone = document.createElementNS(svgNS, "circle");
@@ -549,10 +549,26 @@ Board.prototype.svg_of_board = function() {
             stone.setAttribute("cx", xy.x);
             stone.setAttribute("cy", xy.y);
             stone.setAttribute("r", 0.42 * this.unit);
-            stone.classList.add("white-stone");
+            stone.classList.add("small-stone");
             g2.appendChild(stone);
-            g1.appendChild(g2);
+
+            var dot = document.createElementNS(svgNS, "circle");
+            var xy = coord(file, rank);
+            dot.setAttribute("cx", xy.x);
+            dot.setAttribute("cy", xy.y);
+            dot.setAttribute("r", 0.06 * this.unit);
+            dot.classList.add("dot");
+            g2.appendChild(dot);
+
             
+            var text = document.createElementNS(svgNS, "text");
+            text.classList.add("stonelabel");
+            text.setAttribute("x", xy.x);
+            text.setAttribute("y", xy.y + 10);
+            text.innerHTML = "99";
+            g2.appendChild(text);
+            
+            g1.appendChild(g2);
             g.appendChild(g1);
         }
     }
@@ -1525,6 +1541,6 @@ window.addEventListener("popstate", function (e) {
 
 state.UIfromURLHash(window.location.hash);
 
-//board.dom.classList.add("redblue");
+board.dom.classList.add("redblue");
 
 // })();
