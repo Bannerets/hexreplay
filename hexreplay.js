@@ -748,6 +748,22 @@ Board.prototype.rotate = function(step) {
     this.update();
 }
 
+Board.prototype.setNumbered = function(bool) {
+    if (bool) {
+        this.dom.classList.add("numbered");
+    } else {
+        this.dom.classList.remove("numbered");
+    }
+}
+
+Board.prototype.setRedBlue = function(bool) {
+    if (bool) {
+        this.dom.classList.add("redblue");
+    } else {
+        this.dom.classList.remove("redblue");
+    }
+}
+
 // ----------------------------------------------------------------------
 // Game logic
 
@@ -795,7 +811,9 @@ function GameState(board, movelist_panel) {
                                // game, rather than the current
                                // dimension.
     this.movelist_panel = movelist_panel;
-
+    this.numbered = false;
+    this.redblue = false;
+    
     // Connect click action.
     this.board.onclick = function(cell) {
         self.UIplay(Move.cell(cell));
@@ -808,6 +826,10 @@ function GameState(board, movelist_panel) {
         var n = parseInt(id.substring(5)); // remove move- prefix
         self.UIgotoMove(n);
     });
+
+    // A callback function to update button states.
+    this.onupdate = function() {
+    }
 }
 
 // Check whether the current move is a resign move.
@@ -1082,6 +1104,34 @@ GameState.prototype.UIclear = function() {
     this.UIupdate();
 }
 
+GameState.prototype.formatPlayer = function(player) {
+    if (this.redblue) {
+        switch (player) {
+        case Const.black:
+            return "red&nbsp;&nbsp;";
+            break;
+        case Const.white:
+            return "blue&nbsp;";
+            break;
+        default:
+            return player;
+            break;
+        }
+    } else {
+        switch (player) {
+        case Const.black:
+            return "black";
+            break;
+        case Const.white:
+            return "white";
+            break;
+        default:
+            return player;
+            break;
+        }
+    }        
+}
+
 // Format a move for the move list.
 GameState.prototype.formatMove = function(move, n, current) {
     var div = document.createElement("div");
@@ -1119,7 +1169,7 @@ GameState.prototype.formatMove = function(move, n, current) {
     div.appendChild(numdiv);
     var playerdiv = document.createElement("div");
     playerdiv.classList.add("player");
-    playerdiv.innerHTML = move.player;
+    playerdiv.innerHTML = this.formatPlayer(move.player);
     div.appendChild(playerdiv);
     var actiondiv = document.createElement("div");
     actiondiv.classList.add("action");
@@ -1187,7 +1237,7 @@ GameState.prototype.UIupdate = function() {
     enable_popstate = false;
     window.location.replace(this.URLHash());
     enable_popstate = old_enable_popstate;
-    input_update(input);
+    this.onupdate();
     this.board.rescale();  // because move list might have changed size
 }
 
@@ -1237,6 +1287,12 @@ GameState.prototype.URLHash = function() {
     if (this.board.mirrored) {
         acc += "m";
     }
+    if (this.numbered) {
+        acc += "n";
+    }
+    if (this.redblue) {
+        acc += "c1";
+    }
     acc += ","
     if (this.currentmove === 0) {
         acc += ",";
@@ -1275,6 +1331,26 @@ GameState.prototype.rotate = function(step) {
 
 GameState.prototype.UIrotate = function(step) {
     this.rotate(step);
+    this.UIupdate();
+}
+
+GameState.prototype.setNumbered = function(bool) {
+    this.numbered = bool;
+    this.board.setNumbered(bool);
+}
+
+GameState.prototype.UIsetNumbered = function(bool) {
+    this.setNumbered(bool);
+    this.UIupdate();
+}
+
+GameState.prototype.setRedBlue = function(bool) {
+    this.redblue = bool;
+    this.board.setRedBlue(bool);
+}
+
+GameState.prototype.UIsetRedBlue = function(bool) {
+    this.setRedBlue(bool);
     this.UIupdate();
 }
 
@@ -1328,6 +1404,8 @@ GameState.prototype.fromURLHash = function(hash) {
     var dim = new Dimension(11);
     var rotation = 10;
     var mirrored = false;
+    var numbered = false;
+    var coloring = 0;
     
     var parts = hash.split(",");
 
@@ -1338,13 +1416,19 @@ GameState.prototype.fromURLHash = function(hash) {
         dim = Dimension.parse(p.match);
         s = p.rest;
     }
-    while ((p = parse(s, /^(r[1-9][0-9]*|m)(.*)$/g)) !== null) {
+    while ((p = parse(s, /^(r[1-9][0-9]*|m|n|c[1-9][0-9]*)(.*)$/g)) !== null) {
         switch (p.match[0]) {
         case "r":
             rotation = parseInt(p.match.substring(1));
             break;
         case "m":
             mirrored = true;
+            break;
+        case "n":
+            numbered = true;
+            break;
+        case "c":
+            coloring = parseInt(p.match.substring(1));
             break;
         }
         s = p.rest;
@@ -1354,6 +1438,8 @@ GameState.prototype.fromURLHash = function(hash) {
     this.clear();
     this.setSize(dim);
     this.setOrientation(rotation, mirrored);
+    this.setNumbered(numbered);
+    this.setRedBlue(coloring === 1);
     
     // Parse moves.
     var s = parts[1] ? parts[1] : ""
@@ -1398,41 +1484,62 @@ var state = new GameState(board, movelist_panel);
 // ----------------------------------------------------------------------
 // Map buttons
 
-document.getElementById("button-swap-pieces").addEventListener("click", function () {
+var button_swap_pieces = document.getElementById("button-swap-pieces");
+var button_swap_sides = document.getElementById("button-swap-sides");
+var button_pass = document.getElementById("button-pass");
+var button_resign_black = document.getElementById("button-resign-black");
+var button_resign_white = document.getElementById("button-resign-white");
+var button_rotate_left = document.getElementById("button-rotate-left");
+var button_rotate_right = document.getElementById("button-rotate-right");
+var button_first = document.getElementById("button-first");
+var button_undo = document.getElementById("button-undo");
+var button_redo = document.getElementById("button-redo");
+var button_last = document.getElementById("button-last");
+var button_clear = document.getElementById("button-clear");
+var checkbox_numbered = document.getElementById("checkbox-numbered");
+var checkbox_redblue = document.getElementById("checkbox-redblue")
+
+button_swap_pieces.addEventListener("click", function () {
     state.UIplay(Move.swap_pieces);
 });
-document.getElementById("button-swap-sides").addEventListener("click", function () {
+button_swap_sides.addEventListener("click", function () {
     state.UIplay(Move.swap_sides);
 });
-document.getElementById("button-pass").addEventListener("click", function () {
+button_pass.addEventListener("click", function () {
     state.UIplay(Move.pass);
 });
-document.getElementById("button-resign-black").addEventListener("click", function () {
+button_resign_black.addEventListener("click", function () {
     state.UIplay(Move.resign(Const.black));
 });
-document.getElementById("button-resign-white").addEventListener("click", function () {
+button_resign_white.addEventListener("click", function () {
     state.UIplay(Move.resign(Const.white));
 });
-document.getElementById("button-rotate-left").addEventListener("click", function () {
+button_rotate_left.addEventListener("click", function () {
     state.UIrotate(-1);
 });
-document.getElementById("button-rotate-right").addEventListener("click", function () {
+button_rotate_right.addEventListener("click", function () {
     state.UIrotate(1);
 });
-document.getElementById("button-first").addEventListener("click", function () {
+button_first.addEventListener("click", function () {
     state.UIfirst();
 });
-document.getElementById("button-undo").addEventListener("click", function () {
+button_undo.addEventListener("click", function () {
     state.UIundo();
 });
-document.getElementById("button-redo").addEventListener("click", function () {
+button_redo.addEventListener("click", function () {
     state.UIredo();
 });
-document.getElementById("button-last").addEventListener("click", function () {
+button_last.addEventListener("click", function () {
     state.UIlast();
 });
-document.getElementById("button-clear").addEventListener("click", function () {
+button_clear.addEventListener("click", function () {
     state.UIclear();
+});
+checkbox_numbered.addEventListener("change", function () {
+    state.UIsetNumbered(checkbox_numbered.checked);
+});
+checkbox_redblue.addEventListener("change", function () {
+    state.UIsetRedBlue(checkbox_redblue.checked);
 });
 var input = document.getElementById("input-size");
 input.addEventListener("keydown", function (event) {
@@ -1452,6 +1559,18 @@ function input_update(input) {
     var value = state.dim;
     input.value = value.format();
 }
+state.onupdate = function() {
+    input_update(input);
+    checkbox_numbered.checked = state.numbered;
+    checkbox_redblue.checked = state.redblue;
+    if (state.redblue) {
+        button_resign_black.setAttribute("title", "Red resigns");
+        button_resign_white.setAttribute("title", "Blue resigns");
+    } else {
+        button_resign_black.setAttribute("title", "Black resigns");
+        button_resign_white.setAttribute("title", "White resigns");
+    }
+};
 
 function inputFocus() {
     var a = document.activeElement;
@@ -1540,7 +1659,5 @@ window.addEventListener("popstate", function (e) {
 });
 
 state.UIfromURLHash(window.location.hash);
-
-board.dom.classList.add("redblue");
 
 // })();
