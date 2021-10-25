@@ -127,11 +127,13 @@ svg {
     display: block;
 }
 
-.numbered .dot {
+/* We have to double up .dot to ensure this rule takes precedence over
+   the previous one, because of CSS's strange precedence rules. */
+.numbered .dot.dot {
     display: none;
 }
 
-.swap .dot {
+.swap .dot.dot {
     display: none;
 }
 

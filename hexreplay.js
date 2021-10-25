@@ -687,6 +687,23 @@ Board.prototype.isEmpty = function(cell) {
     return this.getColor(cell) === Const.empty;
 }
 
+// Clear all "last" markings.
+Board.prototype.clearLast = function () {
+    var cells = this.svg.querySelectorAll(".last");
+    cells.forEach(function (c) {
+        c.classList.remove("last");
+    });
+}
+
+// Set the "last" marking on a cell.
+Board.prototype.setLast = function(cell) {
+    var cell = document.getElementById(cell.toString());
+    if (!cell) {
+        return;
+    }
+    cell.classList.add("last");
+}
+
 // Clear the board.
 Board.prototype.clear = function() {
     var cells = this.svg.querySelectorAll(".cell");
@@ -1113,7 +1130,26 @@ GameState.prototype.UIgotoMove = function(n) {
 
 // Mark the appropriate move as "last".
 GameState.prototype.setLast = function () {
-    // Todo ###
+    this.board.clearLast();
+    var n = this.currentmove;
+    if (n === 0) {
+        return;
+    }
+    var move = this.movelist[n-1].move;
+    switch (move.type) {
+    case Const.cell:
+        this.board.setLast(move.cell);
+        break;
+    case Const.swap_pieces:
+        var move2 = this.movelist[n-2].move;
+        this.board.setLast(move2.cell.swap());
+        break;
+    case Const.swap_sides:
+        var move2 = this.movelist[n-2].move;
+        this.board.setLast(move2.cell);
+        break;
+    }
+    return;        
 }
 
 // Set the game size. Return true on success and false on failure
