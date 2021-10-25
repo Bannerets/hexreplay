@@ -1018,10 +1018,11 @@ GameState.prototype.UIclear = function() {
 }
 
 // Format a move for the move list.
-GameState.prototype.formatMove = function(move, current) {
+GameState.prototype.formatMove = function(move, n, current) {
     var div = document.createElement("div");
     div.classList.add("move");
-    if (current) {
+    div.setAttribute("id", "move-" + n);
+    if (n === current) {
         div.classList.add("current");
     }
     if (move === null) {
@@ -1062,15 +1063,52 @@ GameState.prototype.formatMove = function(move, current) {
     return div;
 }
 
+// Vertically scroll the contents of the container so that target is
+// visible within the container. If smooth=true, animate the scolling
+// action.
+function makeVisible(target, container, smooth) {
+    var trect = target.getBoundingClientRect();
+    var crect = container.getBoundingClientRect();
+    var oldtop = container.scrollTop;
+    var oldleft = container.scrollLeft;
+    var rely = trect.y + oldtop;
+    var scrollTopMax = rely;
+    var scrollTopMin = rely + trect.height - crect.height;
+    if (oldtop < scrollTopMin) {
+        container.scrollTo({
+            left: oldleft,
+            top: scrollTopMin,
+            behavior: smooth ? "smooth" : "instant"
+        });
+    } else if (oldtop > scrollTopMax) {
+        container.scrollTo({
+            left: oldleft,
+            top: scrollTopMax,
+            behavior: smooth ? "smooth" : "instant"
+        });
+    }
+}
+
+// Scroll the move list so that move i is visible.
+GameState.prototype.scroll_movelist = function(i) {
+    var item = document.querySelector("#move-"+i);
+    if (!item) {
+        return;
+    }
+    var panel = document.getElementById("movelist-panel");
+    makeVisible(item, panel, true);
+}
+
 // Format the move list.
 GameState.prototype.draw_movelist = function() {
     var p = this.movelist_panel;
     p.innerHTML = "";
-    p.appendChild(this.formatMove(null, this.currentmove === 0));
+    p.appendChild(this.formatMove(null, 0, this.currentmove));
     for (var i=0; i<this.movelist.length; i++) {
         var move = this.movelist[i];
-        p.appendChild(this.formatMove(move, i === this.currentmove-1));
+        p.appendChild(this.formatMove(move, i+1, this.currentmove));
     }
+    this.scroll_movelist(this.currentmove);
 }
 
 // Update all UI components that need to be updated as a whole (do not
