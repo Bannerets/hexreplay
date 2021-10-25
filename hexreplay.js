@@ -693,6 +693,7 @@ Board.prototype.clear = function() {
     cells.forEach(function(cell) {
         cell.classList.remove("black");
         cell.classList.remove("white");
+        cell.classList.remove("stone");
     });
 }
 
