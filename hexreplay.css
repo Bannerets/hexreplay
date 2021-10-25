@@ -65,7 +65,7 @@ svg {
     font-size: 30px;
 }
 
-.stonelabel {
+.stonelabel,.swaplabel {
     display: none;
     font-family: Helvetica,sans-serif;
     font-weight: normal;
@@ -73,17 +73,23 @@ svg {
     font-size: 30px;
 }
 
-.black .stonelabel {
-    display: block;
+.black .stonelabel, .black .swaplabel {
     fill: white;
 }
 
-.white .stonelabel {
+.white .stonelabel, .white .swaplabel {
+    fill: black;
+}
+
+.numbered .stone .stonelabel {
     display: block;
 }
 
-.redblue .white .stonelabel {
-    display: block;
+.numbered .swap .stonelabel {
+    display: none;
+}
+
+.redblue .white .stonelabel, .redblue .white .swaplabel {
     fill: white;
 }
 
@@ -117,23 +123,42 @@ svg {
     display: none;
 }
 
-.stone {
+.stone.last .dot {
+    display: block;
+}
+
+.numbered .dot {
     display: none;
+}
+
+.swap .dot {
+    display: none;
+}
+
+.swaplabel {
+    display: none;
+}
+
+.numbered .stone.swap .swaplabel {
+    display: block;
+}
+
+.stone.last.swap .swaplabel {
+    display: block;
 }
 
 .large-stone {
     display: none;
 }
 
+.black .dot {
+    fill: #c0c0c0;
+}
+
 .black .large-stone {
     display: block;
     fill: url('#black-gradient');
     filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .6));
-}
-
-.black.last .dot {
-    display: block;
-    fill: #c0c0c0;
 }
 
 .redblue .black .large-stone {
@@ -146,8 +171,7 @@ svg {
     filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .7));
 }
 
-.redblue .black.last .dot {
-    display: block;
+.redblue .black .dot {
     fill: #c0c0c0;
 }
 
@@ -161,8 +185,7 @@ svg {
     filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .6));
 }
 
-.white.last .dot {
-    display: block;
+.white .dot {
     fill: #606060;
 }
 
@@ -176,8 +199,7 @@ svg {
     filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .7));
 }
 
-.redblue .white.last .dot {
-    display: block;
+.redblue .white .dot {
     fill: #c0c0c0;
 }
 

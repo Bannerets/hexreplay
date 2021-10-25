@@ -560,8 +560,16 @@ Board.prototype.svg_of_board = function() {
             dot.classList.add("dot");
             g2.appendChild(dot);
 
-            
+            var swap = document.createElementNS(svgNS, "text");
+            var xy = coord(file, rank);
+            swap.classList.add("swaplabel");
+            swap.setAttribute("x", xy.x);
+            swap.setAttribute("y", xy.y + 10);
+            swap.innerHTML = "S";
+            g2.appendChild(swap);
+
             var text = document.createElementNS(svgNS, "text");
+            var xy = coord(file, rank);
             text.classList.add("stonelabel");
             text.setAttribute("x", xy.x);
             text.setAttribute("y", xy.y + 10);
@@ -634,22 +642,36 @@ Board.prototype.svg_of_board = function() {
     return svg;
 }
 
-// Set the cell's content to value, which is Const.black, Const.white, or Const.empty.
-Board.prototype.setStone = function(cell, value) {
+// Set the cell's content to value, which is Const.black, Const.white,
+// or Const.empty. Also set the optional label and swap status.
+Board.prototype.setStone = function(cell, color, label="", swap=false) {
     var cell = document.getElementById(cell.toString());
-    if (cell) {
-        cell.classList.remove("black");
-        cell.classList.remove("white");
-        if (value === Const.black) {
-            cell.classList.add("black");
-        } else if (value === Const.white) {
-            cell.classList.add("white");
-        }
+    if (!cell) {
+        return;
     }
+    cell.classList.remove("stone");
+    cell.classList.remove("black");
+    cell.classList.remove("white");
+    cell.classList.remove("swap");
+    if (color === Const.black) {
+        cell.classList.add("stone");
+        cell.classList.add("black");
+    } else if (color === Const.white) {
+        cell.classList.add("stone");
+        cell.classList.add("white");
+    }
+    if (swap) {
+        cell.classList.add("swap");
+    }
+    var stonelabel = cell.querySelector(".stonelabel");
+    if (!stonelabel) {
+        return;
+    }
+    stonelabel.innerHTML = label;    
 }
 
 // Get the contents of the cell.
-Board.prototype.getStone = function(cell) {
+Board.prototype.getColor = function(cell) {
     var cell = document.getElementById(cell.toString());
     if (cell.classList.contains("black")) {
         return Const.black;
@@ -662,7 +684,7 @@ Board.prototype.getStone = function(cell) {
 
 // Check whether the cell is empty.
 Board.prototype.isEmpty = function(cell) {
-    return this.getStone(cell) === Const.empty;
+    return this.getColor(cell) === Const.empty;
 }
 
 // Clear the board.
@@ -674,18 +696,32 @@ Board.prototype.clear = function() {
     });
 }
 
-// Swap the board state. This involves swapping the board dimensions
-// as well. This swap method is implemented for all boards, and
-// doesn't care whether swapping is legal or not.
-Board.prototype.swap = function() {
+// Swap-pieces the board state. This involves swapping the board
+// dimensions as well. This swap method is implemented for all boards,
+// and doesn't care whether swapping is legal or not. The swap flag on
+// all stones is toggled, so this can also be used to undo a swap.
+Board.prototype.swap_pieces = function() {
     var dict = this.saveContents();
     this.setSize(this.dim.swap()); // also clears the board
     var dict2 = {};
     for (var c in dict) {
         var cell = Cell.fromString(c).swap();
-        dict2[cell] = dict[c] === Const.black ? Const.white : Const.black;
+        dict2[cell] = {
+            color: dict[c].color === Const.black ? Const.white : Const.black,
+            label: dict[c].label,
+            swap: !dict[c].swap
+        }
     }
     this.restoreContents(dict2);
+}
+
+// Swap-sides the board state. The only effect is to toggle the swap
+// flag on the stones. Self-inverse.
+Board.prototype.swap_sides = function() {
+    var stones = this.svg.querySelectorAll(".stone");
+    stones.forEach(function(cell) {
+        cell.classList.toggle("swap");
+    });
 }
 
 // Store the board contents in a data structure. This is used during
@@ -696,11 +732,23 @@ Board.prototype.saveContents = function() {
     var dict = {};
     black.forEach(function(cell) {
         var c = Cell.fromString(cell.id);
-        dict[c] = Const.black;
+        var swap = cell.classList.contains("swap");
+        var label = cell.querySelector(".stonelabel").innerHTML;
+        dict[c] = {
+            color: Const.black,
+            label: label,
+            swap: swap
+        };
     });
     white.forEach(function(cell) {
         var c = Cell.fromString(cell.id);
-        dict[c] = Const.white;
+        var swap = cell.classList.contains("swap");
+        var label = cell.querySelector(".stonelabel").innerHTML;
+        dict[c] = {
+            color: Const.white,
+            label: label,
+            swap: swap
+        };
     });
     return dict;
 }
@@ -709,7 +757,7 @@ Board.prototype.saveContents = function() {
 // of the correct dimensions and empty.
 Board.prototype.restoreContents = function(dict) {
     for (var c in dict) {
-        this.setStone(Cell.fromString(c), dict[c]);
+        this.setStone(Cell.fromString(c), dict[c].color, dict[c].label, dict[c].swap);
     }
 }
 
@@ -912,6 +960,7 @@ GameState.prototype.play = function(move) {
         move: move
     });
     this.playBoardMove(n, player, move);
+    this.setLast();
     return true;
 }
 
@@ -935,14 +984,15 @@ GameState.prototype.UIplay = function(move) {
 GameState.prototype.playBoardMove = function(n, player, move) {
     switch (move.type) {
     case Const.cell:
-        this.board.setStone(move.cell, player);
+        this.board.setStone(move.cell, player, n, false);
         break;
     case Const.pass:
         break;
     case Const.swap_pieces:
-        this.board.swap();
+        this.board.swap_pieces();
         break;
     case Const.swap_sides:
+        this.board.swap_sides();
         break;
     case Const.resign:
         break;
@@ -959,9 +1009,10 @@ GameState.prototype.undoBoardMove = function(n, player, move) {
     case Const.pass:
         break;
     case Const.swap_pieces:
-        this.board.swap();
+        this.board.swap_pieces();
         break;
     case Const.swap_sides:
+        this.board.swap_sides();
         break;
     case Const.resign:
         break;
@@ -980,6 +1031,7 @@ GameState.prototype.redo = function() {
     var move = this.movelist[n];
     this.playBoardMove(move.number, move.player, move.move);
     this.currentmove++;
+    this.setLast();
     return true;
 }
 
@@ -1000,6 +1052,7 @@ GameState.prototype.undo = function() {
     var move = this.movelist[n-1];
     this.undoBoardMove(move.number, move.player, move.move);
     this.currentmove--;
+    this.setLast();
     return true;
 }
 
@@ -1055,6 +1108,11 @@ GameState.prototype.UIgotoMove = function(n) {
     var r = this.gotoMove(n);
     this.UIupdate();
     return r;
+}
+
+// Mark the appropriate move as "last".
+GameState.prototype.setLast = function () {
+    // Todo ###
 }
 
 // Set the game size. Return true on success and false on failure
