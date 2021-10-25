@@ -749,6 +749,14 @@ function GameState(board, movelist_panel) {
     this.board.onclick = function(cell) {
         self.UIplay(Move.cell(cell));
     }
+
+    // Connect click action for movelist.
+    this.movelist_panel.addEventListener("click", function(event) {
+        var move = event.target.closest(".move");
+        var id = move.id;
+        var n = parseInt(id.substring(5)); // remove move- prefix
+        self.UIgotoMove(n);
+    });
 }
 
 // Check whether the current move is a resign move.
@@ -968,6 +976,12 @@ GameState.prototype.gotoMove = function(n) {
         this.redo();
     }
     return this.currentmove === n;
+}
+
+GameState.prototype.UIgotoMove = function(n) {
+    var r = this.gotoMove(n);
+    this.UIupdate();
+    return r;
 }
 
 // Set the game size. Return true on success and false on failure
