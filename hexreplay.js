@@ -201,7 +201,7 @@ function Board(dim, rotation = 9, mirrored = false) {
     
     // Update the board's appearance.
     this.draw_svg();
-    this.rescale();
+    this.update();
 
     window.addEventListener("resize", function () {self.rescale()});
 
@@ -226,12 +226,32 @@ Board.prototype.draw_svg = function() {
     this.dom.appendChild(this.svg);
 }
 
-// Redraw the board, preserving the existing contents.
+// Update the rotation / mirroring of the board, preserving the
+// existing contents and DOM structure.
 Board.prototype.update = function () {
-    var dict = this.saveContents();
-    this.draw_svg();
+    var theta;
+    var scale;
+    if (this.mirrored) {
+        theta = 180 * (this.rotation - 2) / 6;
+        scale = "scale(-1,1)";
+    } else {
+        theta = 180 * (this.rotation + 2) / 6;
+        scale = "";
+    }
+    var rotation = "rotate(" + theta + ")";
+    var unrotation = "rotate(" + (-theta) + ")";
+    var transform = rotation + " " + scale;
+    var untransform = scale + " " + unrotation;
+    
+    var rotatable = this.svg.querySelectorAll(".rotatable");
+    rotatable.forEach(function(e) {
+        e.setAttribute("transform", transform);
+    });
+    var unrotatable = this.svg.querySelectorAll(".unrotatable");
+    unrotatable.forEach(function(e) {
+        e.setAttribute("transform", untransform);
+    });
     this.rescale();
-    this.restoreContents(dict);
 }
 
 // Rescale SVG to container. This must be called upon initialization
@@ -241,33 +261,34 @@ Board.prototype.update = function () {
 Board.prototype.rescale = function() {
     this.svg.setAttribute("width", this.dom.offsetWidth);
     this.svg.setAttribute("height", this.dom.offsetHeight);
+    var bbox = this.svg.getBBox();
+    var margin = 0.5 * this.unit;
+    bbox.x -= margin;
+    bbox.y -= margin;
+    bbox.width += 2*margin;
+    bbox.height += 2*margin;
+    this.svg.setAttribute("viewBox", bbox.x + " " + bbox.y + " " + bbox.width + " " + bbox.height);
 }
 
 // Set the logical size of the board. This also clears the board.
 Board.prototype.setSize = function(dim) {
     this.dim = dim;
     this.draw_svg();
-    this.rescale();
+    this.update();
 }
 
 Board.prototype.svg_of_board = function() {
     var files = this.dim.files;
     var ranks = this.dim.ranks;
+
     var rotation = this.rotation;
     var mirrored = this.mirrored;
+    var theta = 180 * (rotation + 2) / 6;
     
-    var theta = -Math.PI * (rotation + 2) / 6;
-    if (!mirrored) {
-        var ax = this.unit * Math.cos(theta);
-        var ay = -this.unit * Math.sin(theta);
-        var bx = this.unit * Math.cos(theta - Math.PI / 3);
-        var by = -this.unit * Math.sin(theta - Math.PI / 3);
-    } else {
-        var ax = this.unit * Math.cos(theta - Math.PI / 3);
-        var ay = -this.unit * Math.sin(theta - Math.PI / 3);
-        var bx = this.unit * Math.cos(theta);
-        var by = -this.unit * Math.sin(theta);
-    }            
+    var ax = this.unit;
+    var ay = 0
+    var bx = this.unit * 0.5;
+    var by = this.unit * Math.sqrt(3/4);
 
     // Hex coordinates:
     //        ·     ·
@@ -421,7 +442,8 @@ Board.prototype.svg_of_board = function() {
     svg.appendChild(defs);
     
     var g = document.createElementNS(svgNS, "g");
-    g.setAttribute("transform", "scale(1,1)");
+    g.classList.add("rotatable");
+    g.setAttribute("transform-origin", coordstr((files-1)/2,(ranks-1)/2,0,0,0));
     svg.appendChild(g);
 
     // Border
@@ -439,25 +461,25 @@ Board.prototype.svg_of_board = function() {
     var border = document.createElementNS(svgNS, "path");
     var borderblack = "";
     borderblack += "M" + coordstr(0, 0, 0, -e, -r+e/2);
-    borderblack += arc(r4, mirrored, 0, 0, 0, -r-e/2, 0);
+    borderblack += arc(r4, false, 0, 0, 0, -r-e/2, 0);
     for (var i=0; i<files; i++) {
         borderblack += "L" + coordstr(i, 0, 0, -1, 0);
         borderblack += "L" + coordstr(i, 0, 0, 0, -1);
     }
     borderblack += "L" + coordstr(files-1, 0, 0.5, 0, -0.5);
     borderblack += "L" + coordstr(files-1, 0, r2, 0, -r2);
-    borderblack += arc(r3, mirrored, files-1, 0, e2/2, 0, -r+e2/4);
+    borderblack += arc(r3, false, files-1, 0, e2/2, 0, -r+e2/4);
     borderblack += "z";
 
     borderblack += "M" + coordstr(files-1, ranks-1, 0, e, r-e/2);
-    borderblack += arc(r4, mirrored, files-1, ranks-1, 0, r+e/2, 0);
+    borderblack += arc(r4, false, files-1, ranks-1, 0, r+e/2, 0);
     for (var i=0; i<files; i++) {
         borderblack += "L" + coordstr(files-1-i, ranks-1, 0, 1, 0);
         borderblack += "L" + coordstr(files-1-i, ranks-1, 0, 0, 1);
     }
     borderblack += "L" + coordstr(0, ranks-1, -0.5, 0, 0.5);
     borderblack += "L" + coordstr(0, ranks-1, -r2, 0, r2);
-    borderblack += arc(r3, mirrored, 0, ranks-1, -e2/2, 0, r-e2/4);
+    borderblack += arc(r3, false, 0, ranks-1, -e2/2, 0, r-e2/4);
     borderblack += "z";
     
     border.setAttribute("d", borderblack);
@@ -467,25 +489,25 @@ Board.prototype.svg_of_board = function() {
     var border = document.createElementNS(svgNS, "path");
     var borderwhite = "";
     borderwhite += "M" + coordstr(0, 0, -r+e/2, -e, 0);
-    borderwhite += arc(r4, !mirrored, 0, 0, 0, -r-e/2, 0);
+    borderwhite += arc(r4, !false, 0, 0, 0, -r-e/2, 0);
     for (var i=0; i<ranks; i++) {
         borderwhite += "L" + coordstr(0, i, 0, -1, 0);
         borderwhite += "L" + coordstr(0, i, -1, 0, 0);
     }
     borderwhite += "L" + coordstr(0, ranks-1, -0.5, 0, 0.5);
     borderwhite += "L" + coordstr(0, ranks-1, -r2, 0, r2);
-    borderwhite += arc(r3, !mirrored, 0, ranks-1, -r+e2/4, 0, e2/2);
+    borderwhite += arc(r3, !false, 0, ranks-1, -r+e2/4, 0, e2/2);
     borderwhite += "z";
 
     borderwhite += "M" + coordstr(files-1, ranks-1, r-e/2, e, 0);
-    borderwhite += arc(r4, !mirrored, files-1, ranks-1, 0, r+e/2, 0);
+    borderwhite += arc(r4, !false, files-1, ranks-1, 0, r+e/2, 0);
     for (var i=0; i<ranks; i++) {
         borderwhite += "L" + coordstr(files-1, ranks-1-i, 0, 1, 0);
         borderwhite += "L" + coordstr(files-1, ranks-1-i, 1, 0, 0);
     }
     borderwhite += "L" + coordstr(files-1, 0, 0.5, 0, -0.5);
     borderwhite += "L" + coordstr(files-1, 0, r2, 0, -r2);
-    borderwhite += arc(r3, !mirrored, files-1, 0, r-e2/4, 0, -e2/2);
+    borderwhite += arc(r3, !false, files-1, 0, r-e2/4, 0, -e2/2);
     borderwhite += "z";
 
     border.setAttribute("d", borderwhite);
@@ -510,13 +532,17 @@ Board.prototype.svg_of_board = function() {
             tooltip.innerHTML = Cell.cellname(file, rank);
             g1.appendChild(tooltip);
 
+            var g2 = document.createElementNS(svgNS, "g");
+            g2.classList.add("cell-content");
+            g2.classList.add("unrotatable");
+            g2.setAttribute("transform-origin", coordstr(file, rank));
             var stone = document.createElementNS(svgNS, "circle");
             var xy = coord(file, rank);
             stone.setAttribute("cx", xy.x);
             stone.setAttribute("cy", xy.y);
             stone.setAttribute("r", 0.43 * this.unit);
             stone.classList.add("black-stone");
-            g1.appendChild(stone);
+            g2.appendChild(stone);
 
             var stone = document.createElementNS(svgNS, "circle");
             var xy = coord(file, rank);
@@ -524,8 +550,9 @@ Board.prototype.svg_of_board = function() {
             stone.setAttribute("cy", xy.y);
             stone.setAttribute("r", 0.42 * this.unit);
             stone.classList.add("white-stone");
-            g1.appendChild(stone);
-
+            g2.appendChild(stone);
+            g1.appendChild(g2);
+            
             g.appendChild(g1);
         }
     }
@@ -547,8 +574,10 @@ Board.prototype.svg_of_board = function() {
         var xy = coord(-1.1, rank);
         var text = document.createElementNS(svgNS, "text");
         text.classList.add("label");
+        text.classList.add("unrotatable");
         text.setAttribute("x", xy.x);
         text.setAttribute("y", xy.y + 10);
+        text.setAttribute("transform-origin", coordstr(-1.1, rank));
         text.innerHTML = Cell.rankToString(rank);
         g.appendChild(text);
     }
@@ -556,8 +585,10 @@ Board.prototype.svg_of_board = function() {
         var xy = coord(files+0.1, rank);
         var text = document.createElementNS(svgNS, "text");
         text.classList.add("label");
+        text.classList.add("unrotatable");
         text.setAttribute("x", xy.x);
         text.setAttribute("y", xy.y + 10);
+        text.setAttribute("transform-origin", coordstr(files+0.1, rank));
         text.innerHTML = Cell.rankToString(rank);
         g.appendChild(text);
     }
@@ -565,8 +596,10 @@ Board.prototype.svg_of_board = function() {
         var xy = coord(file, -1.1);
         var text = document.createElementNS(svgNS, "text");
         text.classList.add("label");
+        text.classList.add("unrotatable");
         text.setAttribute("x", xy.x);
         text.setAttribute("y", xy.y + 10);
+        text.setAttribute("transform-origin", coordstr(file, -1.1));
         text.innerHTML = Cell.fileToString(file);
         g.appendChild(text);
     }
@@ -574,8 +607,10 @@ Board.prototype.svg_of_board = function() {
         var xy = coord(file, ranks+0.1);
         var text = document.createElementNS(svgNS, "text");
         text.classList.add("label");
+        text.classList.add("unrotatable");
         text.setAttribute("x", xy.x);
         text.setAttribute("y", xy.y + 10);
+        text.setAttribute("transform-origin", coordstr(file, ranks+0.1));
         text.innerHTML = Cell.fileToString(file);
         g.appendChild(text);
     }
