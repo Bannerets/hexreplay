@@ -965,6 +965,10 @@ GameState.prototype.currentPlayer = function () {
 // Play the requested move, if possible. Return true on success, false
 // on failure.
 GameState.prototype.play = function(move) {
+    if (move.type === Const.cell && !this.board.isEmpty(move.cell)) {
+        // Special case: click on existing stone to swap
+        move = Move.swap_pieces;
+    }
     if (!this.isLegal(move)) {
         return false;
     }
@@ -983,10 +987,6 @@ GameState.prototype.play = function(move) {
 }
 
 GameState.prototype.UIplay = function(move) {
-    if (move.type === Const.cell && !this.board.isEmpty(move.cell)) {
-        // Special case: click on existing stone to swap
-        move = Move.swap_pieces;
-    }
     if (!this.isLegal(move)) {
         return false;
     }
@@ -999,6 +999,18 @@ GameState.prototype.UIplay = function(move) {
         this.gotoMove(pos);
     }
     var r = this.play(move);
+    this.UIupdate();
+    return r;
+}
+
+// Let the current player resign.
+GameState.prototype.resign = function() {
+    var player = this.currentPlayer();
+    return this.play(Move.resign(player));
+}
+
+GameState.prototype.UIresign = function() {
+    var r = this.resign();
     this.UIupdate();
     return r;
 }
@@ -1588,6 +1600,7 @@ var button_swap_sides = document.getElementById("button-swap-sides");
 var button_pass = document.getElementById("button-pass");
 var button_resign_black = document.getElementById("button-resign-black");
 var button_resign_white = document.getElementById("button-resign-white");
+var button_resign = document.getElementById("button-resign");
 var button_rotate_left = document.getElementById("button-rotate-left");
 var button_rotate_right = document.getElementById("button-rotate-right");
 var button_first = document.getElementById("button-first");
@@ -1612,6 +1625,9 @@ button_resign_black.addEventListener("click", function () {
 });
 button_resign_white.addEventListener("click", function () {
     state.UIplay(Move.resign(Const.white));
+});
+button_resign.addEventListener("click", function () {
+    state.UIresign();
 });
 button_rotate_left.addEventListener("click", function () {
     state.UIrotate(-1);
