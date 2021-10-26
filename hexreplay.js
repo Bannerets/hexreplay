@@ -983,6 +983,10 @@ GameState.prototype.play = function(move) {
 }
 
 GameState.prototype.UIplay = function(move) {
+    if (move.type === Const.cell && !this.board.isEmpty(move.cell)) {
+        // Special case: click on existing stone to swap
+        move = Move.swap_pieces;
+    }
     if (!this.isLegal(move)) {
         return false;
     }
