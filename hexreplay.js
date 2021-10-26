@@ -830,6 +830,16 @@ Board.prototype.setRedBlue = function(bool) {
     }
 }
 
+Board.prototype.setCursor = function(color) {
+    this.svg.classList.remove("cursor-black");
+    this.svg.classList.remove("cursor-white");
+    if (color === Const.white) {
+        this.svg.classList.add("cursor-white");
+    } else {
+        this.svg.classList.add("cursor-black");
+    }
+}
+
 // ----------------------------------------------------------------------
 // Game logic
 
@@ -1359,6 +1369,7 @@ GameState.prototype.UIupdate = function() {
     window.location.replace(this.URLHash());
     enable_popstate = old_enable_popstate;
     this.onupdate();
+    board.setCursor(this.currentPlayer());
     this.board.rescale();  // because move list might have changed size
 }
 

@@ -310,7 +310,7 @@ svg {
     //flex: 0 0 130px;
     overflow-y: scroll;
     overflow-x: visible;
-    min-width: 140px;
+    min-width: 155px;
 }
 
 .move {
@@ -340,4 +340,20 @@ svg {
 
 .move .action {
     display: inline;
+}
+
+.cursor-black {
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><circle cx='8' cy='8' r='7' fill='black' stroke='white' stroke-width='1'/></svg>") 8 8, auto;
+}
+
+.cursor-white {
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><circle cx='8' cy='8' r='7' fill='white' stroke='black' stroke-width='1'/></svg>") 8 8, auto;
+}
+
+.redblue .cursor-black {
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><circle cx='8' cy='8' r='7' fill='%23e00000' stroke='white' stroke-width='1'/></svg>") 8 8, auto;
+}
+
+.redblue .cursor-white {
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><circle cx='8' cy='8' r='7' fill='%230000ff' stroke='white' stroke-width='1'/></svg>") 8 8, auto;
 }
