@@ -944,7 +944,7 @@ GameState.prototype.isLegal = function(move) {
         break;
     case Const.swap_pieces:
     case Const.swap_sides:
-        return this.currentmove === 1;
+        return this.canSwap();
         break;
     case Const.pass:
     case Const.resign:
@@ -1603,6 +1603,41 @@ GameState.prototype.UIfromURLHash = function(hash) {
     this.UIupdate();
 }
 
+// Determine whether the swap button should be enabled.
+GameState.prototype.canSwap = function() {
+    if (this.resigned() || this.forfeited()) {
+        return false;
+    }
+    return this.currentmove === 1 && this.movelist[0].move.type === Const.cell;
+}
+
+// Determine whether the passing button should be enabled.
+GameState.prototype.canPass = function() {
+    if (this.resigned() || this.forfeited()) {
+        return false;
+    }
+    return true;
+}
+
+// Determine whether the resign and forfeit buttons should be
+// enabled.
+GameState.prototype.canResign = function() {
+    if (this.resigned() || this.forfeited()) {
+        return false;
+    }
+    return true;
+}
+
+// Determine whether the "first" and "undo" buttons should be enabled.
+GameState.prototype.canUndo = function() {
+    return this.currentmove > 0;
+}
+
+// Determine whether the "last" and "redo" buttons should be enabled.
+GameState.prototype.canRedo = function() {
+    return this.currentmove < this.movelist.length;
+}
+
 // ----------------------------------------------------------------------
 // Testing
 
@@ -1706,6 +1741,25 @@ state.onupdate = function() {
         button_resign_black.setAttribute("title", "Black resigns");
         button_resign_white.setAttribute("title", "White resigns");
     }
+
+    function setEnabled(elt, bool) {
+        if (bool) {
+            elt.removeAttribute("disabled");
+        } else {
+            elt.setAttribute("disabled", "disabled");
+        }
+    }
+    
+    setEnabled(button_swap_pieces, state.canSwap());
+    setEnabled(button_swap_sides, state.canSwap());
+    setEnabled(button_pass, state.canPass());
+    setEnabled(button_resign_black, state.canResign());
+    setEnabled(button_resign_white, state.canResign());
+    setEnabled(button_resign, state.canResign());
+    setEnabled(button_first, state.canUndo());
+    setEnabled(button_undo, state.canUndo());
+    setEnabled(button_redo, state.canRedo());
+    setEnabled(button_last, state.canRedo());
 };
 
 function inputFocus() {
