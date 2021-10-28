@@ -928,28 +928,20 @@ GameState.prototype.forfeited = function() {
 
 // Check whether the given move is legal.
 GameState.prototype.isLegal = function(move) {
-    // No legal moves after resigning.
-    if (this.resigned() || this.forfeited()) {
-        return false;
-    }
     switch (move.type) {
     case Const.cell:
-        if (move.cell.file < 0 || move.cell.file >= board.dim.files) {
-            return false;
-        }
-        if (move.cell.rank < 0 || move.cell.rank >= board.dim.ranks) {
-            return false;
-        }
-        return this.board.isEmpty(move.cell);
+        return this.canMove(move.cell);
         break;
     case Const.swap_pieces:
     case Const.swap_sides:
         return this.canSwap();
         break;
     case Const.pass:
+        return this.canPass();
+        break;
     case Const.resign:
     case Const.forfeit:
-        return true;
+        return this.canResign();
         break;
     }        
 }
@@ -1603,7 +1595,21 @@ GameState.prototype.UIfromURLHash = function(hash) {
     this.UIupdate();
 }
 
-// Determine whether the swap button should be enabled.
+// Determine whether moving in the given cell is possible.
+GameState.prototype.canMove = function(cell) {
+    if (this.resigned() || this.forfeited()) {
+        return false;
+    }
+    if (cell.file < 0 || cell.file >= board.dim.files) {
+        return false;
+    }
+    if (cell.rank < 0 || cell.rank >= board.dim.ranks) {
+        return false;
+    }
+    return this.board.isEmpty(cell);
+}
+
+// Determine whether swapping is possible.
 GameState.prototype.canSwap = function() {
     if (this.resigned() || this.forfeited()) {
         return false;
@@ -1611,7 +1617,7 @@ GameState.prototype.canSwap = function() {
     return this.currentmove === 1 && this.movelist[0].move.type === Const.cell;
 }
 
-// Determine whether the passing button should be enabled.
+// Determine whether passing is possible.
 GameState.prototype.canPass = function() {
     if (this.resigned() || this.forfeited()) {
         return false;
@@ -1619,8 +1625,7 @@ GameState.prototype.canPass = function() {
     return true;
 }
 
-// Determine whether the resign and forfeit buttons should be
-// enabled.
+// Determine whether resigning and forfeiting are possible.
 GameState.prototype.canResign = function() {
     if (this.resigned() || this.forfeited()) {
         return false;
@@ -1628,12 +1633,12 @@ GameState.prototype.canResign = function() {
     return true;
 }
 
-// Determine whether the "first" and "undo" buttons should be enabled.
+// Determine whether "first" and "undo" are possible.
 GameState.prototype.canUndo = function() {
     return this.currentmove > 0;
 }
 
-// Determine whether the "last" and "redo" buttons should be enabled.
+// Determine whether "last" and "redo" are possible.
 GameState.prototype.canRedo = function() {
     return this.currentmove < this.movelist.length;
 }
