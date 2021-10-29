@@ -1414,7 +1414,7 @@ GameState.prototype.URLHash = function() {
         orient += 12;
     }
     if (orient !== 10) {
-        acc += "r" + (orient);
+        acc += "r" + orient.toFixed(0);
     }
     if (this.board.mirrored) {
         acc += "m";
