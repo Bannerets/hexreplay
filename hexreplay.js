@@ -957,21 +957,26 @@ GameState.prototype.truncate = function() {
 }
 
 GameState.prototype.currentPlayer = function () {
-    var n = this.currentmove;
-    if (n === 0) {
-        return Const.black;
+    var self = this;
+    function player(n) {
+        if (n === 0) {
+            return Const.black;
+        }
+        var last = self.movelist[n-1];
+        switch (last.move.type) {
+        case Const.swap_sides:
+            return last.player;
+            break;
+        case Const.resign:
+        case Const.forfeit:
+            return player(n-1);
+            break;
+        default:
+            return last.player === Const.black ? Const.white : Const.black;
+            break;
+        }
     }
-    var last = this.movelist[n-1];
-    switch (last.move.type) {
-    case Const.swap_sides:
-    case Const.resign:
-    case Const.forfeit:
-        return last.player;
-        break;
-    default:
-        return last.player === Const.black ? Const.white : Const.black;
-        break;
-    }
+    return player(this.currentmove);
 }
 
 // Play the requested move, if possible. Return true on success, false
