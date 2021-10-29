@@ -982,12 +982,11 @@ GameState.prototype.currentPlayer = function () {
 // Play the requested move, if possible. Return true on success, false
 // on failure.
 GameState.prototype.play = function(move) {
-    if (move.type === Const.cell && !this.board.isEmpty(move.cell)) {
-        // Special case: click on existing stone to swap
-        move = Move.swap_pieces;
-    }
     if (!this.isLegal(move)) {
         return false;
+    }
+    if (this.resigned() || this.forfeited()) {
+        this.currentmove -= 1;
     }
     this.truncate();
     var player = move.getPlayer() || this.currentPlayer();
@@ -1004,6 +1003,10 @@ GameState.prototype.play = function(move) {
 }
 
 GameState.prototype.UIplay = function(move) {
+    // Special case: click on existing stone to swap
+    if (move.type === Const.cell && !this.board.isEmpty(move.cell)) {
+        move = Move.swap_pieces;
+    }
     if (!this.isLegal(move)) {
         return false;
     }
@@ -1602,9 +1605,6 @@ GameState.prototype.UIfromURLHash = function(hash) {
 
 // Determine whether moving in the given cell is possible.
 GameState.prototype.canMove = function(cell) {
-    if (this.resigned() || this.forfeited()) {
-        return false;
-    }
     if (cell.file < 0 || cell.file >= board.dim.files) {
         return false;
     }
@@ -1616,25 +1616,20 @@ GameState.prototype.canMove = function(cell) {
 
 // Determine whether swapping is possible.
 GameState.prototype.canSwap = function() {
+    var n = this.currentmove;
     if (this.resigned() || this.forfeited()) {
-        return false;
+        n -= 1;
     }
-    return this.currentmove === 1 && this.movelist[0].move.type === Const.cell;
+    return n === 1 && this.movelist[0].move.type === Const.cell;
 }
 
 // Determine whether passing is possible.
 GameState.prototype.canPass = function() {
-    if (this.resigned() || this.forfeited()) {
-        return false;
-    }
     return true;
 }
 
 // Determine whether resigning and forfeiting are possible.
 GameState.prototype.canResign = function() {
-    if (this.resigned() || this.forfeited()) {
-        return false;
-    }
     return true;
 }
 
