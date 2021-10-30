@@ -514,6 +514,7 @@ svg {
     margin: 3px;
     padding: 3px;
     box-sizing: border-box;
+    user-select: none;
 }
 
 .menu-divider {
