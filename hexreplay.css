@@ -8,6 +8,7 @@ body {
     box-sizing: border-box;
     margin: 0px;
     padding: 0px;
+    background-color: #c0c0b0;
 }
 
 #board-panel {
@@ -15,6 +16,9 @@ body {
     display: flex;
     flex-flow: column;
     height: 100%;
+    padding-top: 10px;
+    padding-left: 10px;
+    box-sizing: border-box;
 }
 
 #board-container {
@@ -25,16 +29,36 @@ body {
     position: relative;
 }
 
-#buttons-container {
-    flex: 0 0 20px;
+#button-panel {
+    flex: 0 0 10px;
+    display: flex;
+    flex-flow: row;
+    gap: 10px;
+    align-items: center;
 }
+
+#left-buttons {
+    flex: 0;
+    white-space: nowrap;
+}
+
+#mid-buttons {
+    display: flex;
+    flex-flow: row;
+    flex: 1;
+    white-space: nowrap;
+    justify-content: right;
+}
+
+
 
 .board {
     position: relative;
     box-sizing: border-box;
-    background-color: #d9b479;
-    background-image: url("images/wood.jpg");
-    background-repeat: repeat;
+    background-color: #c0c0b0;
+    /* background-color: #d9b479; */
+    /* background-image: url("images/wood.jpg"); */
+    /* background-repeat: repeat; */
     height: 100%;
 }
 
@@ -56,6 +80,12 @@ svg {
 
 .cell {
     pointer-events: all;
+}
+
+.outline {
+    fill: #d9b479;
+    /* fill: url("#woodpattern"); */
+    stroke: none;
 }
 
 .label {
@@ -222,16 +252,12 @@ svg {
     vertical-align: middle;
 }
 
-.button:hover {
+.button:hover:not(:disabled) {
     background-color: #ffffff;
 }
 
-.button:active {
+.button:active:not(:disabled) {
     background-color: #d0d0d0;
-}
-
-.button:disabled {
-    background-color: #f0f0f0;
 }
 
 #button-swap-pieces {
@@ -288,6 +314,27 @@ svg {
     background-position: -450px -30px;
 }
 
+#button-numbered {
+    background-image: url("images/buttons.svg");
+    background-position: -240px 0px;
+}
+
+#button-numbered:disabled {
+    background-position: -240px -30px;
+}
+
+#button-numbered.checked {
+    background-color: #d0d0d0;
+}
+
+#button-numbered.checked:hover {
+    background-color: #dddddd;
+}
+
+#button-numbered.checked:active {
+    background-color: #d0d0d0;
+}
+
 #button-rotate-left {
     background-image: url("images/buttons.svg");
     background-position: -30px 0px;
@@ -342,11 +389,6 @@ svg {
     background-position: -210px -30px;
 }
 
-#button-clear {
-    background-image: url("images/buttons.svg");
-    background-position: -420px 0px;
-}
-
 #button-clear:disabled {
     background-position: -420px -30px;
 }
@@ -367,10 +409,27 @@ svg {
 }
 
 #movelist-panel {
-    //flex: 0 0 130px;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    display: flex;
+    flex-flow: column;
+}
+
+#movelist-controls {
+    flex: 0;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#movelist-container {
+    flex: 1;
+    //height: 100%;
+    //box-sizing: border-box;
     overflow-y: scroll;
     overflow-x: visible;
     min-width: 155px;
+    background-color: #ffffff;
 }
 
 .move {

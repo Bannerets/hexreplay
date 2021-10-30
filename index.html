@@ -8,27 +8,27 @@
   </head>
   <body id="main">
     <div id="board-panel">
+      <div id="button-panel">
+        <div id="left-buttons">
+          <button class="text-button" id="button-clear" type="button"
+                  title="Clear">New board</button>
+          Size: <input class="input" id="input-size" type="text"
+                       title="Board size" size="3"></input>
+        </div>
+        <div id="mid-buttons">
+          <button class="button" id="button-rotate-left" type="button"
+                  title="Rotate left"></button>
+          <button class="button" id="button-rotate-right" type="button"
+                  title="Rotate right"></button>
+          <button class="button" id="button-numbered"
+                 title="Show move numbers"></button>
+        </div>
+      </div>
       <div id="board-container">
       </div>
-      <div id="button-panel">
-        Size: <input class="input" id="input-size" type="text"
-               title="Board size" size="3"></input>
-        <button class="button" id="button-swap-pieces" type="button"
-                title="Swap pieces (S)"></button>
-        <button class="button" id="button-swap-sides" type="button"
-                title="Swap sides"></button>
-        <button class="button" id="button-pass" type="button"
-                title="Pass"></button>
-        <button class="button" id="button-resign-black" type="button"
-                title="Black resigns"></button>
-        <button class="button" id="button-resign-white" type="button"
-                title="White resigns"></button>
-        <button class="button" id="button-resign" type="button"
-                title="Resign"></button>
-        <button class="button" id="button-rotate-left" type="button"
-                title="Rotate left"></button>
-        <button class="button" id="button-rotate-right" type="button"
-                title="Rotate right"></button>
+    </div>
+    <div id="movelist-panel">
+      <div id="movelist-controls">
         <button class="button" id="button-first" type="button"
                 title="First (home)"></button>
         <button class="button" id="button-undo" type="button"
@@ -37,16 +37,9 @@
                 title="Redo (right)"></button>
         <button class="button" id="button-last" type="button"
                 title="Last (end)"></button>
-        <button class="button" id="button-clear" type="button"
-                title="Clear"></button>
-        <input type="checkbox" id="checkbox-numbered"
-               title="Show move numbers"></input>
-        <input type="checkbox" id="checkbox-redblue"
-               title="Use red and blue"></input>
-        </select>
       </div>
-    </div>
-    <div id="movelist-panel">
+      <div id="movelist-container">
+      </div>
     </div>
     <script src="hexreplay.js"></script>
   </body>

@@ -974,5 +974,48 @@
            y="295.41187"
            style="font-size:6.53378773px;stroke-width:0.17501216">R</tspan></text>
     </g>
+    <g
+       id="g1092"
+       transform="matrix(0.66146827,0,0,0.66145833,-9.26151,125.6823)">
+      <rect
+         style="opacity:1;fill:#ffffff;fill-opacity:0.00392157;stroke:none;stroke-width:0.09999925;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="rect988-0-91-1-77-6"
+         width="11.99982"
+         height="12"
+         x="110"
+         y="235" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:5.64444447px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         x="110.52802"
+         y="242.87065"
+         id="text1087"><tspan
+           id="tspan1085"
+           x="110.52802"
+           y="242.87065"
+           style="font-size:5.64444447px;stroke-width:0.26458332">123</tspan></text>
+    </g>
+    <g
+       style="opacity:0.3"
+       id="g1092-3"
+       transform="matrix(0.66146828,0,0,0.66145833,-9.2615111,133.6198)">
+      <rect
+         style="opacity:1;fill:#ffffff;fill-opacity:0.00392157;stroke:none;stroke-width:0.09999925;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="rect988-0-91-1-77-6-67"
+         width="11.99982"
+         height="12"
+         x="110"
+         y="235" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:5.64444447px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         x="110.52802"
+         y="242.87065"
+         id="text1087-5"><tspan
+           id="tspan1085-3"
+           x="110.52802"
+           y="242.87065"
+           style="font-size:5.64444447px;stroke-width:0.26458332">123</tspan></text>
+    </g>
   </g>
 </svg>

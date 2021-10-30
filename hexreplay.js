@@ -369,6 +369,22 @@ Board.prototype.svg_of_board = function() {
 
     var defs = document.createElementNS(svgNS, "defs");
 
+    /*
+    var pattern = document.createElementNS(svgNS, "pattern");
+    pattern.setAttribute("id", "woodpattern");
+    pattern.setAttribute("patternUnits", "userSpaceOnUse");
+    pattern.setAttribute("width", "1000");
+    pattern.setAttribute("height", "1000");
+    var image = document.createElementNS(svgNS, "image");
+    image.setAttribute("href", "images/wood.jpg");
+    image.setAttribute("x", "0");
+    image.setAttribute("y", "0");
+    image.setAttribute("width", "1000");
+    image.setAttribute("height", "1000");
+    pattern.appendChild(image);
+    defs.appendChild(pattern);
+    */
+
     var grad = document.createElementNS(svgNS, "radialGradient");
     grad.setAttribute("id", "black-gradient");
     grad.setAttribute("cx", "30%");
@@ -445,6 +461,31 @@ Board.prototype.svg_of_board = function() {
     g.classList.add("rotatable");
     g.setAttribute("transform-origin", coordstr((files-1)/2,(ranks-1)/2,0,0,0));
     svg.appendChild(g);
+
+    // Cell outline
+    var outline = document.createElementNS(svgNS, "path");
+    var path = ""
+    path += "M" + coordstr(0, 0, 0, -1, 0);
+    for (var i=0; i<ranks; i++) {
+        path += "L" + coordstr(0, i, -1, 0, 0);
+        path += "L" + coordstr(0, i, 0, 0, 1);
+    }
+    for (var i=1; i<files; i++) {
+        path += "L" + coordstr(i, ranks-1, -1, 0, 0);
+        path += "L" + coordstr(i, ranks-1, 0, 0, 1);
+    }
+    for (var i=ranks-1; i>=0; i--) {
+        path += "L" + coordstr(files-1, i, 0, 1, 0);
+        path += "L" + coordstr(files-1, i, 1, 0, 0);
+    }
+    for (var i=files-1; i>=0; i--) {
+        path += "L" + coordstr(i, 0, 0, 0, -1);
+        path += "L" + coordstr(i, 0, 0, -1, 0);
+    }
+    path += "z";
+    outline.setAttribute("d", path);
+    outline.classList.add("outline");
+    g.appendChild(outline);
 
     // Border
     var r = this.borderradius;
@@ -1341,7 +1382,7 @@ GameState.prototype.scroll_movelist = function(i) {
     if (!item) {
         return;
     }
-    var panel = document.getElementById("movelist-panel");
+    var panel = document.getElementById("movelist-container");
     makeVisible(item, panel, true);
 }
 
@@ -1650,18 +1691,18 @@ var main = document.getElementById("board-container");
 var board = new Board(new Dimension(11), 9, false);
 main.appendChild(board.dom);
 board.rescale();
-var movelist_panel = document.getElementById("movelist-panel");
+var movelist_panel = document.getElementById("movelist-container");
 var state = new GameState(board, movelist_panel);
 
 // ----------------------------------------------------------------------
 // Map buttons
 
-var button_swap_pieces = document.getElementById("button-swap-pieces");
-var button_swap_sides = document.getElementById("button-swap-sides");
-var button_pass = document.getElementById("button-pass");
-var button_resign_black = document.getElementById("button-resign-black");
-var button_resign_white = document.getElementById("button-resign-white");
-var button_resign = document.getElementById("button-resign");
+//var button_swap_pieces = document.getElementById("button-swap-pieces");
+//var button_swap_sides = document.getElementById("button-swap-sides");
+//var button_pass = document.getElementById("button-pass");
+//var button_resign_black = document.getElementById("button-resign-black");
+//var button_resign_white = document.getElementById("button-resign-white");
+//var button_resign = document.getElementById("button-resign");
 var button_rotate_left = document.getElementById("button-rotate-left");
 var button_rotate_right = document.getElementById("button-rotate-right");
 var button_first = document.getElementById("button-first");
@@ -1669,27 +1710,27 @@ var button_undo = document.getElementById("button-undo");
 var button_redo = document.getElementById("button-redo");
 var button_last = document.getElementById("button-last");
 var button_clear = document.getElementById("button-clear");
-var checkbox_numbered = document.getElementById("checkbox-numbered");
-var checkbox_redblue = document.getElementById("checkbox-redblue")
+var button_numbered = document.getElementById("button-numbered");
+//var checkbox_redblue = document.getElementById("checkbox-redblue")
 
-button_swap_pieces.addEventListener("click", function () {
-    state.UIplay(Move.swap_pieces);
-});
-button_swap_sides.addEventListener("click", function () {
-    state.UIplay(Move.swap_sides);
-});
-button_pass.addEventListener("click", function () {
-    state.UIplay(Move.pass);
-});
-button_resign_black.addEventListener("click", function () {
-    state.UIplay(Move.resign(Const.black));
-});
-button_resign_white.addEventListener("click", function () {
-    state.UIplay(Move.resign(Const.white));
-});
-button_resign.addEventListener("click", function () {
-    state.UIresign();
-});
+// button_swap_pieces.addEventListener("click", function () {
+//     state.UIplay(Move.swap_pieces);
+// });
+// button_swap_sides.addEventListener("click", function () {
+//     state.UIplay(Move.swap_sides);
+// });
+// button_pass.addEventListener("click", function () {
+//     state.UIplay(Move.pass);
+// });
+// button_resign_black.addEventListener("click", function () {
+//     state.UIplay(Move.resign(Const.black));
+// });
+// button_resign_white.addEventListener("click", function () {
+//     state.UIplay(Move.resign(Const.white));
+// });
+// button_resign.addEventListener("click", function () {
+//     state.UIresign();
+// });
 button_rotate_left.addEventListener("click", function () {
     state.UIrotate(-1);
 });
@@ -1711,12 +1752,13 @@ button_last.addEventListener("click", function () {
 button_clear.addEventListener("click", function () {
     state.UIclear();
 });
-checkbox_numbered.addEventListener("change", function () {
-    state.UIsetNumbered(checkbox_numbered.checked);
+button_numbered.addEventListener("click", function () {
+    button_numbered.classList.toggle("checked");
+    state.UIsetNumbered(button_numbered.classList.contains("checked"));
 });
-checkbox_redblue.addEventListener("change", function () {
-    state.UIsetRedBlue(checkbox_redblue.checked);
-});
+// checkbox_redblue.addEventListener("change", function () {
+//     state.UIsetRedBlue(checkbox_redblue.checked);
+// });
 var input = document.getElementById("input-size");
 input.addEventListener("keydown", function (event) {
     if (event.keyCode !== 13) {
@@ -1737,15 +1779,19 @@ function input_update(input) {
 }
 state.onupdate = function() {
     input_update(input);
-    checkbox_numbered.checked = state.numbered;
-    checkbox_redblue.checked = state.redblue;
-    if (state.redblue) {
-        button_resign_black.setAttribute("title", "Red resigns");
-        button_resign_white.setAttribute("title", "Blue resigns");
+    if (state.numbered) {
+        button_numbered.classList.add("checked");
     } else {
-        button_resign_black.setAttribute("title", "Black resigns");
-        button_resign_white.setAttribute("title", "White resigns");
+        button_numbered.classList.remove("checked");
     }
+    //checkbox_redblue.checked = state.redblue;
+    // if (state.redblue) {
+    //     button_resign_black.setAttribute("title", "Red resigns");
+    //     button_resign_white.setAttribute("title", "Blue resigns");
+    // } else {
+    //     button_resign_black.setAttribute("title", "Black resigns");
+    //     button_resign_white.setAttribute("title", "White resigns");
+    // }
 
     function setEnabled(elt, bool) {
         if (bool) {
@@ -1755,12 +1801,12 @@ state.onupdate = function() {
         }
     }
     
-    setEnabled(button_swap_pieces, state.canSwap());
-    setEnabled(button_swap_sides, state.canSwap());
-    setEnabled(button_pass, state.canPass());
-    setEnabled(button_resign_black, state.canResign());
-    setEnabled(button_resign_white, state.canResign());
-    setEnabled(button_resign, state.canResign());
+    // setEnabled(button_swap_pieces, state.canSwap());
+    // setEnabled(button_swap_sides, state.canSwap());
+    // setEnabled(button_pass, state.canPass());
+    // setEnabled(button_resign_black, state.canResign());
+    // setEnabled(button_resign_white, state.canResign());
+    // setEnabled(button_resign, state.canResign());
     setEnabled(button_first, state.canUndo());
     setEnabled(button_undo, state.canUndo());
     setEnabled(button_redo, state.canRedo());
