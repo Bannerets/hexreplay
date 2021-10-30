@@ -1244,8 +1244,14 @@ GameState.prototype.setSize = function(dim) {
     return true;
 }
 
+GameState.prototype.nonEmpty = function() {
+    return this.movelist.length > 0;
+}
+
 GameState.prototype.UIsetSize = function(dim) {
-    history.pushState(null, null);
+    if (this.nonEmpty()) {
+        history.pushState(null, null);
+    }
     var r = this.setSize(dim);
     this.UIupdate();
     return r;
@@ -1271,7 +1277,9 @@ GameState.prototype.clear = function() {
 }
 
 GameState.prototype.UIclear = function() {
-    history.pushState(null, null);
+    if (this.nonEmpty()) {
+        history.pushState(null, null);
+    }
     this.clear();
     this.UIupdate();
 }
