@@ -1695,14 +1695,28 @@ var movelist_panel = document.getElementById("movelist-container");
 var state = new GameState(board, movelist_panel);
 
 // ----------------------------------------------------------------------
+// Activate menus
+
+var menus = document.querySelectorAll(".menu-container");
+menus.forEach(function(m) {
+    m.addEventListener("click", function(e) {
+        m.classList.toggle("show");
+    });
+    document.addEventListener("click", function(e) {
+        if (!m.contains(e.target)) {
+            m.classList.remove("show");
+        }
+    });
+});
+
+// ----------------------------------------------------------------------
 // Map buttons
 
-//var button_swap_pieces = document.getElementById("button-swap-pieces");
-//var button_swap_sides = document.getElementById("button-swap-sides");
-//var button_pass = document.getElementById("button-pass");
-//var button_resign_black = document.getElementById("button-resign-black");
-//var button_resign_white = document.getElementById("button-resign-white");
-//var button_resign = document.getElementById("button-resign");
+var link_swap = document.getElementById("item-swap");
+var link_pass = document.getElementById("item-pass");
+var link_resign = document.getElementById("item-resign");
+var link_bw = document.getElementById("item-bw");
+var link_rg = document.getElementById("item-rg");
 var button_rotate_left = document.getElementById("button-rotate-left");
 var button_rotate_right = document.getElementById("button-rotate-right");
 var button_first = document.getElementById("button-first");
@@ -1711,26 +1725,16 @@ var button_redo = document.getElementById("button-redo");
 var button_last = document.getElementById("button-last");
 var button_clear = document.getElementById("button-clear");
 var button_numbered = document.getElementById("button-numbered");
-//var checkbox_redblue = document.getElementById("checkbox-redblue")
 
-// button_swap_pieces.addEventListener("click", function () {
-//     state.UIplay(Move.swap_pieces);
-// });
-// button_swap_sides.addEventListener("click", function () {
-//     state.UIplay(Move.swap_sides);
-// });
-// button_pass.addEventListener("click", function () {
-//     state.UIplay(Move.pass);
-// });
-// button_resign_black.addEventListener("click", function () {
-//     state.UIplay(Move.resign(Const.black));
-// });
-// button_resign_white.addEventListener("click", function () {
-//     state.UIplay(Move.resign(Const.white));
-// });
-// button_resign.addEventListener("click", function () {
-//     state.UIresign();
-// });
+link_swap.addEventListener("click", function () {
+     state.UIplay(Move.swap_pieces);
+});
+link_pass.addEventListener("click", function () {
+     state.UIplay(Move.pass);
+});
+link_resign.addEventListener("click", function () {
+     state.UIresign();
+});
 button_rotate_left.addEventListener("click", function () {
     state.UIrotate(-1);
 });
@@ -1756,9 +1760,12 @@ button_numbered.addEventListener("click", function () {
     button_numbered.classList.toggle("checked");
     state.UIsetNumbered(button_numbered.classList.contains("checked"));
 });
-// checkbox_redblue.addEventListener("change", function () {
-//     state.UIsetRedBlue(checkbox_redblue.checked);
-// });
+link_bw.addEventListener("click", function () {
+     state.UIsetRedBlue(false);
+});
+link_rg.addEventListener("click", function () {
+     state.UIsetRedBlue(true);
+});
 var input = document.getElementById("input-size");
 input.addEventListener("keydown", function (event) {
     if (event.keyCode !== 13) {
@@ -1784,29 +1791,20 @@ state.onupdate = function() {
     } else {
         button_numbered.classList.remove("checked");
     }
-    //checkbox_redblue.checked = state.redblue;
-    // if (state.redblue) {
-    //     button_resign_black.setAttribute("title", "Red resigns");
-    //     button_resign_white.setAttribute("title", "Blue resigns");
-    // } else {
-    //     button_resign_black.setAttribute("title", "Black resigns");
-    //     button_resign_white.setAttribute("title", "White resigns");
-    // }
 
     function setEnabled(elt, bool) {
         if (bool) {
             elt.removeAttribute("disabled");
+            elt.classList.remove("disabled");
         } else {
             elt.setAttribute("disabled", "disabled");
+            elt.classList.add("disabled");
         }
     }
     
-    // setEnabled(button_swap_pieces, state.canSwap());
-    // setEnabled(button_swap_sides, state.canSwap());
-    // setEnabled(button_pass, state.canPass());
-    // setEnabled(button_resign_black, state.canResign());
-    // setEnabled(button_resign_white, state.canResign());
-    // setEnabled(button_resign, state.canResign());
+    setEnabled(link_swap, state.canSwap());
+    setEnabled(link_pass, state.canPass());
+    setEnabled(link_resign, state.canResign());
     setEnabled(button_first, state.canUndo());
     setEnabled(button_undo, state.canUndo());
     setEnabled(button_redo, state.canRedo());

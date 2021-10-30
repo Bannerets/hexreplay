@@ -46,8 +46,8 @@ body {
     display: flex;
     flex-flow: row;
     flex: 1;
-    white-space: nowrap;
     justify-content: right;
+    gap: 5px;
 }
 
 
@@ -248,7 +248,6 @@ svg {
     width: 30px;
     height: 30px;
     border-radius: 5px;
-    cursor: pointer;
     vertical-align: middle;
 }
 
@@ -333,6 +332,16 @@ svg {
 
 #button-numbered.checked:active {
     background-color: #d0d0d0;
+}
+
+#button-menu {
+    position: relative;
+    background-image: url("images/buttons.svg");
+    background-position: -270px 0px;
+}
+
+#button-menu:disabled {
+    background-position: -270px -30px;
 }
 
 #button-rotate-left {
@@ -420,6 +429,10 @@ svg {
     flex: 0;
     margin-bottom: 10px;
     text-align: center;
+    display: flex;
+    flex-flow: row;
+    justify-content: center;
+    gap: 5px;
 }
 
 #movelist-container {
@@ -476,3 +489,54 @@ svg {
 .redblue .cursor-white {
     cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><circle cx='8' cy='8' r='7' fill='%230000ff' stroke='white' stroke-width='1'/></svg>") 8 8, auto;
 }
+
+.menu {
+    display: none;
+    position: absolute;
+    top: 30px;
+    right: 0px;
+    width: auto;
+    height: auto;
+    z-index: 1;
+    background-color: #f0f0f0;
+    font-family: Helvetica,sans-serif;
+    font-weight: normal;
+    white-space: nowrap;
+    cursor: default;
+}
+
+.menu-container.show .menu {
+    display: block;
+}
+
+.menu-item,.menu-header {
+    text-align: left;
+    margin: 3px;
+    padding: 3px;
+    box-sizing: border-box;
+}
+
+.menu-divider {
+    height: 5px;
+}
+
+.menu-container {
+    position: relative;
+}
+
+.menu-item:hover:not(.disabled) {
+    background-color: #ffffff;
+}
+
+.menu-item:active:not(.disabled) {
+    background-color: #d0d0d0;
+}
+
+.menu-item.disabled {
+    color: #c0c0c0;
+}
+
+.menu-item.indent {
+    padding-left: 20px;
+}
+
