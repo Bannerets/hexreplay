@@ -454,8 +454,20 @@ svg {
     white-space: nowrap;
 }
 
+.move:hover {
+    background-color: #f0f0f0;
+}
+
 .move.current {
     background-color: #fea;
+}
+
+.move.current:hover {
+    background-color: #f0e0a0;
+}
+
+.move:active {
+    background-color: #d0d0d0;
 }
 
 .move .number {
