@@ -3,6 +3,79 @@
 "use strict";
 
 // ----------------------------------------------------------------------
+// Compatibility
+
+var compatibility = function() {
+    if ("classList" in SVGElement.prototype === false) {
+	// Internet Explorer lacks classList on SVG elements.    
+	Object.defineProperty(SVGElement.prototype, "classList", {
+	    get: function() {
+		var self = this;
+		var classList = new Object();
+		classList.add = function(cls) {
+		    var classes = self.getAttribute("class") || "";
+		    var list = classes.split(" ");
+		    var index = list.indexOf(cls);
+		    if (index === -1) {
+			list.unshift(cls);
+		    }
+		    classes = list.join(" ");
+		    self.setAttribute("class", classes);
+		}
+		classList.remove = function(cls) {
+		    var classes = self.getAttribute("class") || "";
+		    var list = classes.split(" ");
+		    var index = list.indexOf(cls);
+		    if (index !== -1) {
+			list.splice(index, 1);
+		    }
+		    classes = list.join(" ");
+		    self.setAttribute("class", classes);
+		}
+		classList.contains = function(cls) {
+		    var classes = self.getAttribute("class") || "";
+		    var list = classes.split(" ");
+		    var index = list.indexOf(cls);
+		    return index !== -1;
+		}
+		classList.toggle = function(cls) {
+		    if (this.contains(cls)) {
+			this.remove(cls);
+		    } else {
+			this.add(cls);
+		    }
+		}
+		return classList;
+	    }
+	});
+    }
+
+    if ("forEach" in NodeList.prototype === false) {
+	// Internet Explorer lacks forEach on NodeList.
+	NodeList.prototype.forEach = function(fn) {
+	    Array.prototype.forEach.call(this, fn);
+	}
+    }
+
+    if ("matches" in Element.prototype === false) {
+	Element.prototype.matches = Element.prototype.msMatchesSelector;
+    }
+    
+    if ("closest" in Element.prototype === false) {
+	Element.prototype.closest = function (selector) {
+	    var el = this;
+	    while (el.matches && !el.matches(selector)) {
+		el = el.parentNode;
+	    }
+	    return el.matches ? el : null;
+	};
+    }
+}
+
+
+compatibility();
+
+// ----------------------------------------------------------------------
 // Constants
 
 function Const() {
@@ -102,20 +175,20 @@ Cell.stringToRank = function(s) {
 
 // Convert a cell name (such as "a1") to a cell.
 Cell.fromString = function (s) {
-    var regexp = /^([a-z]+)([0-9]+)$/g;
-    var matches = s.matchAll(regexp).next().value;
-    if (!matches) {
+    var regexp = /^([a-z]+)([0-9]+)$/;
+    var match = s.match(regexp);
+    if (!match) {
         return null;
     }
-    var file = Cell.stringToFile(matches[1]);
-    var rank = Cell.stringToRank(matches[2]);
+    var file = Cell.stringToFile(match[1]);
+    var rank = Cell.stringToRank(match[2]);
     return new Cell(file, rank);
 }
 
 // ----------------------------------------------------------------------
 // Dimension
 
-function Dimension(files, ranks = undefined) {
+function Dimension(files, ranks) {
     if (ranks === undefined) {
         ranks = files;
     }
@@ -179,9 +252,16 @@ Dimension.prototype.equals = function(dim) {
 
 // This holds a DOM element to display a board.
 
-function Board(dim, rotation = 9, mirrored = false) {
+function Board(dim, rotation, mirrored) {
     var self = this;
 
+    if (rotation === undefined) {
+	rotation = 9;
+    }
+    if (mirrored === undefined) {
+	mirrored = false;
+    }
+    
     this.dim = dim;
     this.rotation = rotation;
     this.mirrored = mirrored;
@@ -263,11 +343,11 @@ Board.prototype.rescale = function() {
     this.svg.setAttribute("height", this.dom.offsetHeight);
     var bbox = this.svg.getBBox();
     var margin = 0.5 * this.unit;
-    bbox.x -= margin;
-    bbox.y -= margin;
-    bbox.width += 2*margin;
-    bbox.height += 2*margin;
-    this.svg.setAttribute("viewBox", bbox.x + " " + bbox.y + " " + bbox.width + " " + bbox.height);
+    var x = bbox.x - margin;
+    var y = bbox.y - margin;
+    var width = bbox.width + 2*margin;
+    var height = bbox.height + 2*margin;
+    this.svg.setAttribute("viewBox", x + " " + y + " " + width + " " + height);
 }
 
 // Set the logical size of the board. This also clears the board.
@@ -299,7 +379,16 @@ Board.prototype.svg_of_board = function() {
     //           b
     //        ·     ·
     //           ·
-    function coord(a, b, c=0, d=0, e=0) {
+    function coord(a, b, c, d, e) {
+	if (c === undefined) {
+	    c = 0;
+	}
+	if (d === undefined) {
+	    d = 0;
+	}
+	if (e === undefined) {
+	    e = 0;
+	}
         var a1 = a + (2*c + d - e)/3;
         var b1 = b + (-c + d + 2*e)/3;
         return {
@@ -310,7 +399,7 @@ Board.prototype.svg_of_board = function() {
     function xystr(xy) {
         return xy.x.toFixed(0) + " " + xy.y.toFixed(0);
     }
-    function coordstr(a, b, c=0, d=0, e=0) {
+    function coordstr(a, b, c, d, e) {
         return xystr(coord(a, b, c, d, e));
     }
 
@@ -685,7 +774,14 @@ Board.prototype.svg_of_board = function() {
 
 // Set the cell's content to value, which is Const.black, Const.white,
 // or Const.empty. Also set the optional label and swap status.
-Board.prototype.setStone = function(cell, color, label="", swap=false) {
+Board.prototype.setStone = function(cell, color, label, swap) {
+    if (label === undefined) {
+	label = "";
+    }
+    if (swap === undefined) {
+	swap = false;
+    }
+    
     var cell = document.getElementById(cell.toString());
     if (!cell) {
         return;
@@ -920,7 +1016,7 @@ Move.prototype.getPlayer = function() {
 }
 
 function GameState(board, movelist_panel) {
-    self = this;
+    var self = this;
     this.movelist = [];
     this.currentmove = 0;
     this.board = board;
@@ -1538,13 +1634,13 @@ GameState.prototype.UIsetRedBlue = function(bool) {
 // Initialize from URLHash.
 GameState.prototype.fromURLHash = function(hash) {
     function parse(s, regex) {
-        var matches = s.matchAll(regex).next().value;
-        if (!matches) {
+        var match = s.match(regex);
+        if (!match) {
             return null;
         } else {
             return {
-                match: matches[1],
-                rest: matches[2]
+                match: match[1],
+                rest: match[2]
             };
         }
     }
@@ -1593,11 +1689,11 @@ GameState.prototype.fromURLHash = function(hash) {
     // Parse parameters.
     var s = parts[0] ? parts[0] : "";
     var p;
-    if ((p = parse(s, /^([1-9][0-9]*x[1-9][0-9]*|[1-9][0-9]*)(.*)$/g)) !== null) {
+    if ((p = parse(s, /^([1-9][0-9]*x[1-9][0-9]*|[1-9][0-9]*)(.*)$/)) !== null) {
         dim = Dimension.parse(p.match);
         s = p.rest;
     }
-    while ((p = parse(s, /^(r[1-9][0-9]*|m|n|c[1-9][0-9]*)(.*)$/g)) !== null) {
+    while ((p = parse(s, /^(r[1-9][0-9]*|m|n|c[1-9][0-9]*)(.*)$/)) !== null) {
         switch (p.match[0]) {
         case "r":
             rotation = parseInt(p.match.substring(1));
@@ -1625,7 +1721,7 @@ GameState.prototype.fromURLHash = function(hash) {
     // Parse moves.
     var s = parts[1] ? parts[1] : ""
     var p;
-    while ((p = parse(s, /^([a-z]+[1-9][0-9]*|:s|:S|:p|:rb|:rw|:fb|:fw)(.*)$/g)) !== null) {
+    while ((p = parse(s, /^([a-z]+[1-9][0-9]*|:s|:S|:p|:rb|:rw|:fb|:fw)(.*)$/)) !== null) {
         var r = this.play(parse_move(p.match));
         if (!r) {
             return;
@@ -1635,7 +1731,7 @@ GameState.prototype.fromURLHash = function(hash) {
     var pos = this.currentmove;
     var s = parts[2] ? parts[2] : "";
     var p;
-    while ((p = parse(s, /^([a-z]+[1-9][0-9]*|:s|:S|:p|:rb|:rw|:fb|:fw)(.*)$/g)) !== null) {
+    while ((p = parse(s, /^([a-z]+[1-9][0-9]*|:s|:S|:p|:rb|:rw|:fb|:fw)(.*)$/)) !== null) {
         var r = this.play(parse_move(p.match));
         if (!r) {
             break;
