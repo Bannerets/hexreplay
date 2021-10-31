@@ -74,7 +74,7 @@ svg {
 }
 
 .cell:hover .background {
-    fill: #ffffff60;
+    fill: rgba(255,255,255,0.375);
 }
 
 .cell {
