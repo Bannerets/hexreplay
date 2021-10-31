@@ -320,6 +320,26 @@ Board.prototype.draw_svg = function() {
 // Update the rotation / mirroring of the board, preserving the
 // existing contents and DOM structure.
 Board.prototype.update = function () {
+    function setTransform(e, transform) {
+	// Set the transform on a DOM element.
+	// Special case: on IE, transform-origin does not work.
+	if (internet_explorer) {
+	    var originstr = e.getAttribute("transform-origin");
+	    var x = 0;
+	    var y = 0;
+	    if (originstr) {
+		var xy = originstr.split(" ");
+		x = parseInt(xy[0]);
+		y = parseInt(xy[1]);
+	    }
+	    var shift1 = "translate(" + (-x) + "," + (-y) + ")";
+	    var shift2 = "translate(" + x + "," + y + ")";
+	    e.setAttribute("transform", shift2 + " " + transform + " " + shift1);
+	} else {
+	    e.setAttribute("transform", transform);
+	}
+    }
+
     var theta;
     var scale;
     if (this.mirrored) {
@@ -337,11 +357,11 @@ Board.prototype.update = function () {
     var rotatable = this.svg.querySelectorAll(".rotatable");
     rotatable.forEach(function(e) {
 	console.log("X: " + e + " " + transform);
-        e.setAttribute("transform", transform);
+	setTransform(e, transform);
     });
     var unrotatable = this.svg.querySelectorAll(".unrotatable");
     unrotatable.forEach(function(e) {
-        e.setAttribute("transform", untransform);
+	setTransform(e, untransform);
     });
     this.rescale();
 }
