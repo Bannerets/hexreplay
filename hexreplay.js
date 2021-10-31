@@ -384,6 +384,7 @@ Board.prototype.rescale = function() {
 // Set the logical size of the board. This also clears the board.
 Board.prototype.setSize = function(dim) {
     if (dim.equals(this.dim)) {
+	this.clear();
 	return;
     }
     this.dim = dim;
