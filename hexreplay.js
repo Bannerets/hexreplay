@@ -1544,11 +1544,11 @@ GameState.prototype.draw_movelist = function() {
 // to ensure that the UI isn't needlessly updated multiple times.
 GameState.prototype.UIupdate = function() {
     this.draw_movelist();
-    // temporarily disable popstate, to avoid bottomless recursion.
-    var old_enable_popstate = enable_popstate;
-    enable_popstate = false;
+    // temporarily disable hashchange, to avoid bottomless recursion.
+    var old_enable_hashchange = enable_hashchange;
+    enable_hashchange = false;
     window.location.replace(this.URLHash());
-    enable_popstate = old_enable_popstate;
+    enable_hashchange = old_enable_hashchange;
     this.onupdate();
     board.setCursor(this.currentPlayer());
     this.board.rescale();  // because move list might have changed size
@@ -2029,10 +2029,10 @@ document.addEventListener("keydown", function(e) {
     return false;
 });
 
-var enable_popstate = true;
+var enable_hashchange = true;
 
-window.addEventListener("popstate", function (e) {
-    if (enable_popstate) {
+window.addEventListener("hashchange", function (e) {
+    if (enable_hashchange) {
         state.UIfromURLHash(window.location.hash);
     }
 });
