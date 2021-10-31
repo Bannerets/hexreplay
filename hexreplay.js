@@ -5,12 +5,13 @@
 // ----------------------------------------------------------------------
 // Compatibility
 
-var ie = false;
+var internet_explorer = false;
 
 var compatibility = function() {
     if ("classList" in SVGElement.prototype === false) {
+	internet_explorer = true;
+	
 	// Internet Explorer lacks classList on SVG elements.
-	ie = true;
 	Object.defineProperty(SVGElement.prototype, "classList", {
 	    get: function() {
 		var self = this;
@@ -72,6 +73,13 @@ var compatibility = function() {
 	    }
 	    return el.matches ? el : null;
 	};
+    }
+
+    if ("scrollTo" in Element.prototype === false) {
+	Element.prototype.scrollTo = function (options) {
+	    this.scrollTop = options.top;
+	    this.scrollLeft = options.left;
+	}
     }
 }
 
@@ -1465,32 +1473,28 @@ GameState.prototype.formatMove = function(move, n, current) {
 // visible within the container. If smooth=true, animate the scolling
 // action.
 function makeVisible(target, container, smooth) {
-    function scroll(container, left, top, smooth) {
-	if (ie) {
-	    container.scrollTop = top;
-	} else {
-            container.scrollTo({
-		left: left,
-		top: top,
-		behavior: smooth ? "smooth" : "instant"
-            });
-	}
-    }
-
     var trect = target.getBoundingClientRect();
     var crect = container.getBoundingClientRect();
     var oldtop = container.scrollTop;
     var oldleft = container.scrollLeft;
-    var ty = ie ? trect.top : trect.y;
-    var cy = ie ? crect.top : crect.y;
+    var ty = trect.y || trect.top;
+    var cy = crect.y || crect.top;
     var rely = ty - cy + oldtop;
     var scrollTopMax = rely;
     var scrollTopMin = rely + trect.height - crect.height;
 
     if (oldtop < scrollTopMin) {
-	scroll(container, oldleft, scrollTopMin, smooth);
+	container.scrollTo({
+	    left: oldleft,
+	    top: scrollTopMin,
+	    behavior: smooth ? "smooth" : "instant"
+	});
     } else if (oldtop > scrollTopMax) {
-	scroll(container, oldleft, scrollTopMax, smooth);
+	container.scrollTo({
+	    left: oldleft,
+	    top: scrollTopMax,
+	    behavior: smooth ? "smooth" : "instant"
+	});
     }
 }
 
