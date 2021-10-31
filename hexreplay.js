@@ -1462,7 +1462,7 @@ function makeVisible(target, container, smooth) {
     var crect = container.getBoundingClientRect();
     var oldtop = container.scrollTop;
     var oldleft = container.scrollLeft;
-    var rely = trect.y + oldtop;
+    var rely = trect.y - crect.y + oldtop;
     var scrollTopMax = rely;
     var scrollTopMin = rely + trect.height - crect.height;
     if (oldtop < scrollTopMin) {
