@@ -270,7 +270,7 @@ function Board(dim, rotation, mirrored) {
     }
     
     this.dim = dim;
-    this.rotation = rotation;
+    this.rotation = this.mod12(rotation);
     this.mirrored = mirrored;
 
     // Internal parameters.
@@ -298,6 +298,14 @@ function Board(dim, rotation, mirrored) {
             self.onclick(Cell.fromString(cell.id));
         }
     });
+}
+
+Board.prototype.mod12 = function(x) {
+    x = x % 12;
+    if (x < 0) {
+	x += 12;
+    }
+    return x;
 }
 
 // Use this when the SVG does not yet exist in the DOM tree, or when
@@ -955,15 +963,15 @@ Board.prototype.mirror = function(axis) {
         break;
     case Const.shortDiagonal:
         this.mirrored = !this.mirrored;
-        this.rotation += 6;
+        this.rotation = this.mod12(this.rotation + 6);
         break;
     case Const.horizontal:
         this.mirrored = !this.mirrored;
-        this.rotation = -this.rotation;
+        this.rotation = this.mod12(-this.rotation);
         break;
     case Const.vertical:
         this.mirrored = !this.mirrored;
-        this.rotation = 6-this.rotation;
+        this.rotation = this.mod12(6-this.rotation);
         break;
     }
     this.update();
@@ -972,11 +980,7 @@ Board.prototype.mirror = function(axis) {
 // Rotate the board by the given "step", which measured in hours
 // clockwise.
 Board.prototype.rotate = function(step) {
-    if (this.mirrored) {
-        this.rotation += step;
-    } else {
-        this.rotation += step;
-    }
+    this.rotation = this.mod12(this.rotation + step);
     this.update();
 }
 
@@ -1384,7 +1388,7 @@ GameState.prototype.UIsetSize = function(dim) {
 
 // Set the game orientation.
 GameState.prototype.setOrientation = function(rotation, mirrored) {
-    this.board.rotation = rotation;
+    this.board.rotation = this.board.mod12(rotation);
     this.board.mirrored = mirrored;
     this.board.update();
 }
@@ -1586,9 +1590,9 @@ GameState.prototype.hashMove = function(move) {
 GameState.prototype.URLHash = function() {
     var acc = "#";
     acc += this.dim.format();
-    var orient = this.board.rotation % 12;
-    if (orient < 0) {
-        orient += 12;
+    var orient = this.board.mod12(this.board.rotation);
+    if (orient === 0) {
+	orient = 12;
     }
     if (orient !== 10) {
         acc += "r" + orient.toFixed(0);
