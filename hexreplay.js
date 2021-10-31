@@ -356,7 +356,6 @@ Board.prototype.update = function () {
     
     var rotatable = this.svg.querySelectorAll(".rotatable");
     rotatable.forEach(function(e) {
-	console.log("X: " + e + " " + transform);
 	setTransform(e, transform);
     });
     var unrotatable = this.svg.querySelectorAll(".unrotatable");
@@ -694,7 +693,7 @@ Board.prototype.svg_of_board = function() {
             }
             g1.appendChild(path);
             var tooltip = document.createElementNS(svgNS, "title");
-            tooltip.innerHTML = Cell.cellname(file, rank);
+            tooltip.textContent = Cell.cellname(file, rank);
             g1.appendChild(tooltip);
 
             var g2 = document.createElementNS(svgNS, "g");
@@ -730,7 +729,7 @@ Board.prototype.svg_of_board = function() {
             swap.classList.add("swaplabel");
             swap.setAttribute("x", xy.x);
             swap.setAttribute("y", xy.y + 10);
-            swap.innerHTML = "S";
+            swap.textContent = "S";
             g2.appendChild(swap);
 
             var text = document.createElementNS(svgNS, "text");
@@ -738,7 +737,7 @@ Board.prototype.svg_of_board = function() {
             text.classList.add("stonelabel");
             text.setAttribute("x", xy.x);
             text.setAttribute("y", xy.y + 10);
-            text.innerHTML = "99";
+            text.textContent = "99";
             g2.appendChild(text);
             
             g1.appendChild(g2);
@@ -767,7 +766,7 @@ Board.prototype.svg_of_board = function() {
         text.setAttribute("x", xy.x);
         text.setAttribute("y", xy.y + 10);
         text.setAttribute("transform-origin", coordstr(-1.1, rank));
-        text.innerHTML = Cell.rankToString(rank);
+        text.textContent = Cell.rankToString(rank);
         g.appendChild(text);
     }
     for (var rank=0; rank<ranks; rank++) {
@@ -778,7 +777,7 @@ Board.prototype.svg_of_board = function() {
         text.setAttribute("x", xy.x);
         text.setAttribute("y", xy.y + 10);
         text.setAttribute("transform-origin", coordstr(files+0.1, rank));
-        text.innerHTML = Cell.rankToString(rank);
+        text.textContent = Cell.rankToString(rank);
         g.appendChild(text);
     }
     for (var file=0; file<files; file++) {
@@ -789,7 +788,7 @@ Board.prototype.svg_of_board = function() {
         text.setAttribute("x", xy.x);
         text.setAttribute("y", xy.y + 10);
         text.setAttribute("transform-origin", coordstr(file, -1.1));
-        text.innerHTML = Cell.fileToString(file);
+        text.textContent = Cell.fileToString(file);
         g.appendChild(text);
     }
     for (var file=0; file<files; file++) {
@@ -800,7 +799,7 @@ Board.prototype.svg_of_board = function() {
         text.setAttribute("x", xy.x);
         text.setAttribute("y", xy.y + 10);
         text.setAttribute("transform-origin", coordstr(file, ranks+0.1));
-        text.innerHTML = Cell.fileToString(file);
+        text.textContent = Cell.fileToString(file);
         g.appendChild(text);
     }
     
@@ -839,7 +838,7 @@ Board.prototype.setStone = function(cell, color, label, swap) {
     if (!stonelabel) {
         return;
     }
-    stonelabel.innerHTML = label;    
+    stonelabel.textContent = label;    
 }
 
 // Get the contents of the cell.
@@ -923,7 +922,7 @@ Board.prototype.saveContents = function() {
     black.forEach(function(cell) {
         var c = Cell.fromString(cell.id);
         var swap = cell.classList.contains("swap");
-        var label = cell.querySelector(".stonelabel").innerHTML;
+        var label = cell.querySelector(".stonelabel").textContent;
         dict[c] = {
             color: Const.black,
             label: label,
@@ -933,7 +932,7 @@ Board.prototype.saveContents = function() {
     white.forEach(function(cell) {
         var c = Cell.fromString(cell.id);
         var swap = cell.classList.contains("swap");
-        var label = cell.querySelector(".stonelabel").innerHTML;
+        var label = cell.querySelector(".stonelabel").textContent;
         dict[c] = {
             color: Const.white,
             label: label,
