@@ -70,7 +70,7 @@ svg {
 }
 
 .background.shaded {
-    fill: #00000020;
+    fill: rgba(0,0,0,0.125);
 }
 
 .cell:hover .background {
