@@ -45,7 +45,6 @@ body {
 #mid-buttons {
     display: flex;
     flex-flow: row;
-    flex: 1;
     justify-content: right;
     gap: 5px;
 }
