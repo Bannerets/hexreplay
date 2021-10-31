@@ -1068,9 +1068,11 @@ function GameState(board, movelist_panel) {
     // Connect click action for movelist.
     this.movelist_panel.addEventListener("click", function(event) {
         var move = event.target.closest(".move");
-        var id = move.id;
-        var n = parseInt(id.substring(5)); // remove move- prefix
-        self.UIgotoMove(n);
+	if (move) {
+            var id = move.id;
+            var n = parseInt(id.substring(5)); // remove move- prefix
+            self.UIgotoMove(n);
+	}
     });
 
     // A callback function to update button states.
