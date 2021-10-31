@@ -5,12 +5,8 @@
 // ----------------------------------------------------------------------
 // Compatibility
 
-var internet_explorer = false;
-
 var compatibility = function() {
     if ("classList" in SVGElement.prototype === false) {
-	internet_explorer = true;
-	
 	// Internet Explorer lacks classList on SVG elements.
 	Object.defineProperty(SVGElement.prototype, "classList", {
 	    get: function() {
@@ -321,23 +317,21 @@ Board.prototype.draw_svg = function() {
 // existing contents and DOM structure.
 Board.prototype.update = function () {
     function setTransform(e, transform) {
-	// Set the transform on a DOM element.
-	// Special case: on IE, transform-origin does not work.
-	if (internet_explorer) {
-	    var originstr = e.getAttribute("transform-origin");
-	    var x = 0;
-	    var y = 0;
-	    if (originstr) {
-		var xy = originstr.split(" ");
-		x = parseInt(xy[0]);
-		y = parseInt(xy[1]);
-	    }
-	    var shift1 = "translate(" + (-x) + "," + (-y) + ")";
-	    var shift2 = "translate(" + x + "," + y + ")";
-	    e.setAttribute("transform", shift2 + " " + transform + " " + shift1);
-	} else {
-	    e.setAttribute("transform", transform);
+	// Support for transform-origin is spotty in browsers. In
+	// particular, neither Internet Explorer nor Edge supports it,
+	// although the latter is supposed to. Also, it is hard to
+	// test for. So we simply work around it on all browsers.
+	var originstr = e.getAttribute("data-transform-origin");
+	var x = 0;
+	var y = 0;
+	if (originstr) {
+	    var xy = originstr.split(" ");
+	    x = parseInt(xy[0]);
+	    y = parseInt(xy[1]);
 	}
+	var shift1 = "translate(" + (-x) + "," + (-y) + ")";
+	var shift2 = "translate(" + x + "," + y + ")";
+	e.setAttribute("transform", shift2 + " " + transform + " " + shift1);
     }
 
     var theta;
@@ -583,7 +577,7 @@ Board.prototype.svg_of_board = function() {
     
     var g = document.createElementNS(svgNS, "g");
     g.classList.add("rotatable");
-    g.setAttribute("transform-origin", coordstr((files-1)/2,(ranks-1)/2,0,0,0));
+    g.setAttribute("data-transform-origin", coordstr((files-1)/2,(ranks-1)/2,0,0,0));
     svg.appendChild(g);
 
     // Cell outline
@@ -700,7 +694,7 @@ Board.prototype.svg_of_board = function() {
             var g2 = document.createElementNS(svgNS, "g");
             g2.classList.add("cell-content");
             g2.classList.add("unrotatable");
-            g2.setAttribute("transform-origin", coordstr(file, rank));
+            g2.setAttribute("data-transform-origin", coordstr(file, rank));
             var stone = document.createElementNS(svgNS, "circle");
             var xy = coord(file, rank);
             stone.setAttribute("cx", xy.x);
@@ -766,7 +760,7 @@ Board.prototype.svg_of_board = function() {
         text.classList.add("unrotatable");
         text.setAttribute("x", xy.x);
         text.setAttribute("y", xy.y + 10);
-        text.setAttribute("transform-origin", coordstr(-1.1, rank));
+        text.setAttribute("data-transform-origin", coordstr(-1.1, rank));
         text.textContent = Cell.rankToString(rank);
         g.appendChild(text);
     }
@@ -777,7 +771,7 @@ Board.prototype.svg_of_board = function() {
         text.classList.add("unrotatable");
         text.setAttribute("x", xy.x);
         text.setAttribute("y", xy.y + 10);
-        text.setAttribute("transform-origin", coordstr(files+0.1, rank));
+        text.setAttribute("data-transform-origin", coordstr(files+0.1, rank));
         text.textContent = Cell.rankToString(rank);
         g.appendChild(text);
     }
@@ -788,7 +782,7 @@ Board.prototype.svg_of_board = function() {
         text.classList.add("unrotatable");
         text.setAttribute("x", xy.x);
         text.setAttribute("y", xy.y + 10);
-        text.setAttribute("transform-origin", coordstr(file, -1.1));
+        text.setAttribute("data-transform-origin", coordstr(file, -1.1));
         text.textContent = Cell.fileToString(file);
         g.appendChild(text);
     }
@@ -799,7 +793,7 @@ Board.prototype.svg_of_board = function() {
         text.classList.add("unrotatable");
         text.setAttribute("x", xy.x);
         text.setAttribute("y", xy.y + 10);
-        text.setAttribute("transform-origin", coordstr(file, ranks+0.1));
+        text.setAttribute("data-transform-origin", coordstr(file, ranks+0.1));
         text.textContent = Cell.fileToString(file);
         g.appendChild(text);
     }
