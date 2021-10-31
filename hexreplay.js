@@ -5,9 +5,12 @@
 // ----------------------------------------------------------------------
 // Compatibility
 
+var ie = false;
+
 var compatibility = function() {
     if ("classList" in SVGElement.prototype === false) {
-	// Internet Explorer lacks classList on SVG elements.    
+	// Internet Explorer lacks classList on SVG elements.
+	ie = true;
 	Object.defineProperty(SVGElement.prototype, "classList", {
 	    get: function() {
 		var self = this;
@@ -325,6 +328,7 @@ Board.prototype.update = function () {
     
     var rotatable = this.svg.querySelectorAll(".rotatable");
     rotatable.forEach(function(e) {
+	console.log("X: " + e + " " + transform);
         e.setAttribute("transform", transform);
     });
     var unrotatable = this.svg.querySelectorAll(".unrotatable");
@@ -352,6 +356,9 @@ Board.prototype.rescale = function() {
 
 // Set the logical size of the board. This also clears the board.
 Board.prototype.setSize = function(dim) {
+    if (dim.equals(this.dim)) {
+	return;
+    }
     this.dim = dim;
     this.draw_svg();
     this.update();
@@ -1458,25 +1465,32 @@ GameState.prototype.formatMove = function(move, n, current) {
 // visible within the container. If smooth=true, animate the scolling
 // action.
 function makeVisible(target, container, smooth) {
+    function scroll(container, left, top, smooth) {
+	if (ie) {
+	    container.scrollTop = top;
+	} else {
+            container.scrollTo({
+		left: left,
+		top: top,
+		behavior: smooth ? "smooth" : "instant"
+            });
+	}
+    }
+
     var trect = target.getBoundingClientRect();
     var crect = container.getBoundingClientRect();
     var oldtop = container.scrollTop;
     var oldleft = container.scrollLeft;
-    var rely = trect.y - crect.y + oldtop;
+    var ty = ie ? trect.top : trect.y;
+    var cy = ie ? crect.top : crect.y;
+    var rely = ty - cy + oldtop;
     var scrollTopMax = rely;
     var scrollTopMin = rely + trect.height - crect.height;
+
     if (oldtop < scrollTopMin) {
-        container.scrollTo({
-            left: oldleft,
-            top: scrollTopMin,
-            behavior: smooth ? "smooth" : "instant"
-        });
+	scroll(container, oldleft, scrollTopMin, smooth);
     } else if (oldtop > scrollTopMax) {
-        container.scrollTo({
-            left: oldleft,
-            top: scrollTopMax,
-            behavior: smooth ? "smooth" : "instant"
-        });
+	scroll(container, oldleft, scrollTopMax, smooth);
     }
 }
 
