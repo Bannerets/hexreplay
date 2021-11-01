@@ -325,7 +325,8 @@ Board.prototype.draw_svg = function() {
 }
 
 // Update the rotation / mirroring of the board, preserving the
-// existing contents and DOM structure.
+// existing contents and DOM structure. This also computes the
+// viewBox.
 Board.prototype.update = function () {
     function setTransform(e, transform) {
 	// Support for transform-origin is spotty in browsers. In
@@ -367,7 +368,13 @@ Board.prototype.update = function () {
     unrotatable.forEach(function(e) {
 	setTransform(e, untransform);
     });
-    this.rescale();
+    var bbox = this.svg.getBBox();
+    var margin = 0.5 * this.unit;
+    var x = bbox.x - margin;
+    var y = bbox.y - margin;
+    var width = bbox.width + 2*margin;
+    var height = bbox.height + 2*margin;
+    this.svg.setAttribute("viewBox", x + " " + y + " " + width + " " + height);
 }
 
 // Rescale SVG to container. This must be called upon initialization
@@ -377,13 +384,6 @@ Board.prototype.update = function () {
 Board.prototype.rescale = function() {
     this.svg.setAttribute("width", this.dom.offsetWidth);
     this.svg.setAttribute("height", this.dom.offsetHeight);
-    var bbox = this.svg.getBBox();
-    var margin = 0.5 * this.unit;
-    var x = bbox.x - margin;
-    var y = bbox.y - margin;
-    var width = bbox.width + 2*margin;
-    var height = bbox.height + 2*margin;
-    this.svg.setAttribute("viewBox", x + " " + y + " " + width + " " + height);
 }
 
 // Set the logical size of the board. This also clears the board.
