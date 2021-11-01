@@ -189,7 +189,7 @@ svg {
 .black .large-stone {
     display: block;
     fill: url('#black-gradient');
-    filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .6));
+    filter: url("#shadow");
 }
 
 .redblue .black .large-stone {
@@ -199,7 +199,7 @@ svg {
 .redblue .black .small-stone {
     display: block;
     fill: url('#red-gradient');
-    filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .7));
+    filter: url("#shadow");
 }
 
 .redblue .black .dot {
@@ -217,7 +217,7 @@ svg {
 .white .small-stone {
     display: block;
     fill: url('#white-gradient');
-    filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .6));
+    filter: url("#shadow");
 }
 
 .white .dot {
@@ -231,7 +231,7 @@ svg {
 .redblue .white .large-stone {
     display: block;
     fill: url('#blue-gradient');
-    filter: drop-shadow(6px 6px 3px rgba(0, 0, 0, .7));
+    filter: url("#shadow");
 }
 
 .redblue .white .dot {

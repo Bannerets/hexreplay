@@ -495,6 +495,38 @@ Board.prototype.svg_of_board = function() {
 
     var defs = document.createElementNS(svgNS, "defs");
 
+    var filter = document.createElementNS(svgNS, "filter");
+    filter.setAttribute("id", "shadow");
+    //filter.setAttribute("x", "0");
+    //filter.setAttribute("y", "0");
+    //filter.setAttribute("width", "200%");
+    //filter.setAttribute("height", "200%");
+    var feGaussianBlur = document.createElementNS(svgNS, "feGaussianBlur");
+    //feGaussianBlur.setAttribute("result", "blurOut");
+    feGaussianBlur.setAttribute("in", "SourceAlpha");
+    feGaussianBlur.setAttribute("stdDeviation", "3");
+    filter.appendChild(feGaussianBlur);
+    var feOffset = document.createElementNS(svgNS, "feOffset");
+    //feOffset.setAttribute("result", "offOut");
+    //feOffset.setAttribute("in", "SourceAlpha");
+    feOffset.setAttribute("dx", "6");
+    feOffset.setAttribute("dy", "6");
+    filter.appendChild(feOffset);
+    var feComponentTransfer = document.createElementNS(svgNS, "feComponentTransfer");
+    var feFuncA = document.createElementNS(svgNS, "feFuncA");
+    feFuncA.setAttribute("type", "linear");
+    feFuncA.setAttribute("slope", "0.6");
+    feComponentTransfer.appendChild(feFuncA);
+    filter.appendChild(feComponentTransfer);
+    var feMerge = document.createElementNS(svgNS, "feMerge");
+    var feMergeNode1 = document.createElementNS(svgNS, "feMergeNode");
+    feMerge.appendChild(feMergeNode1);
+    var feMergeNode2 = document.createElementNS(svgNS, "feMergeNode");
+    feMergeNode2.setAttribute("in", "SourceGraphic");
+    feMerge.appendChild(feMergeNode2);
+    filter.appendChild(feMerge);
+    defs.appendChild(filter);    
+    
     /*
     var pattern = document.createElementNS(svgNS, "pattern");
     pattern.setAttribute("id", "woodpattern");
