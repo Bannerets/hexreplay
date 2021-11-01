@@ -8,7 +8,7 @@ body {
     box-sizing: border-box;
     margin: 0px;
     padding: 0px;
-    background-color: #e0e0d0;
+    background-color: #d0d0c0;
 }
 
 #board-panel {
@@ -610,3 +610,9 @@ svg {
         font-size: 11px;
     }
 }
+
+.about {
+    padding: 10px;
+    background-color: #e0e0d0;
+}
+

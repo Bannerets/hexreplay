@@ -1906,6 +1906,7 @@ var link_pass = document.getElementById("item-pass");
 var link_resign = document.getElementById("item-resign");
 var link_bw = document.getElementById("item-bw");
 var link_rg = document.getElementById("item-rg");
+var link_about = document.getElementById("item-about");
 var button_rotate_left = document.getElementById("button-rotate-left");
 var button_rotate_right = document.getElementById("button-rotate-right");
 var button_first = document.getElementById("button-first");
@@ -1916,13 +1917,16 @@ var button_clear = document.getElementById("button-clear");
 var button_numbered = document.getElementById("button-numbered");
 
 link_swap.addEventListener("click", function () {
-     state.UIplay(Move.swap_pieces);
+    state.UIplay(Move.swap_pieces);
 });
 link_pass.addEventListener("click", function () {
-     state.UIplay(Move.pass);
+    state.UIplay(Move.pass);
 });
 link_resign.addEventListener("click", function () {
-     state.UIresign();
+    state.UIresign();
+});
+link_about.addEventListener("click", function () {
+    window.open("about.html", "about");
 });
 button_rotate_left.addEventListener("click", function () {
     state.UIrotate(-1);

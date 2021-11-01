@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Interactive Hex Board: About</title>
+    <link rel="stylesheet" href="hexreplay.css">
+    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body class="about">
+
+    <h1>Interactive Hex Board</h1>
+
+    <h2>Link</h2>
+
+    <p>
+      <a href="https://hexworld.org/board">https://hexworld.org/board</a>
+    </p>
+    
+    <h2>Usage</h2>
+
+    <h3>Board:</h3>
+    
+    <ul>
+      <li> Click on a cell to make a move.
+      <li> Click again on stone to swap.
+      <li> Hover over a cell to see its coordinates.
+    </ul>
+
+    <h3>Buttons and menus:</h3>
+    
+    <ul>
+      <li> <button class="text-button" id="button-clear" type="button"
+                  title="Clear">New board</button>: Create new board
+                  or change size. Previous board will be saved in
+        browser history.
+        <li> Size: <input class="input" id="input-size" type="text"
+                       title="Board size" size="3">: Enter size. Both
+                       "11" and "11x12" will work. Previous board will
+                       be saved in browser history.
+      <li> <button class="button" id="button-rotate-left" type="button"
+                  title="Rotate left"></button>
+          <button class="button" id="button-rotate-right" type="button"
+                  title="Rotate right"></button>: Rotate left or right.
+      <li> <button class="button" id="button-numbered"
+                   title="Show move numbers"></button>:
+        Toggle move numbers.
+      <li> <button class="button" id="button-menu"
+                  title="More actions"></button>: Menu with
+                  additional controls: swap, pass, resign, or change colors.
+      <li> <button class="button" id="button-first" type="button"
+                title="First (home)"></button>
+        <button class="button" id="button-undo" type="button"
+                title="Previous (left)"></button>
+        <button class="button" id="button-redo" type="button"
+                title="Next (right)"></button>
+        <button class="button" id="button-last" type="button"
+                title="Last (end)"></button>: Game navigation buttons:
+                first, previous, next, last.
+    </ul>
+
+    <h3>Game navigation</h3>
+
+    <ul>
+      <li> Keyboard shortcuts for navigation:
+        <ul>
+          <li>"home" (first), "left" (previous), "right" (next), "end" (last).
+          <li>Alternative: "f" (first), "p" (previous), "n" (next), "l" (last).
+          <li>Alternative: "up" (previous) and "down" (next).
+        </ul>
+      <li> Click on a move in move list to navigate directly to it.
+    </ul>
+
+    <h3>Sharing</h3>
+
+    <ul>
+      <li> Copy the URL to share the current board with others.
+    </ul>
+    
+    <h2>Information for developers</h2>
+
+    <p>
+      The URL hash field (the part after "#") contains a complete
+      representation of the board and game state. Not all types of
+      moves are accessible in the user interface. The syntax is:
+    </p>
+    
+    <pre>
+      ⟨hash⟩   ::= ⟨config⟩*,⟨move⟩*,⟨move⟩*  (trailing commas can be omitted)
+
+      ⟨config⟩ ::= ⟨n⟩                        (board size: 1–30)
+                 | ⟨n⟩x⟨n⟩                    (board size: 1–30)
+                 | r⟨n⟩                       (rotation: 1–12, a1 is clock direction)
+                 | n                          (turn on move numbers)
+                 | c1                         (red-blue mode)
+
+      ⟨move⟩   ::= ⟨cell⟩                     (normal move)
+                 | :s                         (swap pieces)
+                 | :S                         (swap sides)
+                 | :p                         (pass)
+                 | :rb                        (Black resigns)
+                 | :rw                        (White resigns)
+                 | :fb                        (Black forfeits)
+                 | :fw                        (White forfeits)
+ 
+      ⟨n⟩ is an integer, such as 11.
+      ⟨cell⟩ is a cell name, such as a1.</pre>
+
+    <p>
+      The comma in the move list indicates the current move.
+    </p>
+
+    <h2>Author</h2>
+
+    <p>
+      &copy; 2021 Peter Selinger, <i><a href="mailto:selinger@mathstat.dal.ca">selinger@mathstat.dal.ca</a></i>.
+    </p>
+    
+  </body>
+</html>
