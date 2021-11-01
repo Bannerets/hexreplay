@@ -1,20 +1,34 @@
-deploy: hexreplay-mangled.js dummy
-	cp -f index.html about.html hexreplay.css www/
-	cp -f hexreplay-mangled.js www/hexreplay.js
-	cp -f images/buttons.svg images/favicon.ico www/images/
-	chmod -R a+rX www 
+HTML=index.html about.html
+CSS=hexreplay.css
+JS=hexreplay.js
+IMAGES=images/buttons.svg images/favicon.ico
 
-deploy-clear: dummy
-	cp -f index.html about.html hexreplay.css www/
-	cp -f hexreplay.js www/hexreplay.js
-	cp -f images/buttons.svg images/favicon.ico www/images/
-	chmod -R a+rX www 
+UGLIFY=uglifyjs -c --mangle-props -m toplevel
 
+deploy: 
+	cp -f $(HTML) $(CSS) www/
+	$(UGLIFY) hexreplay.js > www/hexreplay.js
+	cp -f $(IMAGES) www/images/
+	chmod -R a+rX www/
+	chmod -R a-w www/*.html www/*.css www/*.js
 
-hexreplay-mangled.js: hexreplay.js
-	uglifyjs -c --mangle-props -m toplevel "$<" > "$@" 
+deploy-clear:
+	cp -f $(HTML) $(CSS) $(JS) www/
+	cp -f $(IMAGES) www/images/
+	chmod -R a+rX www/
+	chmod -R a-w www/*.html www/*.css www/*.js
 
-dummy:
+testing:
+	cp -f $(HTML) $(CSS) www-testing/
+	rm -f www-testing/hexreplay.js
+	$(UGLIFY) hexreplay.js > www-testing/hexreplay.js
+	cp -f $(IMAGES) www-testing/images/
+	chmod -R a+rX www-testing/
+	chmod -R a-w www-testing/*.html www-testing/*.css www-testing/*.js
 
-clean:
-	rm -f hexreplay-mangled.js
+testing-clear:
+	cp -f $(HTML) $(CSS) $(JS) www-testing/
+	cp -f $(IMAGES) www-testing/images/
+	chmod -R a+rX www-testing/
+	chmod -R a-w www-testing/*.html www-testing/*.css www-testing/*.js
+
