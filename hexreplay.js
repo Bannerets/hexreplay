@@ -1783,9 +1783,9 @@ GameState.prototype.fromURLHash = function(hash) {
         case "r":
             rotation = parseInt(p.match.substring(1));
             break;
-        case "m":
-            mirrored = true;
-            break;
+        // case "m":
+        //     mirrored = true;
+        //     break;
         case "n":
             numbered = true;
             break;
