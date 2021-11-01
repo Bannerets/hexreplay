@@ -548,3 +548,50 @@ svg {
     padding-left: 20px;
 }
 
+#input-size {
+    width: 5.5ex;
+}
+
+/* normal desktop styles */
+@media only screen and (max-width: 600px) and (orientation: portrait) { 
+    #button-panel {
+        margin-right: 10px;
+    }
+
+    #main {
+        flex-flow: column;
+    }
+
+    #movelist-panel {
+        height: calc(100% - 100vw);
+        min-height: 30%;
+        align-items: center;
+    }
+
+    #movelist-controls .button {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    #movelist-container {
+        width: 200px;
+    }
+
+    #button-panel {
+        font-size: 12px;
+    }
+
+    button {
+        font-size: 11px;
+    }
+
+    input {
+        font-size: 11px;
+    }
+}
+
+@media only screen and (max-width: 319px) {
+    #input-size {
+        width: 2.5ex;
+    }
+}
