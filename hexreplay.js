@@ -439,39 +439,6 @@ Board.prototype.svg_of_board = function() {
         return xystr(coord(a, b, c, d, e));
     }
 
-    function boundingbox(points) {
-        var len = points.length;
-        if (len === 0) { // nonsense
-            return {x0: 0, x1: 1, y0: 0, y1: 1};
-        }
-        var x0 = points[0].x;
-        var x1 = points[0].x;
-        var y0 = points[0].y;
-        var y1 = points[0].y;
-        for (var i=1; i<points.length; i++) {
-            x0 = Math.min(x0, points[i].x);
-            x1 = Math.max(x1, points[i].x);
-            y0 = Math.min(y0, points[i].y);
-            y1 = Math.max(y1, points[i].y);
-        }
-        return {x0: x0, x1: x1, y0: y0, y1: y1};
-    }
-    
-    var box = boundingbox([
-        coord(0, -1, 0, 0, -1),
-        coord(0, -1, 0, -1, 0),
-        coord(-1, 0, 0, -1, 0),
-        coord(-1, 0, -1, 0, 0),
-        coord(-1, ranks, 0, -1, 0, 0),
-        coord(-1, ranks, 0, 0, 1),
-        coord(files-1, ranks, 0, 0, 1),
-        coord(files-1, ranks, 0, 1, 0),
-        coord(files, ranks-1, 0, 1, 0),
-        coord(files, ranks-1, 1, 0, 0),
-        coord(files, -1, 1, 0, 0),
-        coord(files, -1, 0, 0, -1)
-    ]);
-
     // Return an SVG path corresponding to hex (file, rank).
     function hexpath(file, rank) {
         var hex = ""
@@ -488,7 +455,7 @@ Board.prototype.svg_of_board = function() {
     var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("width", "500px");
     svg.setAttribute("height", "300px");
-    svg.setAttribute("viewBox", box.x0.toFixed(0) + " " + box.y0.toFixed(0) + " " + (box.x1-box.x0).toFixed(0) + " " + (box.y1-box.y0).toFixed(0));
+    //svg.setAttribute("viewBox", box.x0.toFixed(0) + " " + box.y0.toFixed(0) + " " + (box.x1-box.x0).toFixed(0) + " " + (box.y1-box.y0).toFixed(0));
     svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
     var svgNS = svg.namespaceURI;
 
