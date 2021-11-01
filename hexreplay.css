@@ -8,7 +8,7 @@ body {
     box-sizing: border-box;
     margin: 0px;
     padding: 0px;
-    background-color: #c0c0b0;
+    background-color: #e0e0d0;
 }
 
 #board-panel {
@@ -54,7 +54,6 @@ body {
 .board {
     position: relative;
     box-sizing: border-box;
-    background-color: #c0c0b0;
     height: 100%;
 }
 
@@ -579,16 +578,12 @@ svg {
 }
 
 @media only screen and (max-width: 400px) and (orientation: portrait) { 
-    #button-panel {
+    #left-buttons {
         font-size: 12px;
     }
 
-    button {
+    #left-buttons button {
         font-size: 11px;
-    }
-
-    .menu {
-        font-size: 20px;
     }
     
     input {
@@ -599,5 +594,19 @@ svg {
 @media only screen and (max-width: 319px) {
     #input-size {
         width: 2.5ex;
+    }
+}
+
+@media only screen and (max-width: 519px) and (orientation: landscape) {
+    #left-buttons {
+        font-size: 12px;
+    }
+
+    #left-buttons button {
+        font-size: 11px;
+    }
+
+    input {
+        font-size: 11px;
     }
 }
