@@ -401,10 +401,6 @@ Board.prototype.svg_of_board = function() {
     var files = this.dim.files;
     var ranks = this.dim.ranks;
 
-    var rotation = this.rotation;
-    var mirrored = this.mirrored;
-    var theta = 180 * (rotation + 2) / 6;
-    
     var ax = this.unit;
     var ay = 0
     var bx = this.unit * 0.5;
@@ -2018,62 +2014,62 @@ document.addEventListener("keydown", function(e) {
     if (inputFocus()) {
         return false;
     }
-    if (e.keyCode === "S".charCodeAt(0) && e.ctrlKey == false && e.shiftKey == false) {
+    if (e.keyCode === "S".charCodeAt(0) && e.ctrlKey === false && e.shiftKey === false) {
         document.getElementById("button-swap-pieces").click();
         e.preventDefault();
         return true
     }
-    if (e.keyCode === "P".charCodeAt(0) && e.ctrlKey == false && e.shiftKey == false) {
+    if (e.keyCode === "P".charCodeAt(0) && e.ctrlKey === false && e.shiftKey === false) {
         document.getElementById("button-undo").click();
         e.preventDefault();
         return true
     }
-    if (e.keyCode === "N".charCodeAt(0) && e.ctrlKey == false && e.shiftKey == false) {
+    if (e.keyCode === "N".charCodeAt(0) && e.ctrlKey === false && e.shiftKey === false) {
         document.getElementById("button-redo").click();
         e.preventDefault();
         return true
     }
-    if (e.keyCode === "F".charCodeAt(0) && e.ctrlKey == false && e.shiftKey == false) {
+    if (e.keyCode === "F".charCodeAt(0) && e.ctrlKey === false && e.shiftKey === false) {
         document.getElementById("button-first").click();
         e.preventDefault();
         return true
     }
-    if (e.keyCode === "L".charCodeAt(0) && e.ctrlKey == false && e.shiftKey == false) {
+    if (e.keyCode === "L".charCodeAt(0) && e.ctrlKey === false && e.shiftKey === false) {
         document.getElementById("button-last").click();
         e.preventDefault();
         return true
     }
-    if (e.keyCode === 37 && e.ctrlKey == false && e.shiftKey == false) {
+    if (e.keyCode === 37 && e.ctrlKey === false && e.shiftKey === false) {
         // Left
         document.getElementById("button-undo").click();
         e.preventDefault();
         return true
     }
-    if (e.keyCode === 38 && e.ctrlKey == false && e.shiftKey == false) {
+    if (e.keyCode === 38 && e.ctrlKey === false && e.shiftKey === false) {
         // Up
         document.getElementById("button-undo").click();
         e.preventDefault();
         return true
     }
-    if (e.keyCode === 39 && e.ctrlKey == false && e.shiftKey == false) {
+    if (e.keyCode === 39 && e.ctrlKey === false && e.shiftKey === false) {
         // Right
         document.getElementById("button-redo").click();
         e.preventDefault();
         return true
     }
-    if (e.keyCode === 40 && e.ctrlKey == false && e.shiftKey == false) {
+    if (e.keyCode === 40 && e.ctrlKey === false && e.shiftKey === false) {
         // Down
         document.getElementById("button-redo").click();
         e.preventDefault();
         return true
     }
-    if (e.keyCode === 36 && e.ctrlKey == false && e.shiftKey == false) {
+    if (e.keyCode === 36 && e.ctrlKey === false && e.shiftKey === false) {
         // Home
         document.getElementById("button-first").click();
         e.preventDefault();
         return true
     }
-    if (e.keyCode === 35 && e.ctrlKey == false && e.shiftKey == false) {
+    if (e.keyCode === 35 && e.ctrlKey === false && e.shiftKey === false) {
         // End
         document.getElementById("button-last").click();
         e.preventDefault();

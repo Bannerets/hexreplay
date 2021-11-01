@@ -16,3 +16,5 @@ hexreplay-mangled.js: hexreplay.js
 
 dummy:
 
+clean:
+	rm -f hexreplay-mangled.js
