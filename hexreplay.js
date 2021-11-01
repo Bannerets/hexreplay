@@ -407,14 +407,14 @@ Board.prototype.svg_of_board = function() {
     var by = this.unit * Math.sqrt(3/4);
 
     // Hex coordinates:
-    //        ·     ·
-    //     ·     c     ·
+    //        *     *
+    //     *     c     *
     //        0     a
-    //     ·     d     ·
-    //        e     · 
+    //     *     d     *
+    //        e     * 
     //           b
-    //        ·     ·
-    //           ·
+    //        *     *
+    //           *
     function coord(a, b, c, d, e) {
 	if (c === undefined) {
 	    c = 0;
