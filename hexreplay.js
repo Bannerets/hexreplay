@@ -346,6 +346,7 @@ Board.prototype.update = function () {
 	e.setAttribute("transform", shift2 + " " + transform + " " + shift1);
     }
 
+    // Update all rotations (and unrotations);
     var theta;
     var scale;
     if (this.mirrored) {
@@ -368,13 +369,30 @@ Board.prototype.update = function () {
     unrotatable.forEach(function(e) {
 	setTransform(e, untransform);
     });
-    var bbox = this.svg.getBBox();
-    var margin = 0.5 * this.unit;
-    var x = bbox.x - margin;
-    var y = bbox.y - margin;
-    var width = bbox.width + 2*margin;
-    var height = bbox.height + 2*margin;
-    this.svg.setAttribute("viewBox", x + " " + y + " " + width + " " + height);
+
+    // Update the viewBox.
+    // Coordinate system.
+    var rad = Math.PI * (this.rotation + 2) / 6;
+    var ax = this.unit * Math.cos(rad);
+    var ay = this.unit * Math.sin(rad);
+    var bx = this.unit * Math.cos(rad + Math.PI/3);
+    var by = this.unit * Math.sin(rad + Math.PI/3);
+
+    // Compute the centers of the four corner hexes.
+    var p0 = {x: 0, y: 0};
+    var p1 = {x: (this.dim.files-1)*ax, y: (this.dim.files-1)*ay}
+    var p2 = {x: (this.dim.ranks-1)*bx, y: (this.dim.ranks-1)*by}
+    var p3 = {x: p1.x + p2.x, y: p1.y + p2.y}
+
+    // ViewBox
+    var margin = 1.5 * this.unit;
+    var x0 = Math.min(p0.x, p1.x, p2.x, p3.x) - margin;
+    var y0 = Math.min(p0.y, p1.y, p2.y, p3.y) - margin;
+    var x1 = Math.max(p0.x, p1.x, p2.x, p3.x) + margin;
+    var y1 = Math.max(p0.y, p1.y, p2.y, p3.y) + margin;
+    var width = x1 - x0;
+    var height = y1 - y0;
+    this.svg.setAttribute("viewBox", x0 + " " + y0 + " " + width + " " + height);
 }
 
 // Rescale SVG to container. This must be called upon initialization
@@ -599,7 +617,7 @@ Board.prototype.svg_of_board = function() {
     
     var g = document.createElementNS(svgNS, "g");
     g.classList.add("rotatable");
-    g.setAttribute("data-transform-origin", coordstr((files-1)/2,(ranks-1)/2,0,0,0));
+    g.setAttribute("data-transform-origin", coordstr(0, 0));
     svg.appendChild(g);
 
     // Cell outline
@@ -1841,7 +1859,7 @@ GameState.prototype.canRedo = function() {
 }
 
 // ----------------------------------------------------------------------
-// Testing
+// Set up DOM tree.
 
 var main = document.getElementById("board-container");
 var board = new Board(new Dimension(11), 9, false);
@@ -1979,7 +1997,9 @@ function inputFocus() {
     return false;
 }
 
+// ----------------------------------------------------------------------
 // Keyboard shortcuts
+
 document.addEventListener("keydown", function(e) {
     // Ignore keyboard input when any input field is in focus.
     if (inputFocus()) {
@@ -2048,6 +2068,9 @@ document.addEventListener("keydown", function(e) {
     }
     return false;
 });
+
+// ----------------------------------------------------------------------
+// Handle URL hash
 
 var enable_hashchange = true;
 
