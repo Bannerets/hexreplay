@@ -234,6 +234,9 @@ Dimension.parse = function (s) {
     var files, ranks;
     var x = s.indexOf("x");
     if (x == -1) {
+        x = s.indexOf("X");
+    }
+    if (x == -1) {
         files = fromInt(s);
         ranks = files;
     } else {
