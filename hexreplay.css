@@ -553,7 +553,12 @@ svg {
 
 /* normal desktop styles */
 @media only screen and (max-width: 600px) and (orientation: portrait) { 
+    #board-panel {
+        padding-left: 0px;
+    }
+    
     #button-panel {
+        margin-left: 10px;
         margin-right: 10px;
     }
 
@@ -565,6 +570,7 @@ svg {
         height: calc(100% - 100vw);
         min-height: 30%;
         align-items: center;
+        padding-top: 0px;
     }
 
     #movelist-controls .button {
