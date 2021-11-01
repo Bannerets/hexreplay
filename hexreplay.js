@@ -559,22 +559,6 @@ Board.prototype.svg_of_board = function() {
     filter.appendChild(feMerge);
     defs.appendChild(filter);    
     
-    /*
-    var pattern = document.createElementNS(svgNS, "pattern");
-    pattern.setAttribute("id", "woodpattern");
-    pattern.setAttribute("patternUnits", "userSpaceOnUse");
-    pattern.setAttribute("width", "1000");
-    pattern.setAttribute("height", "1000");
-    var image = document.createElementNS(svgNS, "image");
-    image.setAttribute("href", "images/wood.jpg");
-    image.setAttribute("x", "0");
-    image.setAttribute("y", "0");
-    image.setAttribute("width", "1000");
-    image.setAttribute("height", "1000");
-    pattern.appendChild(image);
-    defs.appendChild(pattern);
-    */
-
     var grad = document.createElementNS(svgNS, "radialGradient");
     grad.setAttribute("id", "black-gradient");
     grad.setAttribute("cx", "30%");

@@ -55,9 +55,6 @@ body {
     position: relative;
     box-sizing: border-box;
     background-color: #c0c0b0;
-    /* background-color: #d9b479; */
-    /* background-image: url("images/wood.jpg"); */
-    /* background-repeat: repeat; */
     height: 100%;
 }
 
@@ -83,7 +80,6 @@ svg {
 
 .outline {
     fill: #d9b479;
-    /* fill: url("#woodpattern"); */
     stroke: none;
 }
 
