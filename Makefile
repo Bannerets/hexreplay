@@ -7,6 +7,7 @@ UGLIFY=uglifyjs -c --mangle-props -m toplevel
 
 deploy: 
 	cp -f $(HTML) $(CSS) www/
+	rm -f www/hexreplay.js
 	$(UGLIFY) hexreplay.js > www/hexreplay.js
 	cp -f $(IMAGES) www/images/
 	chmod -R a+rX www/

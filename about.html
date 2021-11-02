@@ -86,25 +86,25 @@
     </p>
     
     <pre>
-      ⟨hash⟩   ::= ⟨config⟩*,⟨move⟩*,⟨move⟩*  (trailing commas can be omitted)
+ ⟨hash⟩   ::= ⟨size⟩⟨config⟩*,⟨move⟩*,⟨move⟩*  (trailing commas can be omitted)
 
-      ⟨config⟩ ::= ⟨n⟩                        (board size: 1–30)
-                 | ⟨n⟩x⟨n⟩                    (board size: 1–30)
-                 | r⟨n⟩                       (rotation: 1–12, a1 is clock direction)
-                 | n                          (turn on move numbers)
-                 | c1                         (red-blue mode)
+ ⟨size⟩   ::= ⟨n⟩                              (board size: 1–30)
+            | ⟨n⟩x⟨n⟩                          (board size: 1–30)
+ ⟨config⟩ ::= r⟨n⟩                             (rotation: 1–12, a1 is clock direction)
+            | n                                (turn on move numbers)
+            | c1                               (red-blue mode)
 
-      ⟨move⟩   ::= ⟨cell⟩                     (normal move)
-                 | :s                         (swap pieces)
-                 | :S                         (swap sides)
-                 | :p                         (pass)
-                 | :rb                        (Black resigns)
-                 | :rw                        (White resigns)
-                 | :fb                        (Black forfeits)
-                 | :fw                        (White forfeits)
- 
-      ⟨n⟩ is an integer, such as 11.
-      ⟨cell⟩ is a cell name, such as a1.</pre>
+ ⟨move⟩   ::= ⟨cell⟩                           (normal move)
+            | :s                               (swap pieces)
+            | :S                               (swap sides)
+            | :p                               (pass)
+            | :rb                              (Black resigns)
+            | :rw                              (White resigns)
+            | :fb                              (Black forfeits)
+            | :fw                              (White forfeits)
+
+ ⟨n⟩ is an integer, such as 11.
+ ⟨cell⟩ is a cell name, such as a1.</pre>
 
     <p>
       The comma in the move list indicates the current move.
