@@ -19,6 +19,11 @@ deploy-clear:
 	chmod -R a+rX www/
 	chmod -R a-w www/*.html www/*.css www/*.js
 
+deploy-html:
+	cp -f $(HTML) www/
+	chmod -R a+rX www/
+	chmod -R a-w www/*.html
+
 testing:
 	cp -f $(HTML) $(CSS) www-testing/
 	rm -f www-testing/hexreplay.js
