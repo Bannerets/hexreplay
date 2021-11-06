@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Interactive Hex Board: About</title>
+    <title>About Interactive Hex Board</title>
     <link rel="stylesheet" href="hexreplay.css">
     <link rel="icon" href="images/favicon.ico" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -76,6 +76,34 @@
     <ul>
       <li> Copy the URL to share the current board with others.
     </ul>
+
+    <h2>Importing games from other sites</h2>
+
+    <h3>Board Game Arena</h3>
+
+    <p>
+      The user
+      <a href="https://boardgamearena.com/player?id=85283280">comonoid</a>
+      has contributed a bookmarklet for importing a game record
+      from Board Game Arena directly into HexWorld. To use it, copy
+      the following text and paste it into the "URL" portion of a bookmark:
+    </p>
+
+    <div class="codearea">
+      <pre id="bookmarklet" class="code">javascript:void(window.open("https://hexworld.org/board/#"+Array.from(document.querySelectorAll(".gamelogreview.whiteblock")).reduce(({black:e,hash:r},n)=>{const%20a=n=>({black:e,hash:[...r,n]}),h=n.innerHTML.match(/playing%20Hex%20(\d+)x(\d+)/);if(h)return%20a(h[1]+"c1,");const%20c=n.innerHTML.match(/(.+)%20plays%20at%20(\w+\d+)/);if(c)return{black:e||c[1],hash:[...r,c[2]]};if(n.innerHTML.match(/.+%20swaps/))return%20a(":s");if(n.innerHTML.match(/.+%20passes/))return%20a(":p");const%20s=n.innerHTML.match(/(.+)%20(?:concedes%20the%20game|resigns)/);return%20s?a(s[1]===e?":rb":":rw"):{black:e,hash:r}},{black:null,hash:[]}).hash.join("")))</pre>
+      <button onclick="navigator.clipboard.writeText(document.querySelector('#bookmarklet').innerText)">Copy to clipboard</button>
+    </div>
+
+    <p>
+      You can then use this bookmark from any Board Game Arena "Game
+      replay" page. (Limitation: the bookmarklet currently only works
+      correctly if your interface language is English, and it only
+      works for games that have finished).
+    </p>
+    <p>
+      Watch <a href="video/bookmarklet.mp4">this short video</a> to
+      see how to set up and use the bookmarklet.
+    </p>
     
     <h2>Information for developers</h2>
 
@@ -86,25 +114,25 @@
     </p>
     
     <pre>
- ⟨hash⟩   ::= ⟨size⟩⟨config⟩*,⟨move⟩*,⟨move⟩*  (trailing commas can be omitted)
+⟨hash⟩   ::= ⟨size⟩⟨config⟩*,⟨move⟩*,⟨move⟩*  (trailing commas can be omitted)
 
- ⟨size⟩   ::= ⟨n⟩                              (board size: 1–30)
-            | ⟨n⟩x⟨n⟩                          (board size: 1–30)
- ⟨config⟩ ::= r⟨n⟩                             (rotation: 1–12, a1 is clock direction)
-            | n                                (turn on move numbers)
-            | c1                               (red-blue mode)
+⟨size⟩   ::= ⟨n⟩                              (board size: 1–30)
+           | ⟨n⟩x⟨n⟩                          (board size: 1–30)
+⟨config⟩ ::= r⟨n⟩                             (rotation: 1–12, a1 is clock direction)
+           | n                                (turn on move numbers)
+           | c1                               (red-blue mode)
 
- ⟨move⟩   ::= ⟨cell⟩                           (normal move)
-            | :s                               (swap pieces)
-            | :S                               (swap sides)
-            | :p                               (pass)
-            | :rb                              (Black resigns)
-            | :rw                              (White resigns)
-            | :fb                              (Black forfeits)
-            | :fw                              (White forfeits)
+⟨move⟩   ::= ⟨cell⟩                           (normal move)
+           | :s                               (swap pieces)
+           | :S                               (swap sides)
+           | :p                               (pass)
+           | :rb                              (Black resigns)
+           | :rw                              (White resigns)
+           | :fb                              (Black forfeits)
+           | :fw                              (White forfeits)
 
- ⟨n⟩ is an integer, such as 11.
- ⟨cell⟩ is a cell name, such as a1.</pre>
+⟨n⟩ is an integer, such as 11.
+⟨cell⟩ is a cell name, such as a1.</pre>
 
     <p>
       The comma in the move list indicates the current move.

@@ -20,9 +20,9 @@ deploy-clear:
 	chmod -R a-w www/*.html www/*.css www/*.js
 
 deploy-html:
-	cp -f $(HTML) www/
+	cp -f $(HTML) $(CSS) www/
 	chmod -R a+rX www/
-	chmod -R a-w www/*.html
+	chmod -R a-w www/*.html www/*.css
 
 testing:
 	cp -f $(HTML) $(CSS) www-testing/

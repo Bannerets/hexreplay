@@ -622,3 +622,26 @@ svg {
     background-color: #e0e0d0;
 }
 
+.about pre {
+    margin-left: 20px;
+}
+.about p {
+    margin-left: 20px;
+}
+
+.about .codearea pre {
+    background-color: #fffff8;
+    white-space: pre-wrap;       /* css-3 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+    margin-left: 0px;
+    max-height: 80px;
+    overflow-y: scroll;
+}
+
+.about .codearea {
+    margin-left: 40px;
+}
+
