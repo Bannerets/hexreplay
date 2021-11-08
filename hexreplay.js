@@ -705,7 +705,7 @@ Board.prototype.svg_of_board = function() {
             
             var path = document.createElementNS(svgNS, "path");
             path.setAttribute("d", hexpath(0, 0));
-            path.classList.add("background");
+            path.classList.add("cell-bg");
             if (Math.min(file, rank, files-file-1, ranks-rank-1) % 2 === 1) {
                 path.classList.add("shaded");
             }
@@ -743,7 +743,7 @@ Board.prototype.svg_of_board = function() {
 
             var text = document.createElementNS(svgNS, "text");
             var xy = coord(file, rank);
-            text.classList.add("stonelabel");
+            text.classList.add("movelabel");
             text.setAttribute("x", 0);
             text.setAttribute("y", 10);
             text.textContent = "99";
@@ -766,13 +766,13 @@ Board.prototype.svg_of_board = function() {
     grid.classList.add("grid");
     g.appendChild(grid);
 
-    // Labels
+    // Coordinate labels
     for (var rank=0; rank<ranks; rank++) {
         var g1 = document.createElementNS(svgNS, "g");
         var xy = coord(-1.1, rank);
         g1.setAttribute("transform", "translate(" + xy.x + "," + xy.y + ")");
         var text = document.createElementNS(svgNS, "text");
-        text.classList.add("label");
+        text.classList.add("coordlabel");
         text.classList.add("unrotatable");
         text.setAttribute("x", 0);
         text.setAttribute("y", 10);
@@ -785,7 +785,7 @@ Board.prototype.svg_of_board = function() {
         var xy = coord(files+0.1, rank);
         g1.setAttribute("transform", "translate(" + xy.x + "," + xy.y + ")");
         var text = document.createElementNS(svgNS, "text");
-        text.classList.add("label");
+        text.classList.add("coordlabel");
         text.classList.add("unrotatable");
         text.setAttribute("x", 0);
         text.setAttribute("y", 10);
@@ -798,7 +798,7 @@ Board.prototype.svg_of_board = function() {
         var xy = coord(file, -1.1);
         g1.setAttribute("transform", "translate(" + xy.x + "," + xy.y + ")");
         var text = document.createElementNS(svgNS, "text");
-        text.classList.add("label");
+        text.classList.add("coordlabel");
         text.classList.add("unrotatable");
         text.setAttribute("x", 0);
         text.setAttribute("y", 10);
@@ -811,7 +811,7 @@ Board.prototype.svg_of_board = function() {
         var xy = coord(file, ranks+0.1);
         g1.setAttribute("transform", "translate(" + xy.x + "," + xy.y + ")");
         var text = document.createElementNS(svgNS, "text");
-        text.classList.add("label");
+        text.classList.add("coordlabel");
         text.classList.add("unrotatable");
         text.setAttribute("x", 0);
         text.setAttribute("y", 10);
@@ -851,11 +851,11 @@ Board.prototype.setStone = function(cell, color, label, swap) {
     if (swap) {
         cell.classList.add("swap");
     }
-    var stonelabel = cell.querySelector(".stonelabel");
-    if (!stonelabel) {
+    var movelabel = cell.querySelector(".movelabel");
+    if (!movelabel) {
         return;
     }
-    stonelabel.textContent = label;    
+    movelabel.textContent = label;    
 }
 
 // Get the contents of the cell.
@@ -939,7 +939,7 @@ Board.prototype.saveContents = function() {
     black.forEach(function(cell) {
         var c = Cell.fromString(cell.id);
         var swap = cell.classList.contains("swap");
-        var label = cell.querySelector(".stonelabel").textContent;
+        var label = cell.querySelector(".movelabel").textContent;
         dict[c] = {
             color: Const.black,
             label: label,
@@ -949,7 +949,7 @@ Board.prototype.saveContents = function() {
     white.forEach(function(cell) {
         var c = Cell.fromString(cell.id);
         var swap = cell.classList.contains("swap");
-        var label = cell.querySelector(".stonelabel").textContent;
+        var label = cell.querySelector(".movelabel").textContent;
         dict[c] = {
             color: Const.white,
             label: label,
