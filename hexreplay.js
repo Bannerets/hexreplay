@@ -328,24 +328,6 @@ Board.prototype.draw_svg = function() {
 // existing contents and DOM structure. This also computes the
 // viewBox.
 Board.prototype.update = function () {
-    function setTransform(e, transform) {
-	// Support for transform-origin is spotty in browsers. In
-	// particular, neither Internet Explorer nor Edge supports it,
-	// although the latter is supposed to. Also, it is hard to
-	// test for. So we simply work around it on all browsers.
-	var originstr = e.getAttribute("data-transform-origin");
-	var x = 0;
-	var y = 0;
-	if (originstr) {
-	    var xy = originstr.split(" ");
-	    x = parseInt(xy[0]);
-	    y = parseInt(xy[1]);
-	}
-	var shift1 = "translate(" + (-x) + "," + (-y) + ")";
-	var shift2 = "translate(" + x + "," + y + ")";
-	e.setAttribute("transform", shift2 + " " + transform + " " + shift1);
-    }
-
     // Update all rotations (and unrotations);
     var theta;
     var scale;
@@ -363,11 +345,11 @@ Board.prototype.update = function () {
     
     var rotatable = this.svg.querySelectorAll(".rotatable");
     rotatable.forEach(function(e) {
-	setTransform(e, transform);
+	e.setAttribute("transform", transform);
     });
     var unrotatable = this.svg.querySelectorAll(".unrotatable");
     unrotatable.forEach(function(e) {
-	setTransform(e, untransform);
+	e.setAttribute("transform", untransform);
     });
 
     // Update the viewBox.
@@ -614,10 +596,9 @@ Board.prototype.svg_of_board = function() {
     grad.appendChild(stop);
     defs.appendChild(grad);
     svg.appendChild(defs);
-    
+
     var g = document.createElementNS(svgNS, "g");
     g.classList.add("rotatable");
-    g.setAttribute("data-transform-origin", coordstr(0, 0));
     svg.appendChild(g);
 
     // Cell outline
@@ -718,10 +699,12 @@ Board.prototype.svg_of_board = function() {
         for (var file=0; file<files; file++) {
             var g1 = document.createElementNS(svgNS, "g");
             g1.setAttribute("id", Cell.cellname(file, rank));
+            var xy = coord(file, rank);
+            g1.setAttribute("transform", "translate(" + xy.x + "," + xy.y + ")");
             g1.classList.add("cell");
             
             var path = document.createElementNS(svgNS, "path");
-            path.setAttribute("d", hexpath(file, rank));
+            path.setAttribute("d", hexpath(0, 0));
             path.classList.add("background");
             if (Math.min(file, rank, files-file-1, ranks-rank-1) % 2 === 1) {
                 path.classList.add("shaded");
@@ -734,27 +717,26 @@ Board.prototype.svg_of_board = function() {
             var g2 = document.createElementNS(svgNS, "g");
             g2.classList.add("cell-content");
             g2.classList.add("unrotatable");
-            g2.setAttribute("data-transform-origin", coordstr(file, rank));
+
             var stone = document.createElementNS(svgNS, "circle");
-            var xy = coord(file, rank);
-            stone.setAttribute("cx", xy.x);
-            stone.setAttribute("cy", xy.y);
+            stone.setAttribute("cx", 0);
+            stone.setAttribute("cy", 0);
             stone.setAttribute("r", 0.43 * this.unit);
             stone.classList.add("large-stone");
             g2.appendChild(stone);
 
             var stone = document.createElementNS(svgNS, "circle");
             var xy = coord(file, rank);
-            stone.setAttribute("cx", xy.x);
-            stone.setAttribute("cy", xy.y);
+            stone.setAttribute("cx", 0);
+            stone.setAttribute("cy", 0);
             stone.setAttribute("r", 0.42 * this.unit);
             stone.classList.add("small-stone");
             g2.appendChild(stone);
 
             var dot = document.createElementNS(svgNS, "circle");
             var xy = coord(file, rank);
-            dot.setAttribute("cx", xy.x);
-            dot.setAttribute("cy", xy.y);
+            dot.setAttribute("cx", 0);
+            dot.setAttribute("cy", 0);
             dot.setAttribute("r", 0.06 * this.unit);
             dot.classList.add("dot");
             g2.appendChild(dot);
@@ -762,16 +744,16 @@ Board.prototype.svg_of_board = function() {
             var swap = document.createElementNS(svgNS, "text");
             var xy = coord(file, rank);
             swap.classList.add("swaplabel");
-            swap.setAttribute("x", xy.x);
-            swap.setAttribute("y", xy.y + 10);
+            swap.setAttribute("x", 0);
+            swap.setAttribute("y", 10);
             swap.textContent = "S";
             g2.appendChild(swap);
 
             var text = document.createElementNS(svgNS, "text");
             var xy = coord(file, rank);
             text.classList.add("stonelabel");
-            text.setAttribute("x", xy.x);
-            text.setAttribute("y", xy.y + 10);
+            text.setAttribute("x", 0);
+            text.setAttribute("y", 10);
             text.textContent = "99";
             g2.appendChild(text);
             
@@ -794,48 +776,56 @@ Board.prototype.svg_of_board = function() {
 
     // Labels
     for (var rank=0; rank<ranks; rank++) {
+        var g1 = document.createElementNS(svgNS, "g");
         var xy = coord(-1.1, rank);
+        g1.setAttribute("transform", "translate(" + xy.x + "," + xy.y + ")");
         var text = document.createElementNS(svgNS, "text");
         text.classList.add("label");
         text.classList.add("unrotatable");
-        text.setAttribute("x", xy.x);
-        text.setAttribute("y", xy.y + 10);
-        text.setAttribute("data-transform-origin", coordstr(-1.1, rank));
+        text.setAttribute("x", 0);
+        text.setAttribute("y", 10);
         text.textContent = Cell.rankToString(rank);
-        g.appendChild(text);
+        g1.appendChild(text);
+        g.appendChild(g1);
     }
     for (var rank=0; rank<ranks; rank++) {
+        var g1 = document.createElementNS(svgNS, "g");
         var xy = coord(files+0.1, rank);
+        g1.setAttribute("transform", "translate(" + xy.x + "," + xy.y + ")");
         var text = document.createElementNS(svgNS, "text");
         text.classList.add("label");
         text.classList.add("unrotatable");
-        text.setAttribute("x", xy.x);
-        text.setAttribute("y", xy.y + 10);
-        text.setAttribute("data-transform-origin", coordstr(files+0.1, rank));
+        text.setAttribute("x", 0);
+        text.setAttribute("y", 10);
         text.textContent = Cell.rankToString(rank);
-        g.appendChild(text);
+        g1.appendChild(text);
+        g.appendChild(g1);
     }
     for (var file=0; file<files; file++) {
+        var g1 = document.createElementNS(svgNS, "g");
         var xy = coord(file, -1.1);
+        g1.setAttribute("transform", "translate(" + xy.x + "," + xy.y + ")");
         var text = document.createElementNS(svgNS, "text");
         text.classList.add("label");
         text.classList.add("unrotatable");
-        text.setAttribute("x", xy.x);
-        text.setAttribute("y", xy.y + 10);
-        text.setAttribute("data-transform-origin", coordstr(file, -1.1));
+        text.setAttribute("x", 0);
+        text.setAttribute("y", 10);
         text.textContent = Cell.fileToString(file);
-        g.appendChild(text);
+        g1.appendChild(text);
+        g.appendChild(g1);
     }
     for (var file=0; file<files; file++) {
+        var g1 = document.createElementNS(svgNS, "g");
         var xy = coord(file, ranks+0.1);
+        g1.setAttribute("transform", "translate(" + xy.x + "," + xy.y + ")");
         var text = document.createElementNS(svgNS, "text");
         text.classList.add("label");
         text.classList.add("unrotatable");
-        text.setAttribute("x", xy.x);
-        text.setAttribute("y", xy.y + 10);
-        text.setAttribute("data-transform-origin", coordstr(file, ranks+0.1));
+        text.setAttribute("x", 0);
+        text.setAttribute("y", 10);
         text.textContent = Cell.fileToString(file);
-        g.appendChild(text);
+        g1.appendChild(text);
+        g.appendChild(g1);
     }
     
     return svg;
