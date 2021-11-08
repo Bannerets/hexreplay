@@ -84,23 +84,23 @@
     <p>
       The user
       <a href="https://boardgamearena.com/player?id=85283280">comonoid</a>
-      has contributed a bookmarklet for importing a game record
-      from Board Game Arena directly into HexWorld. To use it, copy
-      the following text and paste it into the "URL" portion of a bookmark:
+      has contributed a
+      <a href="https://gist.github.com/Bannerets/9a8bce3ae2ea5e82bab935c037b893ac">bookmarklet</a>
+      for importing a game record from Board Game Arena directly into
+      HexWorld. To use it, copy the following text and paste it into
+      the "URL" portion of a bookmark:
     </p>
 
     <div class="codearea">
-      <pre id="bookmarklet" class="code">javascript:void(window.open("https://hexworld.org/board/#"+Array.from(document.querySelectorAll(".gamelogreview.whiteblock")).reduce(({black:e,hash:r},n)=>{const%20a=n=>({black:e,hash:[...r,n]}),h=n.innerHTML.match(/playing%20Hex%20(\d+)x(\d+)/);if(h)return%20a(h[1]+"c1,");const%20c=n.innerHTML.match(/(.+)%20plays%20at%20(\w+\d+)/);if(c)return{black:e||c[1],hash:[...r,c[2]]};if(n.innerHTML.match(/.+%20swaps/))return%20a(":s");if(n.innerHTML.match(/.+%20passes/))return%20a(":p");const%20s=n.innerHTML.match(/(.+)%20(?:concedes%20the%20game|resigns)/);return%20s?a(s[1]===e?":rb":":rw"):{black:e,hash:r}},{black:null,hash:[]}).hash.join("")))</pre>
+      <pre id="bookmarklet" class="code">javascript:void%20function(){(function(){function%20a(a){let%20b,c;return%20a.reduce((a,b)=%3E[...a,...b.data],[]).map(({type:a,args:d,log:e})=%3E{if(%22message%22===a%26%26d.size){const%20a=d.size.match(/(\d+)x\d+/);if(a)return%20a[1]+%22c1,%22}if(%22playToken%22===a){b||(b=d.player_name);const%20a=c===d.player_id%3F%22:p%22+d.coord:d.coord;return%20c=d.player_id,a}return%22swapPieces%22===a%3F(c=d.player_id,%22:s%22):%22pass%22===a%3F(c=d.player_id,%22:p%22):%22${player_name}%20resigns%22===e||%22playerConcedeGame%22===a%3Fd.player_name===b%3F%22:rb%22:%22:rw%22:void%200}).join(%22%22)}function%20b(a,b){const%20d=window.open(%22about:blank%22);fetch(a,{cache:%22no-cache%22}).then(a=%3Ea.json()).then(a=%3E{const%20e=b(a);d.location.href=c+e}).catch(a=%3E{console.error(a),window.alert(a+%22%22),d.close()})}const%20c=%22https://hexworld.org/board/%23%22,d=window.location.href,e=d.match(/\/(%3F:table|gamereview)\%3Ftable=(\d+)($|%26)/),f=d.match(/\/replay\/.*%3F\/\%3Ftable=\d+($|%26)/),g=d.match(/\/(\d+\/hex)\%3Ftable=(\d+)($|%26)/);if(e){const%20c=e[1];return%20void%20b(`${window.location.origin}/archive/archive/logs.html%3Ftable=${c}`,b=%3Ea(b.data.data.data))}if(f){const%20b=g_gamelogs;if(!b)return%20void%20window.alert(%22Error.%20No%20\%22g_gamelogs\%22%20variable%20found.%22);const%20d=a(b);return%20void%20window.open(c+d)}if(g){const%20c=g[1],d=g[2];return%20void%20b(`${window.location.origin}/${c}/hex/notificationHistory.html%3Ftable=${d}%26from=1%26privateinc=1%26history=1`,b=%3Ea(b.data.data))}window.alert(%22No%20table%20found.%20Use%20this%20bookmark%20while%20viewing%20a%20Hex%20game%20on%20Board%20Game%20Arena.%22)})()}();</pre>
       <button onclick="navigator.clipboard.writeText(document.querySelector('#bookmarklet').innerText)">Copy to clipboard</button>
     </div>
 
     <p>
-      You can then use this bookmark from any Board Game Arena "Game
-      replay" page. (Limitation: the bookmarklet currently only works
-      correctly if your interface language is English, and it only
-      works for games that have finished).
-    </p>
-    <p>
+      You can then use this bookmark from any Hex game on Board Game
+      Arena. It works both for completed games and games in progress,
+      and can be executed on /hex, /table, /gamereview, or
+      /archive/replay pages.
       Watch <a href="video/bookmarklet.mp4">this short video</a> to
       see how to set up and use the bookmarklet.
     </p>

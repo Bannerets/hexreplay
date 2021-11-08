@@ -5,6 +5,8 @@ IMAGES=images/buttons.svg images/favicon.ico
 
 UGLIFY=uglifyjs -c --mangle-props -m toplevel
 
+all: deploy-html
+
 deploy: 
 	cp -f $(HTML) $(CSS) www/
 	rm -f www/hexreplay.js
