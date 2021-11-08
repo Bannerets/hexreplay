@@ -83,6 +83,44 @@ var compatibility = function() {
 compatibility();
 
 // ----------------------------------------------------------------------
+// General-purpose
+
+function dateString() {
+    function pad(s, n) {
+        s = s.toString();
+        while (s.length < n) {
+            s = "0" + s;
+        }
+        return s;
+    }
+
+    var date = new Date();
+    var year = pad(date.getFullYear(), 4);
+    var month = pad(date.getMonth()+1, 2);
+    var day = pad(date.getDate(), 2);
+    return year + month + day;
+}
+
+function download(blob, filename) {
+    if (window.navigator.msSaveOrOpenBlob) { // IE10+                       
+        window.navigator.msSaveOrOpenBlob(blob, filename);
+    } else { // Others                                                      
+        var a = document.createElement("a");
+        var url = URL.createObjectURL(blob);
+        a.href = url;
+        a.download = filename;
+        a.type = blob.type;
+        a.classList.add("hide");
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 0);
+    }
+}
+
+// ----------------------------------------------------------------------
 // Constants
 
 function Const() {
@@ -203,7 +241,7 @@ function Dimension(files, ranks) {
     this.ranks = ranks;
 }
 
-// Formatting for HTML form.
+// Formatting for HTML form, hash.
 Dimension.prototype.format = function () {
     if (this.files == this.ranks) {
         return this.files.toString();
@@ -212,7 +250,7 @@ Dimension.prototype.format = function () {
     }
 }
 
-// Parsing for HTML form.
+// Parsing for HTML form, hash.
 Dimension.parse = function (s) {
     // Parse an integer with optional whitespace (and return undefined
     // if it's anything else).
@@ -247,6 +285,15 @@ Dimension.parse = function (s) {
         return undefined;
     }
     return new Dimension(files, ranks);
+}
+
+// Formatting for SGF.
+Dimension.prototype.toSGF = function() {
+    if (this.files == this.ranks) {
+        return this.files.toString();
+    } else {
+        return this.files + ":" + this.ranks;
+    }
 }
 
 Dimension.prototype.swap = function() {
@@ -1062,6 +1109,29 @@ Move.prototype.getPlayer = function() {
     return null;
 }
 
+Move.prototype.toSGF = function() {
+    switch (this.type) {
+    case Const.cell:
+        return this.cell.toString();
+        break;
+    case Const.swap_pieces:
+        return "swap-pieces";
+        break;
+    case Const.swap_sides:
+        return "swap-sides";
+        break;
+    case Const.pass:
+        return "pass";
+        break;
+    case Const.resign:
+        return "resign";
+        break;
+    case Const.forfeit:
+        return "forfeit";
+        break;
+    }
+}
+
 function GameState(board, movelist_panel) {
     var self = this;
     this.movelist = [];
@@ -1840,6 +1910,33 @@ GameState.prototype.canRedo = function() {
     return this.currentmove < this.movelist.length;
 }
 
+// Convert the game to SGF
+GameState.prototype.toSGF = function() {
+    var acc = "";
+    acc += "(";
+    acc += ";";
+    acc += "AP[hexworld:0.0]";
+    acc += "FF[4]";
+    acc += "GM[11]";
+    acc += "SZ[" + this.dim.toSGF() + "]";
+
+    for (var i=0; i<this.movelist.length; i++) {
+        var move = this.movelist[i];
+        var player = move.player === Const.black ? "B" : "W";
+        acc += ";" + player + "[" + move.move.toSGF() + "]";
+    }
+
+    acc += ")";    
+    return acc;    
+}
+
+GameState.prototype.UIdownloadSGF = function () {
+    var sgf = this.toSGF();
+    var blob = new Blob([sgf], {type: "application/x-smartgameformat"});
+    var filename = dateString() + "-hexworld.sgf";
+    download(blob, filename);
+}
+
 // ----------------------------------------------------------------------
 // Set up DOM tree.
 
@@ -1874,6 +1971,7 @@ var link_resign = document.getElementById("item-resign");
 var link_bw = document.getElementById("item-bw");
 var link_rg = document.getElementById("item-rg");
 var link_about = document.getElementById("item-about");
+var link_download = document.getElementById("item-download");
 var button_rotate_left = document.getElementById("button-rotate-left");
 var button_rotate_right = document.getElementById("button-rotate-right");
 var button_first = document.getElementById("button-first");
@@ -1894,6 +1992,9 @@ link_resign.addEventListener("click", function () {
 });
 link_about.addEventListener("click", function () {
     window.open("about.html", "about");
+});
+link_download.addEventListener("click", function () {
+    state.UIdownloadSGF();
 });
 button_rotate_left.addEventListener("click", function () {
     state.UIrotate(-1);
