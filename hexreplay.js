@@ -582,7 +582,7 @@ Board.prototype.svg_of_board = function() {
     grad.setAttribute("r", "0.6");
     var stop = document.createElementNS(svgNS, "stop");
     stop.setAttribute("offset", "0%");
-    stop.setAttribute("stop-color", "#ff6060");
+    stop.setAttribute("stop-color", "#ff7878");
     grad.appendChild(stop);
     var stop = document.createElementNS(svgNS, "stop");
     stop.setAttribute("offset", "30%");
@@ -602,15 +602,15 @@ Board.prototype.svg_of_board = function() {
     grad.setAttribute("r", "0.6");
     var stop = document.createElementNS(svgNS, "stop");
     stop.setAttribute("offset", "0%");
-    stop.setAttribute("stop-color", "#5858ff");
+    stop.setAttribute("stop-color", "#7070ff");
     grad.appendChild(stop);
     var stop = document.createElementNS(svgNS, "stop");
     stop.setAttribute("offset", "30%");
-    stop.setAttribute("stop-color", "#2020e0");
+    stop.setAttribute("stop-color", "#3030e0");
     grad.appendChild(stop);
     var stop = document.createElementNS(svgNS, "stop");
     stop.setAttribute("offset", "100%");
-    stop.setAttribute("stop-color", "#000060");
+    stop.setAttribute("stop-color", "#000080");
     grad.appendChild(stop);
     defs.appendChild(grad);
     svg.appendChild(defs);

@@ -226,7 +226,7 @@ svg {
 .redblue .white .large-stone {
     display: block;
     fill: url('#blue-gradient');
-    filter: url("#shadow2");
+    filter: url("#shadow");
 }
 
 .redblue .white .dot {
