@@ -470,13 +470,13 @@ Board.prototype.svg_of_board = function() {
     var feGaussianBlur = document.createElementNS(svgNS, "feGaussianBlur");
     //feGaussianBlur.setAttribute("result", "blurOut");
     feGaussianBlur.setAttribute("in", "SourceAlpha");
-    feGaussianBlur.setAttribute("stdDeviation", "3");
+    feGaussianBlur.setAttribute("stdDeviation", "7");
     filter.appendChild(feGaussianBlur);
     var feOffset = document.createElementNS(svgNS, "feOffset");
     //feOffset.setAttribute("result", "offOut");
     //feOffset.setAttribute("in", "SourceAlpha");
-    feOffset.setAttribute("dx", "6");
-    feOffset.setAttribute("dy", "6");
+    feOffset.setAttribute("dx", "14");
+    feOffset.setAttribute("dy", "14");
     filter.appendChild(feOffset);
     var feComponentTransfer = document.createElementNS(svgNS, "feComponentTransfer");
     var feFuncA = document.createElementNS(svgNS, "feFuncA");
@@ -502,13 +502,13 @@ Board.prototype.svg_of_board = function() {
     var feGaussianBlur = document.createElementNS(svgNS, "feGaussianBlur");
     //feGaussianBlur.setAttribute("result", "blurOut");
     feGaussianBlur.setAttribute("in", "SourceAlpha");
-    feGaussianBlur.setAttribute("stdDeviation", "3");
+    feGaussianBlur.setAttribute("stdDeviation", "7");
     filter.appendChild(feGaussianBlur);
     var feOffset = document.createElementNS(svgNS, "feOffset");
     //feOffset.setAttribute("result", "offOut");
     //feOffset.setAttribute("in", "SourceAlpha");
-    feOffset.setAttribute("dx", "6");
-    feOffset.setAttribute("dy", "6");
+    feOffset.setAttribute("dx", "14");
+    feOffset.setAttribute("dy", "14");
     filter.appendChild(feOffset);
     var feComponentTransfer = document.createElementNS(svgNS, "feComponentTransfer");
     var feFuncA = document.createElementNS(svgNS, "feFuncA");
@@ -721,16 +721,8 @@ Board.prototype.svg_of_board = function() {
             var stone = document.createElementNS(svgNS, "circle");
             stone.setAttribute("cx", 0);
             stone.setAttribute("cy", 0);
-            stone.setAttribute("r", 0.43 * this.unit);
-            stone.classList.add("large-stone");
-            g2.appendChild(stone);
-
-            var stone = document.createElementNS(svgNS, "circle");
-            var xy = coord(file, rank);
-            stone.setAttribute("cx", 0);
-            stone.setAttribute("cy", 0);
-            stone.setAttribute("r", 0.42 * this.unit);
-            stone.classList.add("small-stone");
+            stone.setAttribute("r", this.unit);
+            stone.classList.add("stone-circle");
             g2.appendChild(stone);
 
             var dot = document.createElementNS(svgNS, "circle");

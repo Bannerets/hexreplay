@@ -173,7 +173,7 @@ svg {
     display: block;
 }
 
-.large-stone {
+.stone-circle {
     display: none;
 }
 
@@ -181,20 +181,18 @@ svg {
     fill: #c0c0c0;
 }
 
-.black .large-stone {
+.black .stone-circle {
     display: block;
     fill: url('#black-gradient');
     filter: url("#shadow");
+    transform: scale(0.43);
 }
 
-.redblue .black .large-stone {
-    display: none;
-}
-
-.redblue .black .small-stone {
+.redblue .black .stone-circle {
     display: block;
     fill: url('#red-gradient');
     filter: url("#shadow2");
+    transform: scale(0.42);
 }
 
 .redblue .black .dot {
@@ -205,28 +203,22 @@ svg {
     fill: #ffffff;
 }
 
-.small-stone {
-    display: none;
-}
-
-.white .small-stone {
+.white .stone-circle {
     display: block;
     fill: url('#white-gradient');
     filter: url("#shadow");
+    transform: scale(0.42);
 }
 
 .white .dot {
     fill: #606060;
 }
 
-.redblue .white .small-stone {
-    display: none;
-}
-
-.redblue .white .large-stone {
+.redblue .white .stone-circle {
     display: block;
     fill: url('#blue-gradient');
     filter: url("#shadow");
+    transform: scale(0.43);
 }
 
 .redblue .white .dot {
