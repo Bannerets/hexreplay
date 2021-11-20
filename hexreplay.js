@@ -437,8 +437,8 @@ Board.prototype.update = function () {
 // its size is known), and upon any event that may affect the
 // element's size. The window's "resize" event is already handled.
 Board.prototype.rescale = function() {
-    const domOffsetWidth = this.dom.offsetWidth;
-    const domOffsetHeight = this.dom.offsetHeight;
+    var domOffsetWidth = this.dom.offsetWidth;
+    var domOffsetHeight = this.dom.offsetHeight;
 
     if (this.offsetWidth !== undefined && this.offsetHeight !== undefined && domOffsetWidth === this.offsetWidth && domOffsetHeight === this.offsetHeight) {
         // Performance issues on Chrome: don't rescale unnecessarily.
