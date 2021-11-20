@@ -323,9 +323,6 @@ function Board(dim, rotation, mirrored) {
     this.rotation = this.mod12(rotation);
     this.mirrored = mirrored;
 
-    this.offsetWidth = undefined;
-    this.offsetHeight = undefined;
-    
     // Internal parameters.
     this.unit = 80;
     this.borderradius = 1.2;
@@ -336,6 +333,11 @@ function Board(dim, rotation, mirrored) {
     this.dom = document.createElement("div");
     this.dom.classList.add("board");
 
+    // Keep track up previous values of dom.offsetWidth and
+    // dom.offsetHeight to avoid unnecessary updates.
+    this.offsetWidth = undefined;
+    this.offsetHeight = undefined;
+    
     // A user-supplied function to call when a cell is clicked.
     this.onclick = function (cell) {};
     
@@ -438,7 +440,7 @@ Board.prototype.rescale = function() {
     const domOffsetWidth = this.dom.offsetWidth;
     const domOffsetHeight = this.dom.offsetHeight;
 
-    if (domOffsetWidth === this.offsetWidth && domOffsetHeight === this.offsetHeight) {
+    if (this.offsetWidth !== undefined && this.offsetHeight !== undefined && domOffsetWidth === this.offsetWidth && domOffsetHeight === this.offsetHeight) {
         // Performance issues on Chrome: don't rescale unnecessarily.
         return;
     }
@@ -1160,6 +1162,9 @@ function GameState(board, movelist_panel) {
     this.movelist_panel = movelist_panel;
     this.numbered = false;
     this.redblue = false;
+
+    // Keep track of current hash to avoid unnecessary updates.
+    this.currentHash = undefined;
     
     // Connect click action.
     this.board.onclick = function(cell) {
@@ -1641,8 +1646,6 @@ GameState.prototype.draw_movelist = function() {
     this.scroll_movelist(this.currentmove);
 }
 
-var currentHash;
-
 // Update all UI components that need to be updated as a whole (do not
 // support incremental updates). Currently, this is the move list and
 // hash. Only functions whose name starts with UI call this. This is
@@ -1650,7 +1653,7 @@ var currentHash;
 GameState.prototype.UIupdate = function() {
     this.draw_movelist();
     var newHash = this.URLHash();
-    currentHash = newHash;
+    this.currentHash = newHash;
     window.location.replace(newHash);
     this.onupdate();
     board.setCursor(this.currentPlayer());
@@ -1883,6 +1886,9 @@ GameState.prototype.fromURLHash = function(hash) {
 }
 
 GameState.prototype.UIfromURLHash = function(hash) {
+    if (hash === this.currentHash) {
+        return;
+    }
     this.fromURLHash(hash);
     this.UIupdate();
 }
@@ -2174,10 +2180,7 @@ document.addEventListener("keydown", function(e) {
 
 window.addEventListener("hashchange", function (e) {
     var hash = window.location.hash;
-    if (currentHash !== hash) {
-        currentHash = hash;
-        state.UIfromURLHash(hash);
-    }
+    state.UIfromURLHash(hash);
 });
 
 state.UIfromURLHash(window.location.hash);
