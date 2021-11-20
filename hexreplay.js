@@ -323,6 +323,9 @@ function Board(dim, rotation, mirrored) {
     this.rotation = this.mod12(rotation);
     this.mirrored = mirrored;
 
+    this.offsetWidth = undefined;
+    this.offsetHeight = undefined;
+    
     // Internal parameters.
     this.unit = 80;
     this.borderradius = 1.2;
@@ -367,6 +370,9 @@ Board.prototype.draw_svg = function() {
     
     // Create new svg element.
     this.svg = this.svg_of_board();
+
+    this.offsetWidth = undefined;
+    this.offsetHeight = undefined;
 
     this.dom.appendChild(this.svg);
 }
@@ -429,8 +435,19 @@ Board.prototype.update = function () {
 // its size is known), and upon any event that may affect the
 // element's size. The window's "resize" event is already handled.
 Board.prototype.rescale = function() {
-    this.svg.setAttribute("width", this.dom.offsetWidth);
-    this.svg.setAttribute("height", this.dom.offsetHeight);
+    const domOffsetWidth = this.dom.offsetWidth;
+    const domOffsetHeight = this.dom.offsetHeight;
+
+    if (domOffsetWidth === this.offsetWidth && domOffsetHeight === this.offsetHeight) {
+        // Performance issues on Chrome: don't rescale unnecessarily.
+        return;
+    }
+
+    this.offsetWidth = domOffsetWidth;
+    this.offsetHeight = domOffsetHeight;
+    
+    this.svg.setAttribute("width", domOffsetWidth);
+    this.svg.setAttribute("height", domOffsetHeight);
 }
 
 // Set the logical size of the board. This also clears the board.
@@ -1609,7 +1626,7 @@ GameState.prototype.scroll_movelist = function(i) {
         return;
     }
     var panel = document.getElementById("movelist-container");
-    makeVisible(item, panel, true);
+    makeVisible(item, panel, false);
 }
 
 // Format the move list.
@@ -1624,17 +1641,17 @@ GameState.prototype.draw_movelist = function() {
     this.scroll_movelist(this.currentmove);
 }
 
+var currentHash;
+
 // Update all UI components that need to be updated as a whole (do not
 // support incremental updates). Currently, this is the move list and
 // hash. Only functions whose name starts with UI call this. This is
 // to ensure that the UI isn't needlessly updated multiple times.
 GameState.prototype.UIupdate = function() {
     this.draw_movelist();
-    // temporarily disable hashchange, to avoid bottomless recursion.
-    var old_enable_hashchange = enable_hashchange;
-    enable_hashchange = false;
-    window.location.replace(this.URLHash());
-    enable_hashchange = old_enable_hashchange;
+    var newHash = this.URLHash();
+    currentHash = newHash;
+    window.location.replace(newHash);
     this.onupdate();
     board.setCursor(this.currentPlayer());
     this.board.rescale();  // because move list might have changed size
@@ -2155,11 +2172,11 @@ document.addEventListener("keydown", function(e) {
 // ----------------------------------------------------------------------
 // Handle URL hash
 
-var enable_hashchange = true;
-
 window.addEventListener("hashchange", function (e) {
-    if (enable_hashchange) {
-        state.UIfromURLHash(window.location.hash);
+    var hash = window.location.hash;
+    if (currentHash !== hash) {
+        currentHash = hash;
+        state.UIfromURLHash(hash);
     }
 });
 
