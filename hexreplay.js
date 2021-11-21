@@ -1282,7 +1282,9 @@ GameState.prototype.UIplay = function(move) {
         this.gotoMove(pos);
     }
     var r = this.play(move);
-    this.UIupdate();
+    if (r) {
+        this.UIupdate();
+    }
     return r;
 }
 
@@ -1294,7 +1296,9 @@ GameState.prototype.resign = function() {
 
 GameState.prototype.UIresign = function() {
     var r = this.resign();
-    this.UIupdate();
+    if (r) {
+        this.UIupdate();
+    }
     return r;
 }
 
@@ -1355,7 +1359,9 @@ GameState.prototype.redo = function() {
 // Redo the next move. Return true on success, false on failure.
 GameState.prototype.UIredo = function() {
     var r = this.redo();
-    this.UIupdate();
+    if (r) {
+        this.UIupdate();
+    }
     return r;
 }
 
@@ -1376,7 +1382,9 @@ GameState.prototype.undo = function() {
 // Undo the last move. Return true on success, false on failure.
 GameState.prototype.UIundo = function() {
     var r = this.undo();
-    this.UIupdate();
+    if (r) {
+        this.UIupdate();
+    }
     return r;
 }
 
@@ -1391,7 +1399,9 @@ GameState.prototype.first = function() {
 // Go to the start of the move list.
 GameState.prototype.UIfirst = function() {
     var r = this.first();
-    this.UIupdate();
+    if (r) {
+        this.UIupdate();
+    }
     return r;
 }
 
@@ -1406,7 +1416,9 @@ GameState.prototype.last = function() {
 // Go to the start of the move list.
 GameState.prototype.UIlast = function() {
     var r = this.last();
-    this.UIupdate();
+    if (r) {
+        this.UIupdate();
+    }
     return r;
 }
 
@@ -1423,7 +1435,9 @@ GameState.prototype.gotoMove = function(n) {
 
 GameState.prototype.UIgotoMove = function(n) {
     var r = this.gotoMove(n);
-    this.UIupdate();
+    if (r) {
+        this.UIupdate();
+    }
     return r;
 }
 
@@ -1475,7 +1489,9 @@ GameState.prototype.UIsetSize = function(dim) {
         history.pushState(null, null);
     }
     var r = this.setSize(dim);
-    this.UIupdate();
+    if (r) {
+        this.UIupdate();
+    }
     return r;
 }
 
