@@ -521,7 +521,6 @@ Board.prototype.svg_of_board = function() {
     var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("width", "500px");
     svg.setAttribute("height", "300px");
-    //svg.setAttribute("viewBox", box.x0.toFixed(0) + " " + box.y0.toFixed(0) + " " + (box.x1-box.x0).toFixed(0) + " " + (box.y1-box.y0).toFixed(0));
     svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
     var svgNS = svg.namespaceURI;
 
@@ -529,20 +528,13 @@ Board.prototype.svg_of_board = function() {
 
     var filter = document.createElementNS(svgNS, "filter");
     filter.setAttribute("id", "shadow");
-    //filter.setAttribute("x", "0");
-    //filter.setAttribute("y", "0");
-    //filter.setAttribute("width", "200%");
-    //filter.setAttribute("height", "200%");
     var feGaussianBlur = document.createElementNS(svgNS, "feGaussianBlur");
-    //feGaussianBlur.setAttribute("result", "blurOut");
     feGaussianBlur.setAttribute("in", "SourceAlpha");
-    feGaussianBlur.setAttribute("stdDeviation", "7");
+    feGaussianBlur.setAttribute("stdDeviation", "3");
     filter.appendChild(feGaussianBlur);
     var feOffset = document.createElementNS(svgNS, "feOffset");
-    //feOffset.setAttribute("result", "offOut");
-    //feOffset.setAttribute("in", "SourceAlpha");
-    feOffset.setAttribute("dx", "14");
-    feOffset.setAttribute("dy", "14");
+    feOffset.setAttribute("dx", "5");
+    feOffset.setAttribute("dy", "5");
     filter.appendChild(feOffset);
     var feComponentTransfer = document.createElementNS(svgNS, "feComponentTransfer");
     var feFuncA = document.createElementNS(svgNS, "feFuncA");
@@ -561,20 +553,13 @@ Board.prototype.svg_of_board = function() {
     
     var filter = document.createElementNS(svgNS, "filter");
     filter.setAttribute("id", "shadow2");
-    //filter.setAttribute("x", "0");
-    //filter.setAttribute("y", "0");
-    //filter.setAttribute("width", "200%");
-    //filter.setAttribute("height", "200%");
     var feGaussianBlur = document.createElementNS(svgNS, "feGaussianBlur");
-    //feGaussianBlur.setAttribute("result", "blurOut");
     feGaussianBlur.setAttribute("in", "SourceAlpha");
-    feGaussianBlur.setAttribute("stdDeviation", "7");
+    feGaussianBlur.setAttribute("stdDeviation", "3");
     filter.appendChild(feGaussianBlur);
     var feOffset = document.createElementNS(svgNS, "feOffset");
-    //feOffset.setAttribute("result", "offOut");
-    //feOffset.setAttribute("in", "SourceAlpha");
-    feOffset.setAttribute("dx", "14");
-    feOffset.setAttribute("dy", "14");
+    feOffset.setAttribute("dx", "5");
+    feOffset.setAttribute("dy", "5");
     filter.appendChild(feOffset);
     var feComponentTransfer = document.createElementNS(svgNS, "feComponentTransfer");
     var feFuncA = document.createElementNS(svgNS, "feFuncA");
@@ -787,7 +772,7 @@ Board.prototype.svg_of_board = function() {
             var stone = document.createElementNS(svgNS, "circle");
             stone.setAttribute("cx", 0);
             stone.setAttribute("cy", 0);
-            stone.setAttribute("r", this.unit);
+            stone.setAttribute("r", 0.43*this.unit);
             stone.classList.add("stone-circle");
             g2.appendChild(stone);
 
