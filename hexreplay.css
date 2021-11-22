@@ -231,11 +231,11 @@ svg {
 /* Cursors */
 
 .cursor-black {
-    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><circle cx='8' cy='8' r='7' fill='black' stroke='white' stroke-width='1'/></svg>") 8 8, auto;
+    cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAA70lEQVQokXWRTU7CYBCG52tJyp4auIJaOIJELmTiXfAnELhCE93ysxOPgbhjNx+DLV08LqBBSTvvbt5nJpN3BHdSb/eqmyIvct3YM92yLzgcTT9VS+nTosU9KWo6ISqBpv+c2RXyR23m5ldEOMH56czCf7YgNFiYjnFCTy+mz1vUSGT3klbagpBiQ9Hvu1qgj67lkMe1QMwhCxxO6ioUIfjZXtcCN5Jtg/D9sRZ4kPBN6Kq1Ky/o4I1bwelkbo2KoJamo2PUkV8tLrZ0WJr/OEWNI9Kx7lMGxMQMSNG9js7POiqxJ/0qsiLTtQ1Jyv4vlJACppANhI4AAAAASUVORK5CYII=") 8 8, auto;
 }
 
 .cursor-white {
-    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><circle cx='8' cy='8' r='7' fill='white' stroke='black' stroke-width='1'/></svg>") 8 8, auto;
+    cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAABC0lEQVQokXVRTU7CUBj8Xk2+RyS237sBi+4sLL2BK35O4wGUO/iT1MAd0DuIMYgX0ARxxwYsjxTTx7iwqGna+XaTmcmXGYL6OW4d3Zg5b3lr5v41N/c8QUE1ajIU28+mWGONZ/QzsTIIdS5o1ILHnv3Ef6zQtcE41FAEJcOe3aEIh46VWyjilim4/1LEcnRQPz87OfWoBJq+vCdF5uOl1A8AU5gZcZpUChLo1CNCWT4REe2I4NUXb5WCVzpceO5+5KoEI+fuiJtiV6UfLBFYPiYoGXStKymqbSWGIqhQB+NOIWWJtg0e8qqhQh3EsulnEyRIMMFFJhuJf8fK5478K/POKadm5l9ytOe/AdvvIDY9qEzPAAAAAElFTkSuQmCC") 8 8, auto;
 }
 
 /* ---------------------------------------------------------------------- */
