@@ -1183,7 +1183,6 @@ function MoveDisplay(container) {
     this.highlighted = undefined;
     
     this.push(null);
-    this.highlight(0);
     
     // A user-supplied function to call when a move is clicked.
     this.onclick = function (n) {};
@@ -1225,7 +1224,6 @@ MoveDisplay.prototype.truncate = function(n) {
 // Clear the movelist.
 MoveDisplay.prototype.clear = function() {
     this.truncate(0);
-    this.highlight(0);
 }
 
 // Highlight the given element (or none if n === undefined)
@@ -1468,7 +1466,6 @@ GameState.prototype.play = function(move) {
         player: player,
         move: move
     });
-    this.movedisplay.highlight(this.currentmove);
     this.playBoardMove(n, player, move);
     this.setLast();
     return true;
@@ -1561,7 +1558,6 @@ GameState.prototype.redo = function() {
     var move = this.movelist[n];
     this.playBoardMove(move.number, move.player, move.move);
     this.currentmove++;
-    this.movedisplay.highlight(this.currentmove);
     this.setLast();
     return true;
 }
@@ -1585,7 +1581,6 @@ GameState.prototype.undo = function() {
     var move = this.movelist[n-1];
     this.undoBoardMove(move.number, move.player, move.move);
     this.currentmove--;
-    this.movedisplay.highlight(this.currentmove);
     this.setLast();
     return true;
 }
@@ -1745,6 +1740,7 @@ GameState.prototype.UIupdate = function() {
     this.onupdate();
     board.setCursor(this.currentPlayer());
     this.board.rescale();  // because move list might have changed size
+    this.movedisplay.highlight(this.currentmove);
 }
 
 // Format a move for the URL string.
