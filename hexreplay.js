@@ -1974,14 +1974,14 @@ var state = new GameState(board, movelist_panel);
 // ----------------------------------------------------------------------
 // Activate menus
 
-var menus = document.querySelectorAll(".menu-container");
+var menus = document.querySelectorAll(".menu-toggle");
 menus.forEach(function(m) {
     m.addEventListener("click", function(e) {
-        m.classList.toggle("show");
+        m.parentNode.classList.toggle("show");
     });
     document.addEventListener("click", function(e) {
         if (!m.contains(e.target)) {
-            m.classList.remove("show");
+            m.parentNode.classList.remove("show");
         }
     });
 });
