@@ -120,6 +120,35 @@ function download(blob, filename) {
     }
 }
 
+// Vertically scroll the contents of the container so that target is
+// visible within the container. If smooth=true, animate the scolling
+// action.
+function makeVisible(target, container, smooth) {
+    var trect = target.getBoundingClientRect();
+    var crect = container.getBoundingClientRect();
+    var oldtop = container.scrollTop;
+    var oldleft = container.scrollLeft;
+    var ty = trect.y || trect.top;
+    var cy = crect.y || crect.top;
+    var rely = ty - cy + oldtop;
+    var scrollTopMax = rely;
+    var scrollTopMin = rely + trect.height - crect.height;
+
+    if (oldtop < scrollTopMin) {
+	container.scrollTo({
+	    left: oldleft,
+	    top: scrollTopMin,
+	    behavior: smooth ? "smooth" : "instant"
+	});
+    } else if (oldtop > scrollTopMax) {
+	container.scrollTo({
+	    left: oldleft,
+	    top: scrollTopMax,
+	    behavior: smooth ? "smooth" : "instant"
+	});
+    }
+}
+
 // ----------------------------------------------------------------------
 // Constants
 
@@ -1076,7 +1105,7 @@ Board.prototype.setCursor = function(color) {
 }
 
 // ----------------------------------------------------------------------
-// Game logic
+// Moves
 
 // A move is either a cell or one of the special moves Move.pass,
 // Move.swap_pieces, Move.swap_sides, Move.resign, Move.forfeit.
@@ -1136,7 +1165,184 @@ Move.prototype.toSGF = function() {
     }
 }
 
-function GameState(board, movelist_panel) {
+// ----------------------------------------------------------------------
+// Move list
+
+// This object is only in charge of the movelist display, i.e., the
+// DOM element. The logical move list is kept in the GameState object.
+
+function MoveDisplay(container) {
+    var self = this;
+
+    this.redblue = false;
+    
+    this.dom = container;
+    this.dom.innerHTML = "";
+
+    this.childlist = [];
+    this.highlighted = undefined;
+    
+    this.push(null);
+    this.highlight(0);
+    
+    // A user-supplied function to call when a move is clicked.
+    this.onclick = function (n) {};
+    
+    this.dom.addEventListener("click", function (event) {
+        var move = event.target.closest(".move");
+        if (move) {
+            var id = move.id;
+            var n = parseInt(id.substring(5)); // remove move- prefix
+            self.onclick(n);
+        }
+    });
+}
+
+// Push a move to the end of the movelist. The move can be null for an
+// empty move (only used at the start of the movelist).
+MoveDisplay.prototype.push = function(move) {
+    var n = this.childlist.length;
+    var div = this.formatMove(move, n);
+    this.childlist.push({n: n, div: div, move: move});
+    this.dom.appendChild(div);
+}
+
+// Pop a move from the movelist.
+MoveDisplay.prototype.pop = function() {
+    var child = this.childlist.pop();
+    if (child !== undefined) {
+        this.dom.removeChild(child.div);
+    }
+}
+
+// Truncate movelist to length n+1.
+MoveDisplay.prototype.truncate = function(n) {
+    while (this.childlist.length > n+1) {
+        this.pop();
+    }
+}
+
+// Clear the movelist.
+MoveDisplay.prototype.clear = function() {
+    this.truncate(0);
+    this.highlight(0);
+}
+
+// Highlight the given element (or none if n === undefined)
+MoveDisplay.prototype.highlight = function(n) {
+    // Remove the previous highlight, if any.
+    var k = this.highlighted;
+    if (k !== undefined && k < this.childlist.length) {
+        this.childlist[k].div.classList.remove("current");
+    }
+    
+    // Check validity of n
+    if (n < 0 || n >= this.childlist.length) {
+        n = undefined;
+    }
+    this.highlighted = n;
+
+    // Add the new highlight, and scroll to it.
+    if (n !== undefined) {
+        this.childlist[n].div.classList.add("current");
+        makeVisible(this.childlist[n].div, this.dom, false);
+    }
+}
+
+MoveDisplay.prototype.formatPlayer = function(player) {
+    if (this.redblue) {
+        switch (player) {
+        case Const.black:
+            return "red&nbsp;&nbsp;";
+            break;
+        case Const.white:
+            return "blue&nbsp;";
+            break;
+        default:
+            return player;
+            break;
+        }
+    } else {
+        switch (player) {
+        case Const.black:
+            return "black";
+            break;
+        case Const.white:
+            return "white";
+            break;
+        default:
+            return player;
+            break;
+        }
+    }        
+}
+
+// Format a move for the move list.
+MoveDisplay.prototype.formatMove = function(move, n) {
+    var div = document.createElement("div");
+    div.classList.add("move");
+    div.setAttribute("id", "move-" + n);
+    if (move === null) {
+        div.innerHTML = "&nbsp;";
+        return div;
+    }
+    var s;
+    switch (move.move.type) {
+    case Const.cell:
+        s = move.move.cell.toString();
+        break;
+    case Const.swap_pieces:
+    case Const.swap_sides:
+        s = "swap";
+        break;
+    case Const.pass:
+        s = "pass";
+        break;
+    case Const.resign:
+        s = "resign";
+        break;
+    case Const.forfeit:
+        s = "forfeit";
+        break;
+    }
+    var numdiv = document.createElement("div");
+    numdiv.classList.add("number");
+    numdiv.innerHTML = move.number + '.';
+    div.appendChild(numdiv);
+    var playerdiv = document.createElement("div");
+    playerdiv.classList.add("player");
+    playerdiv.innerHTML = this.formatPlayer(move.player);
+    div.appendChild(playerdiv);
+    var actiondiv = document.createElement("div");
+    actiondiv.classList.add("action");
+    actiondiv.innerHTML = s;
+    div.appendChild(actiondiv);
+    return div;
+}
+
+MoveDisplay.prototype.setRedBlue = function(bool) {
+    if (bool !== this.redblue) {
+        this.redblue = bool;
+        this.updatePlayers();
+    }
+}
+
+// Update the player names in all moves. This is done in response to a
+// change from black/white to red/blue mode or vice versa.
+MoveDisplay.prototype.updatePlayers = function() {
+    for (var i=1; i<this.childlist.length; i++) {
+        var child = this.childlist[i];
+        var playerdiv = child.div.querySelector(".player");
+        if (playerdiv !== undefined && child.move !== null) {
+            playerdiv.innerHTML = this.formatPlayer(child.move.player);
+        }
+    }
+}
+
+// ----------------------------------------------------------------------
+// Game state
+
+function GameState(board, movedisplay) {
     var self = this;
     this.movelist = [];
     this.currentmove = 0;
@@ -1144,7 +1350,7 @@ function GameState(board, movelist_panel) {
     this.dim = this.board.dim; // Holds the initial dimension of the
                                // game, rather than the current
                                // dimension.
-    this.movelist_panel = movelist_panel;
+    this.movedisplay = movedisplay;
     this.numbered = false;
     this.redblue = false;
 
@@ -1156,16 +1362,12 @@ function GameState(board, movelist_panel) {
         self.UIplay(Move.cell(cell));
     }
 
-    // Connect click action for movelist.
-    this.movelist_panel.addEventListener("click", function(event) {
-        var move = event.target.closest(".move");
-	if (move) {
-            var id = move.id;
-            var n = parseInt(id.substring(5)); // remove move- prefix
-            self.UIgotoMove(n);
-	}
-    });
-
+    // Connect click action for movedisplay.
+    this.movedisplay.onclick = function(n) {
+        console.log(n);
+        self.UIgotoMove(n);
+    };
+    
     // A callback function to update button states.
     this.onupdate = function() {
     }
@@ -1217,6 +1419,7 @@ GameState.prototype.isDestructive = function(move) {
 // Truncate movelist to current position.
 GameState.prototype.truncate = function() {
     this.movelist.length = this.currentmove;
+    this.movedisplay.truncate(this.currentmove);
 }
 
 GameState.prototype.currentPlayer = function () {
@@ -1260,6 +1463,12 @@ GameState.prototype.play = function(move) {
         player: player,
         move: move
     });
+    this.movedisplay.push({
+        number: n,
+        player: player,
+        move: move
+    });
+    this.movedisplay.highlight(this.currentmove);
     this.playBoardMove(n, player, move);
     this.setLast();
     return true;
@@ -1352,6 +1561,7 @@ GameState.prototype.redo = function() {
     var move = this.movelist[n];
     this.playBoardMove(move.number, move.player, move.move);
     this.currentmove++;
+    this.movedisplay.highlight(this.currentmove);
     this.setLast();
     return true;
 }
@@ -1375,6 +1585,7 @@ GameState.prototype.undo = function() {
     var move = this.movelist[n-1];
     this.undoBoardMove(move.number, move.player, move.move);
     this.currentmove--;
+    this.movedisplay.highlight(this.currentmove);
     this.setLast();
     return true;
 }
@@ -1510,6 +1721,7 @@ GameState.prototype.UIsetOrientation = function(rotation, mirrored) {
 // Clear the move list.
 GameState.prototype.clear = function() {
     this.movelist = [];
+    this.movedisplay.clear();
     this.currentmove = 0;
     this.board.clear();
 }
@@ -1522,137 +1734,11 @@ GameState.prototype.UIclear = function() {
     this.UIupdate();
 }
 
-GameState.prototype.formatPlayer = function(player) {
-    if (this.redblue) {
-        switch (player) {
-        case Const.black:
-            return "red&nbsp;&nbsp;";
-            break;
-        case Const.white:
-            return "blue&nbsp;";
-            break;
-        default:
-            return player;
-            break;
-        }
-    } else {
-        switch (player) {
-        case Const.black:
-            return "black";
-            break;
-        case Const.white:
-            return "white";
-            break;
-        default:
-            return player;
-            break;
-        }
-    }        
-}
-
-// Format a move for the move list.
-GameState.prototype.formatMove = function(move, n, current) {
-    var div = document.createElement("div");
-    div.classList.add("move");
-    div.setAttribute("id", "move-" + n);
-    if (n === current) {
-        div.classList.add("current");
-    }
-    if (move === null) {
-        div.innerHTML = "&nbsp;";
-        return div;
-    }
-    var s;
-    switch (move.move.type) {
-    case Const.cell:
-        s = move.move.cell.toString();
-        break;
-    case Const.swap_pieces:
-    case Const.swap_sides:
-        s = "swap";
-        break;
-    case Const.pass:
-        s = "pass";
-        break;
-    case Const.resign:
-        s = "resign";
-        break;
-    case Const.forfeit:
-        s = "forfeit";
-        break;
-    }
-    var numdiv = document.createElement("div");
-    numdiv.classList.add("number");
-    numdiv.innerHTML = move.number + '.';
-    div.appendChild(numdiv);
-    var playerdiv = document.createElement("div");
-    playerdiv.classList.add("player");
-    playerdiv.innerHTML = this.formatPlayer(move.player);
-    div.appendChild(playerdiv);
-    var actiondiv = document.createElement("div");
-    actiondiv.classList.add("action");
-    actiondiv.innerHTML = s;
-    div.appendChild(actiondiv);
-    return div;
-}
-
-// Vertically scroll the contents of the container so that target is
-// visible within the container. If smooth=true, animate the scolling
-// action.
-function makeVisible(target, container, smooth) {
-    var trect = target.getBoundingClientRect();
-    var crect = container.getBoundingClientRect();
-    var oldtop = container.scrollTop;
-    var oldleft = container.scrollLeft;
-    var ty = trect.y || trect.top;
-    var cy = crect.y || crect.top;
-    var rely = ty - cy + oldtop;
-    var scrollTopMax = rely;
-    var scrollTopMin = rely + trect.height - crect.height;
-
-    if (oldtop < scrollTopMin) {
-	container.scrollTo({
-	    left: oldleft,
-	    top: scrollTopMin,
-	    behavior: smooth ? "smooth" : "instant"
-	});
-    } else if (oldtop > scrollTopMax) {
-	container.scrollTo({
-	    left: oldleft,
-	    top: scrollTopMax,
-	    behavior: smooth ? "smooth" : "instant"
-	});
-    }
-}
-
-// Scroll the move list so that move i is visible.
-GameState.prototype.scroll_movelist = function(i) {
-    var item = document.querySelector("#move-"+i);
-    if (!item) {
-        return;
-    }
-    var panel = document.getElementById("movelist-container");
-    makeVisible(item, panel, false);
-}
-
-// Format the move list.
-GameState.prototype.draw_movelist = function() {
-    var p = this.movelist_panel;
-    p.innerHTML = "";
-    p.appendChild(this.formatMove(null, 0, this.currentmove));
-    for (var i=0; i<this.movelist.length; i++) {
-        var move = this.movelist[i];
-        p.appendChild(this.formatMove(move, i+1, this.currentmove));
-    }
-    this.scroll_movelist(this.currentmove);
-}
-
 // Update all UI components that need to be updated as a whole (do not
 // support incremental updates). Currently, this is the move list and
 // hash. Only functions whose name starts with UI call this. This is
 // to ensure that the UI isn't needlessly updated multiple times.
 GameState.prototype.UIupdate = function() {
-    this.draw_movelist();
     var newHash = this.URLHash();
     this.currentHash = newHash;
     window.location.replace(newHash);
@@ -1767,6 +1853,7 @@ GameState.prototype.UIsetNumbered = function(bool) {
 GameState.prototype.setRedBlue = function(bool) {
     this.redblue = bool;
     this.board.setRedBlue(bool);
+    this.movedisplay.setRedBlue(bool);
 }
 
 GameState.prototype.UIsetRedBlue = function(bool) {
@@ -1969,7 +2056,8 @@ var board = new Board(new Dimension(11), 9, false);
 main.appendChild(board.dom);
 board.rescale();
 var movelist_panel = document.getElementById("movelist-container");
-var state = new GameState(board, movelist_panel);
+var movedisplay = new MoveDisplay(movelist_panel);
+var state = new GameState(board, movedisplay);
 
 // ----------------------------------------------------------------------
 // Activate menus
