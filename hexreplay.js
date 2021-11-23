@@ -397,7 +397,7 @@ Board.prototype.mod12 = function(x) {
 // content should be preserved, use update().
 Board.prototype.draw_svg = function() {
     // Delete old contents.
-    this.dom.innerHTML = "";
+    this.dom.innerText = "";
     
     // Create new svg element.
     this.svg = this.svg_of_board();
@@ -1177,7 +1177,7 @@ function MoveDisplay(container) {
     this.redblue = false;
     
     this.dom = container;
-    this.dom.innerHTML = "";
+    this.dom.innerText = "";
 
     this.childlist = [];
     this.highlighted = undefined;
@@ -1253,10 +1253,10 @@ MoveDisplay.prototype.formatPlayer = function(player) {
     if (this.redblue) {
         switch (player) {
         case Const.black:
-            return "red&nbsp;&nbsp;";
+            return "red\xA0\xA0";
             break;
         case Const.white:
-            return "blue&nbsp;";
+            return "blue\xA0";
             break;
         default:
             return player;
@@ -1283,7 +1283,7 @@ MoveDisplay.prototype.formatMove = function(move, n) {
     div.classList.add("move");
     div.setAttribute("id", "move-" + n);
     if (move === null) {
-        div.innerHTML = "&nbsp;";
+        div.innerText = "\xA0";
         return div;
     }
     var s;
@@ -1307,15 +1307,15 @@ MoveDisplay.prototype.formatMove = function(move, n) {
     }
     var numdiv = document.createElement("div");
     numdiv.classList.add("number");
-    numdiv.innerHTML = move.number + '.';
+    numdiv.innerText = move.number + '.';
     div.appendChild(numdiv);
     var playerdiv = document.createElement("div");
     playerdiv.classList.add("player");
-    playerdiv.innerHTML = this.formatPlayer(move.player);
+    playerdiv.innerText = this.formatPlayer(move.player);
     div.appendChild(playerdiv);
     var actiondiv = document.createElement("div");
     actiondiv.classList.add("action");
-    actiondiv.innerHTML = s;
+    actiondiv.innerText = s;
     div.appendChild(actiondiv);
     return div;
 }
@@ -1334,7 +1334,7 @@ MoveDisplay.prototype.updatePlayers = function() {
         var child = this.childlist[i];
         var playerdiv = child.div.querySelector(".player");
         if (playerdiv !== undefined && child.move !== null) {
-            playerdiv.innerHTML = this.formatPlayer(child.move.player);
+            playerdiv.innerText = this.formatPlayer(child.move.player);
         }
     }
 }
