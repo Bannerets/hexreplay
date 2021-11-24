@@ -253,13 +253,14 @@ svg {
     visibility: visible;
     fill: url('#red-gradient');
     filter: url("#shadow2");
-    transform: scale(0.97);
+    transform: scale(0.98);
 }
 
 .redblue .white .stone-circle {
     visibility: visible;
     fill: url('#blue-gradient');
     filter: url("#shadow");
+    transform: none;
 }
 
 .redblue .white .movelabel, .redblue .white .swaplabel {
