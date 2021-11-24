@@ -1095,12 +1095,12 @@ Board.prototype.setRedBlue = function(bool) {
 }
 
 Board.prototype.setCursor = function(color) {
-    this.svg.classList.remove("cursor-black");
-    this.svg.classList.remove("cursor-white");
     if (color === Const.white) {
         this.svg.classList.add("cursor-white");
+        this.svg.classList.remove("cursor-black");
     } else {
         this.svg.classList.add("cursor-black");
+        this.svg.classList.remove("cursor-white");
     }
 }
 
