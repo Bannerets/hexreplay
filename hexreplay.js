@@ -60,7 +60,7 @@ var compatibility = function() {
     if ("matches" in Element.prototype === false) {
 	Element.prototype.matches = Element.prototype.msMatchesSelector;
     }
-    
+
     if ("closest" in Element.prototype === false) {
 	Element.prototype.closest = function (selector) {
 	    var el = this;
@@ -102,9 +102,9 @@ function dateString() {
 }
 
 function download(blob, filename) {
-    if (window.navigator.msSaveOrOpenBlob) { // IE10+                       
+    if (window.navigator.msSaveOrOpenBlob) { // IE10+
         window.navigator.msSaveOrOpenBlob(blob, filename);
-    } else { // Others                                                      
+    } else { // Others
         var a = document.createElement("a");
         var url = URL.createObjectURL(blob);
         a.href = url;
@@ -123,6 +123,7 @@ function download(blob, filename) {
 // Vertically scroll the contents of the container so that target is
 // visible within the container. If smooth=true, animate the scolling
 // action.
+// Reads DOM, then returns a function that does the actual scrolling.
 function makeVisible(target, container, smooth) {
     var trect = target.getBoundingClientRect();
     var crect = container.getBoundingClientRect();
@@ -134,18 +135,20 @@ function makeVisible(target, container, smooth) {
     var scrollTopMax = rely;
     var scrollTopMin = rely + trect.height - crect.height;
 
-    if (oldtop < scrollTopMin) {
-	container.scrollTo({
-	    left: oldleft,
-	    top: scrollTopMin,
-	    behavior: smooth ? "smooth" : "instant"
-	});
-    } else if (oldtop > scrollTopMax) {
-	container.scrollTo({
-	    left: oldleft,
-	    top: scrollTopMax,
-	    behavior: smooth ? "smooth" : "instant"
-	});
+    return function finishScrolling() {
+        if (oldtop < scrollTopMin) {
+            container.scrollTo({
+                left: oldleft,
+                top: scrollTopMin,
+                behavior: smooth ? "smooth" : "instant"
+            });
+        } else if (oldtop > scrollTopMax) {
+            container.scrollTo({
+                left: oldleft,
+                top: scrollTopMax,
+                behavior: smooth ? "smooth" : "instant"
+            });
+        }
     }
 }
 
@@ -296,7 +299,7 @@ Dimension.parse = function (s) {
             return undefined;
         }
         return n;
-    }            
+    }
 
     var files, ranks;
     var x = s.indexOf("x");
@@ -347,7 +350,7 @@ function Board(dim, rotation, mirrored) {
     if (mirrored === undefined) {
 	mirrored = false;
     }
-    
+
     this.dim = dim;
     this.rotation = this.mod12(rotation);
     this.mirrored = mirrored;
@@ -364,12 +367,14 @@ function Board(dim, rotation, mirrored) {
 
     // Keep track up previous values of dom.offsetWidth and
     // dom.offsetHeight to avoid unnecessary updates.
+    this.prevOffsetWidth = undefined;
+    this.prevOffsetHeight = undefined;
     this.offsetWidth = undefined;
     this.offsetHeight = undefined;
-    
+
     // A user-supplied function to call when a cell is clicked.
     this.onclick = function (cell) {};
-    
+
     // Update the board's appearance.
     this.draw_svg();
     this.update();
@@ -398,7 +403,7 @@ Board.prototype.mod12 = function(x) {
 Board.prototype.draw_svg = function() {
     // Delete old contents.
     this.dom.innerText = "";
-    
+
     // Create new svg element.
     this.svg = this.svg_of_board();
 
@@ -426,7 +431,7 @@ Board.prototype.update = function () {
     var unrotation = "rotate(" + (-theta) + ")";
     var transform = rotation + " " + scale;
     var untransform = scale + " " + unrotation;
-    
+
     var rotatable = this.svg.querySelectorAll(".rotatable");
     rotatable.forEach(function(e) {
 	e.setAttribute("transform", transform);
@@ -461,24 +466,27 @@ Board.prototype.update = function () {
     this.svg.setAttribute("viewBox", x0 + " " + y0 + " " + width + " " + height);
 }
 
+// Read the needed values from the DOM.
+Board.prototype.read = function() {
+    this.prevOffsetWidth = this.offsetWidth;
+    this.prevOffsetHeight = this.offsetHeight;
+    this.offsetWidth = this.dom.offsetWidth;
+    this.offsetHeight = this.dom.offsetHeight;
+}
+
 // Rescale SVG to container. This must be called upon initialization
 // (*after* the board element is integrated in the DOM tree, so that
 // its size is known), and upon any event that may affect the
 // element's size. The window's "resize" event is already handled.
+// Only writes to the DOM.
 Board.prototype.rescale = function() {
-    var domOffsetWidth = this.dom.offsetWidth;
-    var domOffsetHeight = this.dom.offsetHeight;
-
-    if (this.offsetWidth !== undefined && this.offsetHeight !== undefined && domOffsetWidth === this.offsetWidth && domOffsetHeight === this.offsetHeight) {
+    if (this.offsetWidth === this.prevOffsetWidth && this.offsetHeight === this.prevOffsetHeight) {
         // Performance issues on Chrome: don't rescale unnecessarily.
         return;
     }
 
-    this.offsetWidth = domOffsetWidth;
-    this.offsetHeight = domOffsetHeight;
-    
-    this.svg.setAttribute("width", domOffsetWidth);
-    this.svg.setAttribute("height", domOffsetHeight);
+    this.svg.setAttribute("width", this.offsetWidth);
+    this.svg.setAttribute("height", this.offsetHeight);
 }
 
 // Set the logical size of the board. This also clears the board.
@@ -506,7 +514,7 @@ Board.prototype.svg_of_board = function() {
     //     *     c     *
     //        0     a
     //     *     d     *
-    //        e     * 
+    //        e     *
     //           b
     //        *     *
     //           *
@@ -546,7 +554,7 @@ Board.prototype.svg_of_board = function() {
         hex += "z";
         return hex;
     }
-    
+
     var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("width", "500px");
     svg.setAttribute("height", "300px");
@@ -578,8 +586,8 @@ Board.prototype.svg_of_board = function() {
     feMergeNode2.setAttribute("in", "SourceGraphic");
     feMerge.appendChild(feMergeNode2);
     filter.appendChild(feMerge);
-    defs.appendChild(filter);    
-    
+    defs.appendChild(filter);
+
     var filter = document.createElementNS(svgNS, "filter");
     filter.setAttribute("id", "shadow2");
     var feGaussianBlur = document.createElementNS(svgNS, "feGaussianBlur");
@@ -603,8 +611,8 @@ Board.prototype.svg_of_board = function() {
     feMergeNode2.setAttribute("in", "SourceGraphic");
     feMerge.appendChild(feMergeNode2);
     filter.appendChild(feMerge);
-    defs.appendChild(filter);    
-    
+    defs.appendChild(filter);
+
     var grad = document.createElementNS(svgNS, "radialGradient");
     grad.setAttribute("id", "black-gradient");
     grad.setAttribute("cx", "30%");
@@ -620,7 +628,7 @@ Board.prototype.svg_of_board = function() {
     grad.appendChild(stop);
     defs.appendChild(grad);
     svg.appendChild(defs);
-    
+
     var grad = document.createElementNS(svgNS, "radialGradient");
     grad.setAttribute("id", "white-gradient");
     grad.setAttribute("cx", "30%");
@@ -636,7 +644,7 @@ Board.prototype.svg_of_board = function() {
     grad.appendChild(stop);
     defs.appendChild(grad);
     svg.appendChild(defs);
-    
+
     var grad = document.createElementNS(svgNS, "radialGradient");
     grad.setAttribute("id", "red-gradient");
     grad.setAttribute("cx", "30%");
@@ -656,7 +664,7 @@ Board.prototype.svg_of_board = function() {
     grad.appendChild(stop);
     defs.appendChild(grad);
     svg.appendChild(defs);
-    
+
     var grad = document.createElementNS(svgNS, "radialGradient");
     grad.setAttribute("id", "blue-gradient");
     grad.setAttribute("cx", "30%");
@@ -717,7 +725,7 @@ Board.prototype.svg_of_board = function() {
     function arc(r, clockwise, file, rank, c, d, e) {
         return "A" + r.toFixed(0) + " " + r.toFixed(0) + " 0 0 " + (clockwise ? "1" : "0") + " " + coordstr(file, rank, c, d, e);
     }
-    
+
     var border = document.createElementNS(svgNS, "path");
     var borderblack = "";
     borderblack += "M" + coordstr(0, 0, 0, -e, -r+e/2);
@@ -741,11 +749,11 @@ Board.prototype.svg_of_board = function() {
     borderblack += "L" + coordstr(0, ranks-1, -r2, 0, r2);
     borderblack += arc(r3, false, 0, ranks-1, -e2/2, 0, r-e2/4);
     borderblack += "z";
-    
+
     border.setAttribute("d", borderblack);
     border.classList.add("black-border");
     g.appendChild(border);
-    
+
     var border = document.createElementNS(svgNS, "path");
     var borderwhite = "";
     borderwhite += "M" + coordstr(0, 0, -r+e/2, -e, 0);
@@ -773,7 +781,7 @@ Board.prototype.svg_of_board = function() {
     border.setAttribute("d", borderwhite);
     border.classList.add("white-border");
     g.appendChild(border);
-    
+
     // Clickable cells and stones
     for (var rank=0; rank<ranks; rank++) {
         for (var file=0; file<files; file++) {
@@ -782,7 +790,7 @@ Board.prototype.svg_of_board = function() {
             var xy = coord(file, rank);
             g1.setAttribute("transform", "translate(" + xy.x + "," + xy.y + ")");
             g1.classList.add("cell");
-            
+
             var path = document.createElementNS(svgNS, "path");
             path.setAttribute("d", hexpath(0, 0));
             path.classList.add("cell-bg");
@@ -828,12 +836,12 @@ Board.prototype.svg_of_board = function() {
             text.setAttribute("y", 10);
             text.textContent = "99";
             g2.appendChild(text);
-            
+
             g1.appendChild(g2);
             g.appendChild(g1);
         }
     }
-    
+
     // Grid
     var grid = document.createElementNS(svgNS, "path");
     var hexes = "";
@@ -899,7 +907,7 @@ Board.prototype.svg_of_board = function() {
         g1.appendChild(text);
         g.appendChild(g1);
     }
-    
+
     return svg;
 }
 
@@ -912,7 +920,7 @@ Board.prototype.setStone = function(cell, color, label, swap) {
     if (swap === undefined) {
 	swap = false;
     }
-    
+
     var cell = document.getElementById(cell.toString());
     if (!cell) {
         return;
@@ -935,7 +943,7 @@ Board.prototype.setStone = function(cell, color, label, swap) {
     if (!movelabel) {
         return;
     }
-    movelabel.textContent = label;    
+    movelabel.textContent = label;
 }
 
 // Get the contents of the cell.
@@ -1175,18 +1183,18 @@ function MoveDisplay(container) {
     var self = this;
 
     this.redblue = false;
-    
+
     this.dom = container;
     this.dom.innerText = "";
 
     this.childlist = [];
     this.highlighted = undefined;
-    
+
     this.push(null);
-    
+
     // A user-supplied function to call when a move is clicked.
     this.onclick = function (n) {};
-    
+
     this.dom.addEventListener("click", function (event) {
         var move = event.target.closest(".move");
         if (move) {
@@ -1226,24 +1234,35 @@ MoveDisplay.prototype.clear = function() {
     this.truncate(0);
 }
 
-// Highlight the given element (or none if n === undefined)
-MoveDisplay.prototype.highlight = function(n) {
-    // Remove the previous highlight, if any.
-    var k = this.highlighted;
-    if (k !== undefined && k < this.childlist.length) {
-        this.childlist[k].div.classList.remove("current");
-    }
-    
+// Highlight the given element (or none if n === undefined).
+// Reads the appropriate values from the DOM, then returns a _finishHighlighting_
+// function, which does the actual writing to the DOM.
+MoveDisplay.prototype.prepareHighlighting = function(n) {
     // Check validity of n
     if (n < 0 || n >= this.childlist.length) {
         n = undefined;
     }
-    this.highlighted = n;
 
-    // Add the new highlight, and scroll to it.
-    if (n !== undefined) {
-        this.childlist[n].div.classList.add("current");
-        makeVisible(this.childlist[n].div, this.dom, false);
+    var scroll = n !== undefined
+        ? makeVisible(this.childlist[n].div, this.dom, false)
+        : function() {};
+
+    var self = this;
+
+    return function finishHighlighting() {
+        // Remove the previous highlight, if any.
+        var k = self.highlighted;
+        if (k !== undefined && k < self.childlist.length) {
+            self.childlist[k].div.classList.remove("current");
+        }
+
+        self.highlighted = n;
+
+        // Add the new highlight, and scroll to it.
+        if (n !== undefined) {
+            self.childlist[n].div.classList.add("current");
+            scroll();
+        }
     }
 }
 
@@ -1272,7 +1291,7 @@ MoveDisplay.prototype.formatPlayer = function(player) {
             return player;
             break;
         }
-    }        
+    }
 }
 
 // Format a move for the move list.
@@ -1344,6 +1363,7 @@ function GameState(board, movedisplay) {
     var self = this;
     this.movelist = [];
     this.currentmove = 0;
+    this.movesToBeRendered = [];
     this.board = board;
     this.dim = this.board.dim; // Holds the initial dimension of the
                                // game, rather than the current
@@ -1354,7 +1374,7 @@ function GameState(board, movedisplay) {
 
     // Keep track of current hash to avoid unnecessary updates.
     this.currentHash = undefined;
-    
+
     // Connect click action.
     this.board.onclick = function(cell) {
         self.UIplay(Move.cell(cell));
@@ -1365,7 +1385,7 @@ function GameState(board, movedisplay) {
         console.log(n);
         self.UIgotoMove(n);
     };
-    
+
     // A callback function to update button states.
     this.onupdate = function() {
     }
@@ -1406,7 +1426,7 @@ GameState.prototype.isLegal = function(move) {
     case Const.forfeit:
         return this.canResign();
         break;
-    }        
+    }
 }
 
 // Check if making a move would truncate the movelist
@@ -1466,8 +1486,14 @@ GameState.prototype.play = function(move) {
         player: player,
         move: move
     });
-    this.playBoardMove(n, player, move);
-    this.setLast();
+    this.movesToBeRendered.push({
+        number: n,
+        player: player,
+        move: move,
+        undo: false
+    });
+    // this.playBoardMove(n, player, move);
+    // this.setLast();
     return true;
 }
 
@@ -1508,30 +1534,13 @@ GameState.prototype.UIresign = function() {
     return r;
 }
 
-GameState.prototype.playBoardMove = function(n, player, move) {
+GameState.prototype.renderBoardMove = function(number, player, move, undo) {
     switch (move.type) {
     case Const.cell:
-        this.board.setStone(move.cell, player, n, false);
-        break;
-    case Const.pass:
-        break;
-    case Const.swap_pieces:
-        this.board.swap_pieces();
-        break;
-    case Const.swap_sides:
-        this.board.swap_sides();
-        break;
-    case Const.resign:
-        break;
-    case Const.forfeit:
-        break;
-    }
-}
-
-GameState.prototype.undoBoardMove = function(n, player, move) {
-    switch (move.type) {
-    case Const.cell:
-        this.board.setStone(move.cell, Const.empty);
+        if (undo)
+            this.board.setStone(move.cell, Const.empty);
+        else
+            this.board.setStone(move.cell, player, number, false);
         break;
     case Const.pass:
         break;
@@ -1556,9 +1565,15 @@ GameState.prototype.redo = function() {
         return false;
     }
     var move = this.movelist[n];
-    this.playBoardMove(move.number, move.player, move.move);
+    this.movesToBeRendered.push({
+        number: move.number,
+        player: move.player,
+        move: move.move,
+        undo: false
+    });
+    // this.playBoardMove(move.number, move.player, move.move);
     this.currentmove++;
-    this.setLast();
+    // this.setLast();
     return true;
 }
 
@@ -1579,9 +1594,15 @@ GameState.prototype.undo = function() {
         return false;
     }
     var move = this.movelist[n-1];
-    this.undoBoardMove(move.number, move.player, move.move);
+    this.movesToBeRendered.push({
+        number: move.number,
+        player: move.player,
+        move: move.move,
+        undo: true
+    });
+    // this.undoBoardMove(move.number, move.player, move.move);
     this.currentmove--;
-    this.setLast();
+    // this.setLast();
     return true;
 }
 
@@ -1668,7 +1689,7 @@ GameState.prototype.setLast = function () {
         this.board.setLast(move2.cell);
         break;
     }
-    return;        
+    return;
 }
 
 // Set the game size. Return true on success and false on failure
@@ -1718,6 +1739,7 @@ GameState.prototype.clear = function() {
     this.movelist = [];
     this.movedisplay.clear();
     this.currentmove = 0;
+    this.movesToBeRendered = [];
     this.board.clear();
 }
 
@@ -1737,10 +1759,20 @@ GameState.prototype.UIupdate = function() {
     var newHash = this.URLHash();
     this.currentHash = newHash;
     window.location.replace(newHash);
-    this.onupdate();
-    board.setCursor(this.currentPlayer());
+
+    this.board.read();
+    var highlight = this.movedisplay.prepareHighlighting(this.currentmove);
+
     this.board.rescale();  // because move list might have changed size
-    this.movedisplay.highlight(this.currentmove);
+    var self = this;
+    this.movesToBeRendered.forEach(function(move) {
+        self.renderBoardMove(move.number, move.player, move.move, move.undo)
+    });
+    this.movesToBeRendered = [];
+    this.setLast();
+    // this.board.setCursor(this.currentPlayer());
+    highlight();
+    this.onupdate();
 }
 
 // Format a move for the URL string.
@@ -1812,7 +1844,7 @@ GameState.prototype.URLHash = function() {
         len--;
         acc = acc.substring(0, len);
     }
-        
+
     return acc;
 }
 
@@ -1897,19 +1929,19 @@ GameState.prototype.fromURLHash = function(hash) {
         default:
             return Move.cell(Cell.fromString(s));
             break;
-        }            
+        }
     }
 
     if (hash.length > 0 && hash[0] === "#") {
         hash = hash.substring(1);
     }
-    
+
     var dim = new Dimension(11);
     var rotation = 10;
     var mirrored = false;
     var numbered = false;
     var coloring = 0;
-    
+
     var parts = hash.split(",");
 
     // Parse parameters.
@@ -1943,7 +1975,7 @@ GameState.prototype.fromURLHash = function(hash) {
     this.setOrientation(rotation, mirrored);
     this.setNumbered(numbered);
     this.setRedBlue(coloring === 1);
-    
+
     // Parse moves.
     var s = parts[1] ? parts[1] : ""
     var p;
@@ -2033,8 +2065,8 @@ GameState.prototype.toSGF = function() {
         acc += ";" + player + "[" + move.move.toSGF() + "]";
     }
 
-    acc += ")";    
-    return acc;    
+    acc += ")";
+    return acc;
 }
 
 GameState.prototype.UIdownloadSGF = function () {
@@ -2170,7 +2202,7 @@ state.onupdate = function() {
             elt.classList.add("disabled");
         }
     }
-    
+
     setEnabled(link_swap, state.canSwap());
     setEnabled(link_pass, state.canPass());
     setEnabled(link_resign, state.canResign());
