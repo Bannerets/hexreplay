@@ -365,6 +365,60 @@ function Board(dim, rotation, mirrored) {
     this.dom = document.createElement("div");
     this.dom.classList.add("board");
 
+    this.cursorOverlay = document.createElement("div");
+    this.cursorOverlay.classList.add("cursor-overlay");
+    this.dom.appendChild(this.cursorOverlay);
+
+    // .cursor-overlay is a workaround for bug #664066 in Chrome
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=664066
+    function onMousedownOrClick(event) {
+        var newEvent = new MouseEvent(event.type, {
+            view: window,
+            bubbles: true,
+            cancelable: true,
+            screenX: event.screenX,
+            screenY: event.screenY
+        });
+        var elements = document.elementsFromPoint(event.clientX, event.clientY);
+        // elements[0] is .cursor-overlay, ignore it
+        elements[1].dispatchEvent(newEvent);
+    }
+    this.cursorOverlay.addEventListener("mousedown", onMousedownOrClick);
+    this.cursorOverlay.addEventListener("click", onMousedownOrClick);
+
+    // Hover cannot be implemented in CSS because of .cursor-overlay.
+    // document.elementsFromPoint can be a bit slow.
+    let hasPointer;
+    var hoveredCell;
+    function onMousemove(event) {
+        if (hasPointer === undefined) {
+            var styles = window.getComputedStyle(self.cursorOverlay);
+            if (styles.display === "none") {
+                hasPointer = false;
+                window.removeEventListener("mousemove", onMousemove);
+                if (hoveredCell) hoveredCell.classList.remove("hover");
+                return;
+            }
+            if (styles.zIndex == 10) {
+                hasPointer = true;
+            }
+        }
+        var elements = document.elementsFromPoint(event.clientX, event.clientY);
+        var found = elements.some(function(el) {
+            if (!el.classList.contains("cell-bg")) return false;
+            if (hoveredCell === el) return true;
+            if (hoveredCell) hoveredCell.classList.remove("hover");
+            el.classList.add("hover");
+            hoveredCell = el;
+            return true;
+        })
+        if (!found && hoveredCell !== undefined) {
+            hoveredCell.classList.remove("hover");
+            hoveredCell = undefined;
+        }
+    }
+    window.addEventListener("mousemove", onMousemove);
+
     // Keep track up previous values of dom.offsetWidth and
     // dom.offsetHeight to avoid unnecessary updates.
     this.prevOffsetWidth = undefined;
@@ -404,8 +458,8 @@ Board.prototype.mod12 = function(x) {
 // the contents should be cleared. If the SVG already exists and the
 // content should be preserved, use update().
 Board.prototype.draw_svg = function() {
-    // Delete old contents.
-    this.dom.innerText = "";
+    // Delete old svg element.
+    if (this.svg) this.dom.removeChild(this.svg);
     
     // Create new svg element.
     this.svg = this.svg_of_board();
@@ -490,6 +544,9 @@ Board.prototype.rescale = function() {
 
     this.svg.setAttribute("width", this.offsetWidth);
     this.svg.setAttribute("height", this.offsetHeight);
+
+    this.cursorOverlay.style.width = this.offsetWidth + "px";
+    this.cursorOverlay.style.height = this.offsetHeight + "px";
 }
 
 // Set the logical size of the board. This also clears the board.
@@ -1107,11 +1164,11 @@ Board.prototype.setRedBlue = function(bool) {
 
 Board.prototype.setCursor = function(color) {
     if (color === Const.white) {
-        this.svg.classList.add("cursor-white");
-        this.svg.classList.remove("cursor-black");
+        this.cursorOverlay.classList.add("cursor-white");
+        this.cursorOverlay.classList.remove("cursor-black");
     } else {
-        this.svg.classList.add("cursor-black");
-        this.svg.classList.remove("cursor-white");
+        this.cursorOverlay.classList.remove("cursor-white");
+        this.cursorOverlay.classList.add("cursor-black");
     }
 }
 

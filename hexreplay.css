@@ -137,7 +137,7 @@ svg {
     fill: rgba(0,0,0,0.125);
 }
 
-.cell:hover .cell-bg {
+.cell:hover .cell-bg, .cell-bg.shaded.hover, .cell-bg.hover {
     fill: rgba(255,255,255,0.375);
 }
 
@@ -237,6 +237,17 @@ svg {
 
     .cursor-white {
         cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAABC0lEQVQokXVRTU7CUBj8Xk2+RyS237sBi+4sLL2BK35O4wGUO/iT1MAd0DuIMYgX0ARxxwYsjxTTx7iwqGna+XaTmcmXGYL6OW4d3Zg5b3lr5v41N/c8QUE1ajIU28+mWGONZ/QzsTIIdS5o1ILHnv3Ef6zQtcE41FAEJcOe3aEIh46VWyjilim4/1LEcnRQPz87OfWoBJq+vCdF5uOl1A8AU5gZcZpUChLo1CNCWT4REe2I4NUXb5WCVzpceO5+5KoEI+fuiJtiV6UfLBFYPiYoGXStKymqbSWGIqhQB+NOIWWJtg0e8qqhQh3EsulnEyRIMMFFJhuJf8fK5478K/POKadm5l9ytOe/AdvvIDY9qEzPAAAAAElFTkSuQmCC") 8 8, auto;
+    }
+
+    .cursor-overlay {
+        position: absolute;
+        z-index: 10;
+    }
+}
+
+@media not all and (any-pointer: fine) {
+    .cursor-overlay {
+        display: none;
     }
 }
 
