@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>About Interactive Hex Board</title>
+    <link rel="stylesheet" href="hexreplay.css">
+    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body class="about">
+
+    <h1>Interactive Hex Board</h1>
+
+    <h2>Link</h2>
+
+    <p>
+      <a href="https://hexworld.org/board">https://hexworld.org/board</a>
+    </p>
+    
+    <h2>Usage</h2>
+
+    <h3>Board:</h3>
+    
+    <ul>
+      <li> Click on a cell to make a move.
+      <li> Click again on stone to swap.
+      <li> Hover over a cell to see its coordinates.
+    </ul>
+
+    <h3>Buttons and menus:</h3>
+    
+    <ul>
+      <li> <button class="text-button" id="button-clear" type="button"
+                  title="Clear">New board</button>: Create new empty
+                  board. Previous board will be saved in browser
+                  history.
+        <li> Size: <input class="input" id="input-size" type="text"
+                       title="Board size" size="3">: Change board
+                       size. Both "11" and "11x12" will work. Previous
+                       board will be saved in browser history.
+      <li> <button class="button" id="button-rotate-left" type="button"
+                  title="Rotate left"></button>
+          <button class="button" id="button-rotate-right" type="button"
+                  title="Rotate right"></button>: Rotate left or right.
+      <li> <button class="button" id="button-numbered"
+                   title="Show move numbers"></button>:
+        Toggle move numbers.
+      <li> <button class="button" id="button-menu"
+                  title="More actions"></button>: Menu with
+                  additional controls: swap, pass, resign, change
+                  colors, or download.
+      <li> <button class="button" id="button-first" type="button"
+                title="First (home)"></button>
+        <button class="button" id="button-undo" type="button"
+                title="Previous (left)"></button>
+        <button class="button" id="button-redo" type="button"
+                title="Next (right)"></button>
+        <button class="button" id="button-last" type="button"
+                title="Last (end)"></button>: Game navigation buttons:
+                first, previous, next, last.
+    </ul>
+
+    <h3>Game navigation</h3>
+
+    <ul>
+      <li> Keyboard shortcuts for navigation:
+        <ul>
+          <li>"home" (first), "left" (previous), "right" (next), "end" (last).
+          <li>Alternative: "f" (first), "p" (previous), "n" (next), "l" (last).
+          <li>Alternative: "up" (previous) and "down" (next).
+        </ul>
+      <li> Click on a move in move list to navigate directly to it.
+    </ul>
+
+    <h3>Sharing</h3>
+
+    <ul>
+      <li> Copy the URL to share the current board with others.
+    </ul>
+
+    <h2>Importing games from other sites</h2>
+
+    <h3>Board Game Arena</h3>
+
+    <p>
+      The user
+      <a href="https://boardgamearena.com/player?id=85283280">comonoid</a>
+      has contributed a
+      <a href="https://gist.github.com/Bannerets/9a8bce3ae2ea5e82bab935c037b893ac">bookmarklet</a>
+      for importing a game record from Board Game Arena directly into
+      HexWorld. To use it, copy the following text and paste it into
+      the "URL" portion of a bookmark:
+    </p>
+
+    <div class="codearea">
+      <pre id="bookmarklet" class="code">javascript:void%20function(){(function(){function%20a(a){return%20a.match(/\/(\d+\/hex)\%3Ftable=(\d+)/)}function%20b(a){let%20b,c;return%20a.reduce((a,b)=%3E[...a,...b.data],[]).map(({type:a,args:d,log:e})=%3E{if(%22message%22===a%26%26d.size){d.red%26%26!b%3Fb=d.red+%22%22:console.warn(%22No%20\%22args.red\%22%22);const%20a=d.size.match(/(\d+)x\d+/);if(a)return%20a[1]+%22c1,%22}if(%22playToken%22===a){b||(b=d.player_id);const%20a=c==d.player_id%3F%22:p%22+d.coord:d.coord;return%20c=d.player_id,a}return%22swapPieces%22===a%3F(c=d.player_id,%22:s%22):%22pass%22===a%3F(c=d.player_id,%22:p%22):%22resign%22===a||%22playerConcedeGame%22===a%3Fd.player_id==b%3F%22:rb%22:%22:rw%22:void%200}).join(%22%22)}function%20c(a){return%20console.info(`Requesting%20table%20archives%20for%20%23${a}`),fetch(`${window.location.origin}/gamereview/gamereview/requestTableArchive.html%3Ftable=${a}`,{cache:%22no-cache%22}).then(a=%3Ea.json()).then(a=%3E{if(1!==a.status){if(a.error)throw%20new%20Error(`Error%20while%20requesting%20the%20table%20archive:%20${a.error}`);console.warn(%22result.status%20!==%201%22,a)}})}function%20d(a,c,d){const%20e=a%3F`${window.location.origin}/archive/archive/logs.html%3Ftable=${c}`:`${window.location.origin}/${d}/hex/notificationHistory.html%3Ftable=${c}%26from=1%26privateinc=1%26history=1`;return%20fetch(e,{cache:%22no-cache%22}).then(a=%3Ea.json()).then(c=%3E{if(%220%22===c.status+%22%22%26%26c.error)throw%20new%20Error(`Error%20while%20fetching%20the%20move%20history:%20${c.error}`);const%20d=a%3Fc.data.data.data:c.data.data;return%20console.info(%22Events:%22,d),b(d)})}function%20e(a,b,e){const%20g=window.open(%22about:blank%22);d(a,b,e).catch(f=%3E{if(f%20instanceof%20Error%26%26f.message.includes(%22Cannot%20find%20gamenotifs%20log%20file%20of%20an%20archived%20table%22))return%20c(b).then(()=%3Ed(a,b,e));throw%20f}).then(a=%3E{console.info(`HexWorld%20hash:%20${a}`),g.location.href=f+a}).catch(a=%3E{g.close(),console.error(a),window.alert(a+%22%22)})}const%20f=%22https://hexworld.org/board/%23%22,g=window.location.href,h=g.match(/\/table\%3Ftable=(\d+)/),i=g.match(/\/gamereview\%3Ftable=(\d+)/),j=g.match(/\/replay\/.*%3F\/\%3Ftable=\d+/),k=a(g);if(k){const%20a=k[1],b=k[2];return%20void%20e(!1,b,a)}if(h){const%20b=h[1],c=document.querySelector(%22%23access_game_panel%22);if(c%26%26%22none%22!==c.style.display){const%20b=document.querySelector(%22%23view_end_btn%22);if(!b||!b.href)return%20window.alert(%22Error:%20Cannot%20find%20%23view_end_btn%22);const%20c=a(b.href);return%20c%3Fvoid%20e(!1,c[2],c[1]):window.alert(`Cannot%20parse%20the%20url:%20${b.href}`)}return%20c||console.warn(%22Cannot%20detect%20if%20the%20game%20is%20finished.%22),void%20e(!0,b)}if(i)return%20void%20e(!0,i[1]);if(j){const%20a=g_gamelogs;if(!a)return%20window.alert(%22Error.%20No%20\%22g_gamelogs\%22%20variable%20found.%22);const%20c=b(a);return%20void%20window.open(f+c)}window.alert(%22No%20table%20found.%20Use%20this%20bookmark%20while%20viewing%20a%20Hex%20game%20on%20Board%20Game%20Arena.%22)})()}();</pre>
+      <button onclick="navigator.clipboard.writeText(document.querySelector('#bookmarklet').innerText)">Copy to clipboard</button>
+    </div>
+
+    <p>
+      You can then use this bookmark from any Hex game on Board Game
+      Arena. It works both for completed games and games in progress,
+      and can be executed on /hex, /table, /gamereview, or
+      /archive/replay pages.
+      Watch <a href="video/bookmarklet.mp4">this short video</a> to
+      see how to set up and use the bookmarklet.
+    </p>
+    
+    <h2>Information for developers</h2>
+
+    <p>
+      The URL hash field (the part after "#") contains a complete
+      representation of the board and game state. Not all types of
+      moves are accessible in the user interface. The syntax is:
+    </p>
+    
+    <pre>
+⟨hash⟩   ::= ⟨size⟩⟨config⟩*,⟨move⟩*,⟨move⟩*  (trailing commas can be omitted)
+
+⟨size⟩   ::= ⟨n⟩                              (board size: 1–30)
+           | ⟨n⟩x⟨n⟩                          (board size: 1–30)
+⟨config⟩ ::= r⟨n⟩                             (rotation: 1–12, a1 is clock direction)
+           | n                                (turn on move numbers)
+           | c1                               (red-blue mode)
+
+⟨move⟩   ::= ⟨cell⟩                           (normal move)
+           | :s                               (swap pieces)
+           | :S                               (swap sides)
+           | :p                               (pass)
+           | :rb                              (Black resigns)
+           | :rw                              (White resigns)
+           | :fb                              (Black forfeits)
+           | :fw                              (White forfeits)
+
+⟨n⟩ is an integer, such as 11.
+⟨cell⟩ is a cell name, such as a1.</pre>
+
+    <p>
+      The comma in the move list indicates the current move.
+    </p>
+
+    <h2>Author</h2>
+
+    <p>
+      &copy; 2021 Peter Selinger, <i><a href="mailto:selinger@mathstat.dal.ca">selinger@mathstat.dal.ca</a></i>.
+    </p>
+
+    <p>
+      With contributions from <a href="https://boardgamearena.com/player?id=85283280">comonoid</a>.
+    </p>
+    
+  </body>
+</html>
