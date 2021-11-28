@@ -123,6 +123,7 @@ function download(blob, filename) {
 // Vertically scroll the contents of the container so that target is
 // visible within the container. If smooth=true, animate the scolling
 // action.
+// Reads DOM, then returns a function that does the actual scrolling.
 function makeVisible(target, container, smooth) {
     var trect = target.getBoundingClientRect();
     var crect = container.getBoundingClientRect();
@@ -134,18 +135,20 @@ function makeVisible(target, container, smooth) {
     var scrollTopMax = rely;
     var scrollTopMin = rely + trect.height - crect.height;
 
-    if (oldtop < scrollTopMin) {
-	container.scrollTo({
-	    left: oldleft,
-	    top: scrollTopMin,
-	    behavior: smooth ? "smooth" : "instant"
-	});
-    } else if (oldtop > scrollTopMax) {
-	container.scrollTo({
-	    left: oldleft,
-	    top: scrollTopMax,
-	    behavior: smooth ? "smooth" : "instant"
-	});
+    return function finishScrolling() {
+        if (oldtop < scrollTopMin) {
+            container.scrollTo({
+                left: oldleft,
+                top: scrollTopMin,
+                behavior: smooth ? "smooth" : "instant"
+            });
+        } else if (oldtop > scrollTopMax) {
+            container.scrollTo({
+                left: oldleft,
+                top: scrollTopMax,
+                behavior: smooth ? "smooth" : "instant"
+            });
+        }
     }
 }
 
@@ -364,6 +367,8 @@ function Board(dim, rotation, mirrored) {
 
     // Keep track up previous values of dom.offsetWidth and
     // dom.offsetHeight to avoid unnecessary updates.
+    this.prevOffsetWidth = undefined;
+    this.prevOffsetHeight = undefined;
     this.offsetWidth = undefined;
     this.offsetHeight = undefined;
     
@@ -374,7 +379,10 @@ function Board(dim, rotation, mirrored) {
     this.draw_svg();
     this.update();
 
-    window.addEventListener("resize", function () {self.rescale()});
+    window.addEventListener("resize", function () {
+        self.read();
+        self.rescale();
+    });
 
     this.dom.addEventListener("mousedown", function(event) {
         var cell = event.target.closest(".cell");
@@ -461,24 +469,27 @@ Board.prototype.update = function () {
     this.svg.setAttribute("viewBox", x0 + " " + y0 + " " + width + " " + height);
 }
 
+// Read needed values from the DOM.
+Board.prototype.read = function() {
+    this.prevOffsetWidth = this.offsetWidth;
+    this.prevOffsetHeight = this.offsetHeight;
+    this.offsetWidth = this.dom.offsetWidth;
+    this.offsetHeight = this.dom.offsetHeight;
+}
+
 // Rescale SVG to container. This must be called upon initialization
 // (*after* the board element is integrated in the DOM tree, so that
 // its size is known), and upon any event that may affect the
 // element's size. The window's "resize" event is already handled.
+// Only writes to the DOM.
 Board.prototype.rescale = function() {
-    var domOffsetWidth = this.dom.offsetWidth;
-    var domOffsetHeight = this.dom.offsetHeight;
-
-    if (this.offsetWidth !== undefined && this.offsetHeight !== undefined && domOffsetWidth === this.offsetWidth && domOffsetHeight === this.offsetHeight) {
+    if (this.offsetWidth === this.prevOffsetWidth && this.offsetHeight === this.prevOffsetHeight) {
         // Performance issues on Chrome: don't rescale unnecessarily.
         return;
     }
 
-    this.offsetWidth = domOffsetWidth;
-    this.offsetHeight = domOffsetHeight;
-    
-    this.svg.setAttribute("width", domOffsetWidth);
-    this.svg.setAttribute("height", domOffsetHeight);
+    this.svg.setAttribute("width", this.offsetWidth);
+    this.svg.setAttribute("height", this.offsetHeight);
 }
 
 // Set the logical size of the board. This also clears the board.
@@ -1226,24 +1237,35 @@ MoveDisplay.prototype.clear = function() {
     this.truncate(0);
 }
 
-// Highlight the given element (or none if n === undefined)
-MoveDisplay.prototype.highlight = function(n) {
-    // Remove the previous highlight, if any.
-    var k = this.highlighted;
-    if (k !== undefined && k < this.childlist.length) {
-        this.childlist[k].div.classList.remove("current");
-    }
-    
+// Highlight the given element (or none if n === undefined).
+// Reads the appropriate values from the DOM, then returns a _finishHighlighting_
+// function, which does the actual writing to the DOM.
+MoveDisplay.prototype.prepareHighlighting = function(n) {
     // Check validity of n
     if (n < 0 || n >= this.childlist.length) {
         n = undefined;
     }
-    this.highlighted = n;
 
-    // Add the new highlight, and scroll to it.
-    if (n !== undefined) {
-        this.childlist[n].div.classList.add("current");
-        makeVisible(this.childlist[n].div, this.dom, false);
+    var scroll = n !== undefined
+        ? makeVisible(this.childlist[n].div, this.dom, false)
+        : function() {};
+
+    var self = this;
+
+    return function finishHighlighting() {
+        // Remove the previous highlight, if any.
+        var k = self.highlighted;
+        if (k !== undefined && k < self.childlist.length) {
+            self.childlist[k].div.classList.remove("current");
+        }
+
+        self.highlighted = n;
+
+        // Add the new highlight, and scroll to it.
+        if (n !== undefined) {
+            self.childlist[n].div.classList.add("current");
+            scroll();
+        }
     }
 }
 
@@ -1344,6 +1366,7 @@ function GameState(board, movedisplay) {
     var self = this;
     this.movelist = [];
     this.currentmove = 0;
+    this.movesToBeRendered = [];
     this.board = board;
     this.dim = this.board.dim; // Holds the initial dimension of the
                                // game, rather than the current
@@ -1389,7 +1412,7 @@ GameState.prototype.forfeited = function() {
     return this.movelist[n-1].move.type === Const.forfeit;
 }
 
-// Check whether the given move is legal.
+// Check in the DOM whether the given move is legal.
 GameState.prototype.isLegal = function(move) {
     switch (move.type) {
     case Const.cell:
@@ -1466,8 +1489,12 @@ GameState.prototype.play = function(move) {
         player: player,
         move: move
     });
-    this.playBoardMove(n, player, move);
-    this.setLast();
+    this.movesToBeRendered.push({
+        number: n,
+        player: player,
+        move: move,
+        undo: false
+    });
     return true;
 }
 
@@ -1486,6 +1513,8 @@ GameState.prototype.UIplay = function(move) {
         this.UIlast();
         history.pushState(null, null);
         this.gotoMove(pos);
+        // Actually remove stones from the DOM so that isLegal check can pass
+        this.renderMoves();
     }
     var r = this.play(move);
     if (r) {
@@ -1508,30 +1537,13 @@ GameState.prototype.UIresign = function() {
     return r;
 }
 
-GameState.prototype.playBoardMove = function(n, player, move) {
+GameState.prototype.renderBoardMove = function(number, player, move, undo) {
     switch (move.type) {
     case Const.cell:
-        this.board.setStone(move.cell, player, n, false);
-        break;
-    case Const.pass:
-        break;
-    case Const.swap_pieces:
-        this.board.swap_pieces();
-        break;
-    case Const.swap_sides:
-        this.board.swap_sides();
-        break;
-    case Const.resign:
-        break;
-    case Const.forfeit:
-        break;
-    }
-}
-
-GameState.prototype.undoBoardMove = function(n, player, move) {
-    switch (move.type) {
-    case Const.cell:
-        this.board.setStone(move.cell, Const.empty);
+        if (undo)
+            this.board.setStone(move.cell, Const.empty);
+        else
+            this.board.setStone(move.cell, player, number, false);
         break;
     case Const.pass:
         break;
@@ -1556,9 +1568,13 @@ GameState.prototype.redo = function() {
         return false;
     }
     var move = this.movelist[n];
-    this.playBoardMove(move.number, move.player, move.move);
+    this.movesToBeRendered.push({
+        number: move.number,
+        player: move.player,
+        move: move.move,
+        undo: false
+    });
     this.currentmove++;
-    this.setLast();
     return true;
 }
 
@@ -1579,9 +1595,13 @@ GameState.prototype.undo = function() {
         return false;
     }
     var move = this.movelist[n-1];
-    this.undoBoardMove(move.number, move.player, move.move);
+    this.movesToBeRendered.push({
+        number: move.number,
+        player: move.player,
+        move: move.move,
+        undo: true
+    });
     this.currentmove--;
-    this.setLast();
     return true;
 }
 
@@ -1718,6 +1738,7 @@ GameState.prototype.clear = function() {
     this.movelist = [];
     this.movedisplay.clear();
     this.currentmove = 0;
+    this.movesToBeRendered = [];
     this.board.clear();
 }
 
@@ -1729,6 +1750,15 @@ GameState.prototype.UIclear = function() {
     this.UIupdate();
 }
 
+GameState.prototype.renderMoves = function() {
+    var self = this;
+    this.movesToBeRendered.forEach(function(move) {
+        self.renderBoardMove(move.number, move.player, move.move, move.undo);
+    });
+    this.movesToBeRendered = [];
+    this.setLast();
+}
+
 // Update all UI components that need to be updated as a whole (do not
 // support incremental updates). Currently, this is the move list and
 // hash. Only functions whose name starts with UI call this. This is
@@ -1737,10 +1767,17 @@ GameState.prototype.UIupdate = function() {
     var newHash = this.URLHash();
     this.currentHash = newHash;
     window.location.replace(newHash);
-    this.onupdate();
-    board.setCursor(this.currentPlayer());
+
+    // Reading
+    this.board.read();
+    var highlightMove = this.movedisplay.prepareHighlighting(this.currentmove);
+
+    // Writing
     this.board.rescale();  // because move list might have changed size
-    this.movedisplay.highlight(this.currentmove);
+    this.renderMoves();
+    this.board.setCursor(this.currentPlayer());
+    highlightMove();
+    this.onupdate();
 }
 
 // Format a move for the URL string.
